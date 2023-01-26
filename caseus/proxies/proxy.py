@@ -155,6 +155,15 @@ class Proxy(pak.AsyncPacketHandler):
         def session_id(self):
             return self.destination.session_id
 
+        async def replace_packet(self, packet, replacement_cls=serverbound.KeepAlivePacket, **fields):
+            await self.write_packet(
+                replacement_cls,
+
+                fingerprint = packet.fingerprint,
+
+                **fields,
+            )
+
         # The fingerprint is not included in the packet length.
         def _written_packet_length(self, data):
             return len(data) - 1

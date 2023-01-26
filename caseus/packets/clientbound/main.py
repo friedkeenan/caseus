@@ -306,13 +306,13 @@ class HandshakeResponsePacket(ClientboundPacket):
     unk_boolean_5: types.Boolean
 
 @public
-class SetCanTransform(ClientboundPacket):
+class SetCanTransformPacket(ClientboundPacket):
     id = (27, 10)
 
     can_transform: types.Boolean
 
 @public
-class SetTransformation(ClientboundPacket):
+class SetTransformationPacket(ClientboundPacket):
     id = (27, 11)
 
     session_id:     types.Int

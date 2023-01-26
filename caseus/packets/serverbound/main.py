@@ -112,7 +112,7 @@ class KeepAlivePacket(ServerboundPacket):
     id = (26, 26)
 
 @public
-class SetTransformation(ServerboundPacket):
+class SetTransformationPacket(ServerboundPacket):
     id = (27, 11)
 
     transformation: pak.Enum(types.Short, enums.Transformation)
