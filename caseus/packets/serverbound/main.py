@@ -112,6 +112,12 @@ class KeepAlivePacket(ServerboundPacket):
     id = (26, 26)
 
 @public
+class SetTransformation(ServerboundPacket):
+    id = (27, 11)
+
+    transformation: pak.Enum(types.Short, enums.Transformation)
+
+@public
 class HandshakePacket(ServerboundPacket):
     """Sent by the client to start the :class:`~.Connection`."""
 

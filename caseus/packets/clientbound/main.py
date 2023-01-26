@@ -306,6 +306,19 @@ class HandshakeResponsePacket(ClientboundPacket):
     unk_boolean_5: types.Boolean
 
 @public
+class SetCanTransform(ClientboundPacket):
+    id = (27, 10)
+
+    can_transform: types.Boolean
+
+@public
+class SetTransformation(ClientboundPacket):
+    id = (27, 11)
+
+    session_id:     types.Int
+    transformation: pak.Enum(types.Short, enums.Transformation)
+
+@public
 class ReaffirmServerAddressPacket(ClientboundPacket):
     """Sent to the client to make sure it's connected to the expected server."""
 

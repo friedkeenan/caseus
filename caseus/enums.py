@@ -62,3 +62,12 @@ class ShamanLabel(enum.Enum):
     KeepCalm       = 4
     GetReady       = 5
     NoIdea         = 6
+
+@public
+class Transformation(enum.Enum):
+    SmallBox   = 48
+    LargeBox   = 49
+    Anvil      = 50
+    SmallPlank = 51
+    LargePlank = 52
+    Mouse      = 53
