@@ -90,6 +90,12 @@ class CommandPacket(ServerboundPacket):
     command: types.String
 
 @public
+class VampireInfectPacket(ServerboundPacket):
+    id = (8, 66)
+
+    session_id: types.Int
+
+@public
 class EnvironmentUserIdPacket(ServerboundPacket):
     id = (26, 12)
 

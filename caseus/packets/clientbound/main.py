@@ -217,6 +217,20 @@ class MakeShamanPacket(ClientboundPacket):
     unk_int_6:     types.Int
 
 @public
+class SetVampirePacket(ClientboundPacket):
+    id = (8, 66)
+
+    session_id: types.Int
+    vampire:    types.Boolean
+
+    # I'm at least *pretty* sure
+    # that this corresponds to
+    # transmissiblity. It is
+    # stored globally and not
+    # per-player however.
+    transmissible: types.Boolean
+
+@public
 class Unknown_20_4_Packet(ClientboundPacket):
     id = (20, 4)
 
