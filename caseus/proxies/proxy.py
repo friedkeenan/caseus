@@ -151,6 +151,10 @@ class Proxy(pak.AsyncPacketHandler):
         def satellite(self):
             return self.destination.satellite
 
+        @property
+        def session_id(self):
+            return self.destination.session_id
+
         # The fingerprint is not included in the packet length.
         def _written_packet_length(self, data):
             return len(data) - 1
@@ -195,6 +199,8 @@ class Proxy(pak.AsyncPacketHandler):
                 self.satellite = None
 
                 self.proxy.main_clients.append(self)
+
+            self.session_id = None
 
         def close(self):
             try:
@@ -412,6 +418,10 @@ class Proxy(pak.AsyncPacketHandler):
 
         return False
 
+    @pak.packet_listener(clientbound.LoginSuccessPacket)
+    async def _on_login_success(self, source, packet):
+        source.destination.session_id = packet.session_id
+
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _proxy_satellite_server(self, source, packet):
         if packet.should_ignore:
@@ -437,8 +447,9 @@ class Proxy(pak.AsyncPacketHandler):
 
         self._satellite_packets.remove((original_packet, main_client))
 
-        source.main    = source.Pair(client=main_client, server=main_client.destination)
-        source.secrets = main_client.secrets
+        source.main       = source.Pair(client=main_client, server=main_client.destination)
+        source.secrets    = main_client.secrets
+        source.session_id = main_client.session_id
 
         server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
