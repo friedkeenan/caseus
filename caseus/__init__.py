@@ -14,10 +14,10 @@ del importlib_metadata
 from . import types
 from . import proxies
 from . import sniffers
+from . import game
 
 from .secrets import *
 from .packets import *
-from .game    import *
 
 from .proxies  import Proxy
 from .sniffers import Sniffer

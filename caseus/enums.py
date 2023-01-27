@@ -71,3 +71,17 @@ class Transformation(enum.Enum):
     SmallPlank = 51
     LargePlank = 52
     Mouse      = 53
+
+@public
+class StaffMessageType(enum.Enum):
+    Unnamed      = 0
+    Named        = 1
+    Arbitre      = 2
+    Modo         = 3
+    ModoAll      = 4
+    AribtreAll   = 5
+    Event        = 6 # TODO: Make sure this is a correct name.
+    LuaTeam      = 7
+    MapCrew      = 8
+    FunCorp      = 9
+    FashionSquad = 10

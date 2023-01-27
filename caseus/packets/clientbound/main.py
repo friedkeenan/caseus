@@ -20,8 +20,7 @@ from ..packet import (
 
 from ... import types
 from ... import enums
-
-from ...game import Room, flag_url
+from ... import game
 
 @public
 class LegacyWrapperPacket(ClientboundPacket):
@@ -182,7 +181,7 @@ class JoinedRoomPacket(ClientboundPacket):
     flag_code: types.String
 
     def room(self):
-        return Room(
+        return game.Room(
             official  = self.official,
             raw_name  = self.raw_name,
             flag_code = self.flag_code,
@@ -204,6 +203,41 @@ class RoomMessagePacket(ClientboundPacket):
     # Seems to always be 'False', and the value
     # doesn't seem to matter in the game code.
     unk_boolean_3: types.Boolean
+
+@public
+class StaffMessagePacket(ClientboundPacket):
+    id = (6, 10)
+
+    message_type: pak.Enum(types.Byte, enums.StaffMessageType)
+
+    # NOTE: Not always used.
+    username: types.String
+
+    message: types.String
+
+    # Whether or not message decorating should be disabled.
+    # If it is disabled, then the message will just show up
+    # in the general channel with no frill besides being colored.
+    # If decoration is disabled for the 'Unnamed' and 'Event'
+    # messages types, then nothing is displayed.
+    disable_decoration: types.Boolean
+
+    # If 'True' then 'message' is treated as a translation key.
+    is_translation: types.Boolean
+
+    translation_args: types.String[types.Byte]
+
+@public
+class ServerMessagePacket(ClientboundPacket):
+    id = (6, 20)
+
+    general_channel: types.Boolean
+
+    # If the translation key does not start with
+    # '$', or has a space, or has a newline, then
+    # it is just treated as the final message.
+    translation_key:  types.String
+    translation_args: types.String[types.Byte]
 
 @public
 class MakeShamanPacket(ClientboundPacket):
@@ -470,7 +504,7 @@ class LanguageSelectionInformationPacket(ClientboundPacket):
     )[types.UnsignedShort]
 
     def flag_url(self, flag_code):
-        return flag_url(flag_code, self.FLAG_SIZE)
+        return game.flag_url(flag_code, self.FLAG_SIZE)
 
 @public
 class ExtensionWrapperPacket(ClientboundPacket):
