@@ -405,6 +405,13 @@ class SetHandlingTribullePackets(ClientboundPacket):
     handle_tribulle_packets: types.Boolean
 
 @public
+class SetTitlePacket(ClientboundPacket):
+    id = (100, 72)
+
+    gender:   pak.Enum(types.UnsignedByte, enums.Gender)
+    title_id: types.UnsignedShort
+
+@public
 class SetActivePlayersPacket(ClientboundPacket):
     id = (144, 1)
 
