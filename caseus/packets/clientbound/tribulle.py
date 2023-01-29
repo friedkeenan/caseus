@@ -10,10 +10,8 @@ from ... import enums
 class LoginInformation(ClientboundTribullePacket):
     id = 3
 
-    gender: pak.Enum(types.Byte, enums.Gender)
-
-    # Seemingly always '0'.
-    player_id: types.Int
+    gender:    pak.Enum(types.Byte, enums.Gender)
+    global_id: types.Int
 
     soulmate:  types.FriendDescription
     friends:   types.FriendDescription[types.Short]

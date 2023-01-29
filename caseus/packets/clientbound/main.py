@@ -210,16 +210,16 @@ class StaffMessagePacket(ClientboundPacket):
 
     message_type: pak.Enum(types.Byte, enums.StaffMessageType)
 
-    # NOTE: Not always used.
-    username: types.String
+    # NOTE: Not always used, and not always just a username.
+    name: types.String
 
     message: types.String
 
     # Whether or not message decorating should be disabled.
     # If it is disabled, then the message will just show up
     # in the general channel with no frill besides being colored.
-    # If decoration is disabled for the 'Unnamed' and 'Event'
-    # messages types, then nothing is displayed.
+    # If decoration is disabled for the 'ModeratorRoom' and
+    # 'ModeratorCommunity' messages types, then nothing is displayed.
     disable_decoration: types.Boolean
 
     # If 'True' then 'message' is treated as a translation key.
@@ -312,8 +312,7 @@ class LoginSuccessPacket(ClientboundPacket):
     # Whether you are using a registered account or a guest account.
     registered: types.Boolean
 
-    # This seems like it could be staff role IDs the user has?
-    unk_array_7: types.Byte[types.Byte]
+    staff_role_ids: pak.Enum(types.Byte, enums.StaffRoleID)[types.Byte]
 
     # Seems like you can repeat the same message if this is true.
     # Also seems connected to staff roles. Maybe it's true if you
@@ -443,7 +442,7 @@ class SetLoginBannerPacket(ClientboundPacket):
         return self.IMAGE_URL_FMT.format(week_number=self.week_number)
 
 @public
-class QueueLoadFurTextures(ClientboundPacket):
+class QueueLoadFurTexturesPacket(ClientboundPacket):
     id = (144, 34)
 
     fur_id_list: pak.LEB128[pak.LEB128]

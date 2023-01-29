@@ -71,6 +71,13 @@ class RoomMessagePacket(ServerboundPacket):
     message: types.String
 
 @public
+class StaffMessagePacket(ServerboundPacket):
+    id = (6, 10)
+
+    message_type: pak.Enum(types.Byte, enums.StaffMessageType)
+    message:      types.String
+
+@public
 class CommandPacket(ServerboundPacket):
     """Sent to the server when certain commands are used.
 

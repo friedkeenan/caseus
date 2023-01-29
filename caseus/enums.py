@@ -74,14 +74,28 @@ class Transformation(enum.Enum):
 
 @public
 class StaffMessageType(enum.Enum):
-    Unnamed      = 0
-    Named        = 1
-    Arbitre      = 2
-    Modo         = 3
-    ModoAll      = 4
-    AribtreAll   = 5
-    Event        = 6 # TODO: Make sure this is a correct name.
-    LuaTeam      = 7
-    MapCrew      = 8
-    FunCorp      = 9
-    FashionSquad = 10
+    # The 'All' versions send to members of that team in
+    # all communities, not just the one the player is in.
+
+    ModeratorRoom       = 0
+    AdministratorGlobal = 1
+    Arbitre             = 2
+    Modo                = 3
+    ModoAll             = 4
+    AribtreAll          = 5
+    ModeratorCommunity  = 6
+    LuaTeam             = 7
+    MapCrew             = 8
+    FunCorp             = 9
+    FashionSquad        = 10
+
+@public
+class StaffRoleID(enum.Enum):
+    Arbitre       = 3
+    Modo          = 5
+    Unknown7      = 7 # Might be sentinel? Never used in game.
+    Administrator = 10
+    MapCrew       = 11
+    LuaTeam       = 12
+    FunCorp       = 13
+    FashionSquad  = 15

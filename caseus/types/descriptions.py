@@ -90,7 +90,7 @@ public(
         "PlayerDescription",
 
         username       = String,
-        room_id        = Int,
+        session_id     = Int,
         is_shaman      = Boolean,
         deaths         = Byte, # TODO: Better figure out what this is.
         score          = Short,
@@ -98,12 +98,12 @@ public(
         title_id       = Short,
         title_stars    = Byte,
         gender         = _Gender,
-        unk_string_10  = String,
+        unk_string_10  = String, # A lot of times it's the string '0' but others it's a string of a different number. Same name as avatar ID seemingly?
         outfit_code    = String, # TODO: Parse outfit.
         unk_boolean_12 = Boolean,
         mouse_color    = Int,
         shaman_color   = Int,
-        unk_int_15     = Int,
+        unk_int_15     = Int, # Staff name color?
         name_color     = Int,
         unk_ubyte_17   = UnsignedByte,
     )
