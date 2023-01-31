@@ -360,6 +360,31 @@ class ReaffirmServerAddressPacket(ClientboundPacket):
     address: types.String
 
 @public
+class SetSendKeyboardPacket(ClientboundPacket):
+    id = (29, 2)
+
+    key_code: types.Short
+    down:     types.ByteBoolean
+    enable:   types.ByteBoolean
+
+@public
+class SetSendMouseDownPacket(ClientboundPacket):
+    id = (29, 3)
+
+    enable: types.ByteBoolean
+
+@public
+class SetPlayerNameColorPacket(ClientboundPacket):
+    id = (29, 4)
+
+    session_id: types.Int
+    color:      types.Int
+
+@public
+class CleanupLuaScriptingPacket(ClientboundPacket):
+    id = (29, 5)
+
+@public
 class ChangeSatelliteServerPacket(ClientboundPacket):
     """Sent by the main server to tell the client to change the satellite server."""
 

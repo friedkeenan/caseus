@@ -211,6 +211,28 @@ class SystemInformationPacket(ServerboundPacket):
     zero_byte: types.Byte
 
 @public
+class KeyboardPacket(ServerboundPacket):
+    CIPHER = XOR
+
+    id = (29, 2)
+
+    key_code: types.Short
+    down:     types.Boolean
+    player_x: types.Short
+    player_y: types.Short
+
+    # Seem to always be '0'?
+    unk_short_5: types.Short
+    unk_short_6: types.Short
+
+@public
+class MouseDownPacket(ServerboundPacket):
+    id = (29, 3)
+
+    x: types.Short
+    y: types.Short
+
+@public
 class SatelliteHandshakePacket(ServerboundPacket):
     """Sent by the client to the satellite server after switching to it."""
 

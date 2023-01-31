@@ -75,6 +75,9 @@ class Proxy(pak.AsyncPacketHandler):
 
             await pak.io.Connection.wait_closed(self)
 
+        async def _replace_packet(self, packet):
+            pass
+
         async def _read_length(self):
             length_data = b""
 
@@ -134,6 +137,10 @@ class Proxy(pak.AsyncPacketHandler):
                 packet_data
             )
 
+    # TODO: Do some sort of inheritance shenanigans for connections
+    # to better support multiple inheritance of proxies? Maybe also
+    # allow for 'CommonConnection'.
+
     class ServerConnection(_Connection):
         @property
         def secrets(self):
@@ -155,13 +162,11 @@ class Proxy(pak.AsyncPacketHandler):
         def session_id(self):
             return self.destination.session_id
 
-        async def replace_packet(self, packet, replacement_cls=serverbound.KeepAlivePacket, **fields):
+        async def _replace_packet(self, packet):
             await self.write_packet(
-                replacement_cls,
+                serverbound.KeepAlivePacket,
 
                 fingerprint = packet.fingerprint,
-
-                **fields,
             )
 
         # The fingerprint is not included in the packet length.
@@ -248,6 +253,10 @@ class Proxy(pak.AsyncPacketHandler):
 
             return packet
 
+    REPLACE_PACKET = pak.util.UniqueSentinel("REPLACE_PACKET")
+    FORWARD_PACKET = pak.util.UniqueSentinel("FORWARD_PACEKT")
+    DO_NOTHING     = pak.util.UniqueSentinel("DO_NOTHING") # TODO: Better name?
+
     def __init__(
         self,
         *,
@@ -272,6 +281,9 @@ class Proxy(pak.AsyncPacketHandler):
         self.satellite_clients = []
 
         self._satellite_packets = []
+
+    def register_packet_listener(self, listener, *packet_types, after=False, **flags):
+        super().register_packet_listener(listener, *packet_types, after=after, **flags)
 
     def is_serving(self):
         return (
@@ -300,22 +312,37 @@ class Proxy(pak.AsyncPacketHandler):
         self.close()
         await self.wait_closed()
 
-    async def _listen_to_nested_packet(self, source_conn, packet):
+    async def _listen_to_nested_packet(self, source_conn, packet, *, after):
         packet = packet.immutable_copy()
 
         async with self.listener_task_group(listen_sequentially=source_conn._listen_sequentially) as group:
-            for listener in self.listeners_for_packet(packet):
+            for listener in self.listeners_for_packet(packet, after=after):
                 group.create_task(listener(source_conn, packet))
 
     async def _listen_to_packet(self, source_conn, packet):
         async with self.listener_task_group(listen_sequentially=source_conn._listen_sequentially) as group:
-            listeners = self.listeners_for_packet(packet)
+            before_listeners = self.listeners_for_packet(packet, after=False)
             async def proxy_wrapper():
-                results = await asyncio.gather(*[listener(source_conn, packet) for listener in listeners])
+                results = await asyncio.gather(*[listener(source_conn, packet) for listener in before_listeners])
 
-                # We don't use 'all' here because we want to accept 'None' too.
-                if False not in results:
+                if self.REPLACE_PACKET in results:
+                    await source_conn.destination._replace_packet(packet)
+
+                elif self.DO_NOTHING not in results:
                     await source_conn.destination.write_packet_instance(packet)
+
+                    after_listeners = self.listeners_for_packet(packet, after=True)
+                    await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
+
+                # # We don't use 'all' here because we want to accept 'None' too.
+                # if False not in results and self.REPLACE_PACKET not in results:
+                #     await source_conn.destination.write_packet_instance(packet)
+
+                #     after_listeners = self.listeners_for_packet(packet, after=True)
+                #     await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
+
+                # elif self.REPLACE_PACKET in results:
+                #     await source_conn.destination._replace_packet(packet)
 
             group.create_task(proxy_wrapper())
 
@@ -338,6 +365,11 @@ class Proxy(pak.AsyncPacketHandler):
             client_task = asyncio.create_task(self._listen_impl(client))
 
             while client.destination is None:
+                if client.is_closing():
+                    await client_task
+
+                    return
+
                 await pak.util.yield_exec()
 
             await asyncio.gather(client_task, self._listen_impl(client.destination))
@@ -409,7 +441,7 @@ class Proxy(pak.AsyncPacketHandler):
 
         await source.destination.write_packet_instance(corrected)
 
-        return False
+        return self.DO_NOTHING
 
     @pak.packet_listener(clientbound.ReaffirmServerAddressPacket)
     async def _protect_proxy_address(self, source, packet):
@@ -425,7 +457,7 @@ class Proxy(pak.AsyncPacketHandler):
 
         await source.destination.write_packet_instance(protected)
 
-        return False
+        return self.DO_NOTHING
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
     async def _on_login_success(self, source, packet):
@@ -434,7 +466,7 @@ class Proxy(pak.AsyncPacketHandler):
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _proxy_satellite_server(self, source, packet):
         if packet.should_ignore:
-            return True
+            return self.FORWARD_PACKET
 
         self._satellite_packets.append((packet, source.destination))
 
@@ -444,7 +476,7 @@ class Proxy(pak.AsyncPacketHandler):
 
         await source.destination.write_packet_instance(proxied)
 
-        return False
+        return self.DO_NOTHING
 
     @pak.packet_listener(serverbound.SatelliteHandshakePacket)
     async def _complete_satellite_proxy(self, source, packet):
@@ -470,18 +502,30 @@ class Proxy(pak.AsyncPacketHandler):
 
     @pak.packet_listener(serverbound.TribulleWrapperPacket, clientbound.TribulleWrapperPacket)
     async def _on_tribulle(self, source, packet):
-        await self._listen_to_nested_packet(source, packet.nested)
+        await self._listen_to_nested_packet(source, packet.nested, after=False)
 
     @pak.packet_listener(serverbound.LegacyWrapperPacket, clientbound.LegacyWrapperPacket)
     async def _on_legacy(self, source, packet):
-        await self._listen_to_nested_packet(source, packet.nested)
+        await self._listen_to_nested_packet(source, packet.nested, after=False)
 
     @pak.packet_listener(serverbound.ExtensionWrapperPacket, clientbound.ExtensionWrapperPacket)
     async def _on_extension(self, source, packet):
-        await self._listen_to_nested_packet(source, packet.nested)
+        await self._listen_to_nested_packet(source, packet.nested, after=False)
 
         # Never forward on an extension packet.
-        return False
+        return self.DO_NOTHING
+
+    @pak.packet_listener(serverbound.TribulleWrapperPacket, clientbound.TribulleWrapperPacket)
+    async def _on_tribulle_after(self, source, packet):
+        await self._listen_to_nested_packet(source, packet.nested, after=True)
+
+    @pak.packet_listener(serverbound.LegacyWrapperPacket, clientbound.LegacyWrapperPacket, after=True)
+    async def _on_legacy_after(self, source, packet):
+        await self._listen_to_nested_packet(source, packet.nested, after=True)
+
+    @pak.packet_listener(serverbound.ExtensionWrapperPacket, clientbound.ExtensionWrapperPacket, after=True)
+    async def _on_extension_after(self, source, packet):
+        await self._listen_to_nested_packet(source, packet.nested, after=True)
 
     @pak.packet_listener(serverbound.KeySourcesPacket)
     async def _load_packet_key_sources(self, source, packet):

@@ -25,6 +25,10 @@ class Byte(pak.Int8):
 
     endian = ">"
 
+# TODO: Actually implement this.
+# Also go through each boolean field and see if it's really one of these.
+public(ByteBoolean = Boolean)
+
 @public
 class UnsignedByte(pak.UInt8):
     """An unsigned 8-bit integer."""
