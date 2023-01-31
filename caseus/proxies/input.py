@@ -23,8 +23,8 @@ class InputListeningProxy(Proxy):
     class ClientConnection(Proxy.ClientConnection):
         class _MouseListenerInfo:
             def __init__(self):
-                self.proxy_listening = True
-                self.game_listening  = True
+                self.proxy_listening = False
+                self.game_listening  = False
 
         class _KeyListenerInfo:
             def __init__(self):
