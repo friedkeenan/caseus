@@ -113,6 +113,24 @@ class EnvironmentUserIdPacket(ServerboundPacket):
     unk_string_2: types.String
 
 @public
+class PingPacket(ServerboundPacket):
+    """A packet to test the ping of the satellite server.
+
+    Most staff roles are able to get ping information in
+    their ``/ips`` screen. When doing so, this is the packet
+    that the client sends to the satellite server, expecting a
+    :class:`clientbound.PongPacket <.PongPacket>` in return.
+    If it does not get one within 10 seconds, then it gives up
+    trying to ping. If it does get one however, it will send
+    another one, and another, and so on.
+
+    If the server does not think you should be able to ping,
+    then it will just ignore this packet.
+    """
+
+    id = (26, 25)
+
+@public
 class KeepAlivePacket(ServerboundPacket):
     """Sent by the client periodically to keep the :class:`~.Connection` alive."""
 
@@ -249,10 +267,48 @@ class TribulleWrapperPacket(ServerboundPacket):
     nested: _NestedTribulleType(ServerboundTribullePacket)
 
 @public
-class ClientLanguagePacket(ServerboundPacket):
+class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):
+    id = (149, 12)
+
+@public
+class AddFashionSquadOutfitPacket(ServerboundPacket):
+    id = (149, 13)
+
+    outfit_name: types.String
+    background:  pak.Enum(types.Short, enums.FashionSquadOutfitBackground) # TODO: EnumOr.
+    date:        types.String
+    outfit_code: types.String # TODO: Parse outfit.
+
+@public
+class RemoveFashionSquadOutfitPacket(ServerboundPacket):
+    id = (149, 14)
+
+    outfit_id: types.Int
+
+@public
+class OpenFashionSquadSalesMenuPacket(ServerboundPacket):
+    id = (149, 16)
+
+@public
+class RemoveFashionSquadSalePacket(ServerboundPacket):
+    id = (149, 17)
+
+    sale_id: types.Int
+
+@public
+class AddFashionSquadSalePacket(ServerboundPacket):
+    id = (149, 18)
+
+    item_id:       types.String
+    starting_date: types.String
+    ending_date:   types.String
+    percentage:    types.Byte
+
+@public
+class SetLanguagePacket(ServerboundPacket):
     id = (176, 1)
 
-    code: types.String
+    language: types.String
 
 @public
 class ExtensionWrapperPacket(ServerboundPacket):

@@ -91,6 +91,8 @@ class StaffMessageType(enum.Enum):
 
 @public
 class StaffRoleID(enum.Enum):
+    NONE = 0
+
     Arbitre       = 3
     Modo          = 5
     Unknown7      = 7 # Might be sentinel? Never used in game.
@@ -99,3 +101,15 @@ class StaffRoleID(enum.Enum):
     LuaTeam       = 12
     FunCorp       = 13
     FashionSquad  = 15
+
+@public
+class FashionSquadOutfitBackground(enum.Enum):
+    Greenery   = 0
+    Beach      = 1
+    Ocean      = 2
+    Valentines = 3
+    Halloween  = 4
+
+    @property
+    def url(self):
+        return f"https://www.transformice.com/images/x_transformice/x_interface/fonds_shop/{self.value}.jpg"

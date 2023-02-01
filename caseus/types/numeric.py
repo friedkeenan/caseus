@@ -203,3 +203,6 @@ class VarInt(VarNum):
     """
 
     bits = 32
+
+# TODO: Actually implement the limit.
+public(LimitedLEB128 = pak.LEB128)

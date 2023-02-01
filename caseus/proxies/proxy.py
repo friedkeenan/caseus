@@ -21,8 +21,7 @@ from .. import types
 
 @public
 class Proxy(pak.AsyncPacketHandler):
-    MAIN_SERVER_ADDR  = "193.70.81.30"
-    MAIN_SERVER_PORTS = [11801, 12801, 13801, 14801]
+    MAIN_SERVER_PORTS_FALLBACK = [11801, 12801, 13801, 14801]
 
     CORRECT_LOADER_SIZE = 0x7EE88
 
@@ -334,16 +333,6 @@ class Proxy(pak.AsyncPacketHandler):
                     after_listeners = self.listeners_for_packet(packet, after=True)
                     await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
 
-                # # We don't use 'all' here because we want to accept 'None' too.
-                # if False not in results and self.REPLACE_PACKET not in results:
-                #     await source_conn.destination.write_packet_instance(packet)
-
-                #     after_listeners = self.listeners_for_packet(packet, after=True)
-                #     await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
-
-                # elif self.REPLACE_PACKET in results:
-                #     await source_conn.destination._replace_packet(packet)
-
             group.create_task(proxy_wrapper())
 
     async def _listen_impl(self, source_conn):
@@ -358,29 +347,21 @@ class Proxy(pak.AsyncPacketHandler):
                 await self.end_listener_tasks()
 
     async def listen(self, client):
-        if client.destination is not None:
-            await asyncio.gather(self._listen_impl(client), self._listen_impl(client.destination))
+        client_task = asyncio.create_task(self._listen_impl(client))
 
-        else:
-            client_task = asyncio.create_task(self._listen_impl(client))
+        # The server connection gets initialized later.
+        while client.destination is None:
+            if client.is_closing():
+                await client_task
 
-            while client.destination is None:
-                if client.is_closing():
-                    await client_task
+                return
 
-                    return
+            await pak.util.yield_exec()
 
-                await pak.util.yield_exec()
-
-            await asyncio.gather(client_task, self._listen_impl(client.destination))
+        await asyncio.gather(client_task, self._listen_impl(client.destination))
 
     async def new_main_connection(self, client_reader, client_writer):
-        server_reader, server_writer = await self.open_streams(self.MAIN_SERVER_ADDR, self.MAIN_SERVER_PORTS)
-
-        server = self.ServerConnection(self, reader=server_reader, writer=server_writer)
-        client = self.ClientConnection(self, destination=server, reader=client_reader, writer=client_writer)
-
-        server.destination = client
+        client = self.ClientConnection(self, reader=client_reader, writer=client_writer)
 
         async with client:
             await self.listen(client)
@@ -530,3 +511,14 @@ class Proxy(pak.AsyncPacketHandler):
     @pak.packet_listener(serverbound.KeySourcesPacket)
     async def _load_packet_key_sources(self, source, packet):
         source.secrets = Secrets(packet.packet_key_sources)
+
+    @pak.packet_listener(serverbound.MainServerInfoPacket)
+    async def _connect_to_main_server(self, source, packet):
+        ports = packet.ports
+        if len(ports) == 0:
+            ports = self.MAIN_SERVER_PORTS_FALLBACK
+
+        server_reader, server_writer = await self.open_streams(packet.address, ports)
+        source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
+
+        source.main.server = source.destination

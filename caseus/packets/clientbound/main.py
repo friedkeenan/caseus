@@ -339,6 +339,10 @@ class HandshakeResponsePacket(ClientboundPacket):
     unk_boolean_5: types.Boolean
 
 @public
+class PongPacket(ClientboundPacket):
+    id = (26, 25)
+
+@public
 class SetCanTransformPacket(ClientboundPacket):
     id = (27, 10)
 
@@ -360,18 +364,18 @@ class ReaffirmServerAddressPacket(ClientboundPacket):
     address: types.String
 
 @public
-class SetSendKeyboardPacket(ClientboundPacket):
+class BindKeyboardPacket(ClientboundPacket):
     id = (29, 2)
 
     key_code: types.Short
     down:     types.ByteBoolean
-    enable:   types.ByteBoolean
+    active:   types.ByteBoolean
 
 @public
-class SetSendMouseDownPacket(ClientboundPacket):
+class BindMouseDownPacket(ClientboundPacket):
     id = (29, 3)
 
-    enable: types.ByteBoolean
+    active: types.ByteBoolean
 
 @public
 class SetPlayerNameColorPacket(ClientboundPacket):
@@ -453,10 +457,50 @@ class UpdateActivePlayerPacket(ClientboundPacket):
     unk_boolean_3: types.Boolean
 
 @public
+class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
+    id = (144, 22)
+
+    outfits: pak.Compound(
+        "OutfitInfo",
+
+        outfit_id    = types.Int,
+        outfit_name  = types.String,
+        background   = pak.Enum(types.Byte, enums.FashionSquadOutfitBackground),
+        removal_date = types.String,
+        outfit_code  = types.String, # TODO: Parse outfit.
+
+        # Might have similar meaning as unk_leb128_6 of sales menu packet.
+        unk_byte_6 = types.Byte,
+    )[types.Int]
+
+@public
+class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
+    id = (144, 29)
+
+    sales: pak.Compound(
+        "SaleInfo",
+
+        sale_id    = types.LimitedLEB128,
+        item_id    = types.String,
+        sale_start = types.String,
+        sale_end   = types.String,
+        percentage = types.LimitedLEB128,
+
+        # Some sort of enum, for colors of sale_start and sale_end.
+        #
+        # Value '1' cannot cancel the sale, and has color '0xFFD991'.
+        # Value '2' can cancel the sale and has color '0xF79337'.
+        #
+        # Other values are possible and cannot
+        # cancel the sale and have color '0x60608F'.
+        unk_leb128_6 = types.LimitedLEB128,
+    )[types.VarInt]
+
+@public
 class SetLoginBannerPacket(ClientboundPacket):
     id = (144, 31)
 
-    week_number: pak.LEB128
+    week_number: types.LimitedLEB128
 
     IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_aventure/x_banniere/x_{week_number}.jpg"
 
@@ -470,7 +514,7 @@ class SetLoginBannerPacket(ClientboundPacket):
 class QueueLoadFurTexturesPacket(ClientboundPacket):
     id = (144, 34)
 
-    fur_id_list: pak.LEB128[pak.LEB128]
+    fur_id_list: types.LimitedLEB128[types.LimitedLEB128]
 
     SWF_URL_FMT = "https://www.transformice.com/images/x_bibliotheques/fourrures/f{fur_id}.swf"
 

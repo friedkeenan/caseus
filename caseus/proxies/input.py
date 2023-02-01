@@ -66,9 +66,9 @@ class InputListeningProxy(Proxy):
         async def listen_to_mouse(self, listen=True):
             if not self._mouse_info.game_listening and listen is not self._mouse_info.proxy_listening:
                 await self.write_packet(
-                    clientbound.SetSendMouseDownPacket,
+                    clientbound.BindMouseDownPacket,
 
-                    enable = listen,
+                    active = listen,
                 )
 
             self._mouse_info.proxy_listening = listen
@@ -84,11 +84,11 @@ class InputListeningProxy(Proxy):
                 listen is not previously_listening
             ):
                 await self.write_packet(
-                    clientbound.SetSendKeyboardPacket,
+                    clientbound.BindKeyboardPacket,
 
                     key_code = key_code,
                     down     = down,
-                    enable   = listen,
+                    active   = listen,
                 )
 
             if listen:
@@ -96,11 +96,11 @@ class InputListeningProxy(Proxy):
             else:
                 proxy_listeners.remove(key_code)
 
-    @pak.packet_listener(clientbound.SetSendMouseDownPacket)
+    @pak.packet_listener(clientbound.BindMouseDownPacket)
     async def _track_mouse_game_listening(self, source, packet):
         source._mouse_info.game_listening = packet.enable
 
-    @pak.packet_listener(clientbound.SetSendKeyboardPacket)
+    @pak.packet_listener(clientbound.BindKeyboardPacket)
     async def _track_key_game_listeners(self, source, packet):
         if packet.enable:
             source._key_info.game_listeners(down=packet.down).add(packet.key_code)
@@ -138,11 +138,11 @@ class InputListeningProxy(Proxy):
     async def _reenable_key_listeners(self, client, *, down):
         for key_code in client._key_info.proxy_listeners(down=down):
             await client.write_packet(
-                clientbound.SetSendKeyboardPacket,
+                clientbound.BindKeyboardPacket,
 
                 key_code = key_code,
                 down     = down,
-                enable   = True,
+                active   = True,
             )
 
     @pak.packet_listener(clientbound.CleanupLuaScriptingPacket, clientbound.JoinedRoomPacket, after=True)
@@ -152,9 +152,9 @@ class InputListeningProxy(Proxy):
 
         if source._mouse_info.proxy_listening:
             await source.destination.write_packet(
-                clientbound.SetSendMouseDownPacket,
+                clientbound.BindMouseDownPacket,
 
-                enable = True,
+                active = True,
             )
 
         await self._reenable_key_listeners(source.destination, down=True)
