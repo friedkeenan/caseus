@@ -317,7 +317,7 @@ class LoginSuccessPacket(ClientboundPacket):
     # Seems like you can repeat the same message if this is true.
     # Also seems connected to staff roles. Maybe it's true if you
     # have a moderator-ish role?
-    unk_bool_8: types.Boolean
+    unk_boolean_8: types.Boolean
 
     # Never used despite having maybe meaningful values.
     unk_ushort_9: types.UnsignedShort

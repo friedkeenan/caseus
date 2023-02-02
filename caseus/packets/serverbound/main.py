@@ -251,7 +251,7 @@ class MouseDownPacket(ServerboundPacket):
     y: types.Short
 
 @public
-class SatelliteHandshakePacket(ServerboundPacket):
+class SatelliteDelayedIdentificationPacket(ServerboundPacket):
     """Sent by the client to the satellite server after switching to it."""
 
     id = (44, 1)

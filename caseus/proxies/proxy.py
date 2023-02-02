@@ -40,12 +40,12 @@ class Proxy(pak.AsyncPacketHandler):
         #
         # We make explicit calls to 'Connection' at times to avoid recursion.
 
+        _listen_sequentially = True
+
         class Pair:
             def __init__(self, *, client, server):
                 self.client = client
                 self.server = server
-
-        _listen_sequentially = False
 
         def __init__(self, proxy, *, destination=None, **kwargs):
             self.proxy       = proxy
@@ -141,6 +141,11 @@ class Proxy(pak.AsyncPacketHandler):
     # allow for 'CommonConnection'.
 
     class ServerConnection(_Connection):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            self.fingerprint = None
+
         @property
         def secrets(self):
             return self.destination.secrets
@@ -173,7 +178,9 @@ class Proxy(pak.AsyncPacketHandler):
             return len(data) - 1
 
         def _written_packet_data(self, packet):
-            header = packet.header(ctx=self.ctx)
+            header = packet.Header(fingerprint=self.fingerprint, id=packet.id(ctx=self.ctx))
+
+            self.fingerprint = (self.fingerprint + 1) % 100
 
             packet_body = packet.pack_without_header(ctx=self.ctx)
             packet_body = packet.cipher_data(packet_body, secrets=self.secrets, fingerprint=header.fingerprint)
@@ -190,11 +197,6 @@ class Proxy(pak.AsyncPacketHandler):
             return packet_cls.unpack(buf, ctx=self.ctx)
 
     class ClientConnection(_Connection):
-        # We always want to listen sequentially for client
-        # connections so that the fingerprints never get
-        # out of order when sending them to the server.
-        _listen_sequentially = True
-
         def __init__(self, proxy, *, is_satellite=False, main=None, **kwargs):
             super().__init__(proxy, **kwargs)
 
@@ -324,14 +326,18 @@ class Proxy(pak.AsyncPacketHandler):
             async def proxy_wrapper():
                 results = await asyncio.gather(*[listener(source_conn, packet) for listener in before_listeners])
 
+                if self.DO_NOTHING in results:
+                    return
+
                 if self.REPLACE_PACKET in results:
                     await source_conn.destination._replace_packet(packet)
 
-                elif self.DO_NOTHING not in results:
-                    await source_conn.destination.write_packet_instance(packet)
+                    return
 
-                    after_listeners = self.listeners_for_packet(packet, after=True)
-                    await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
+                await source_conn.destination.write_packet_instance(packet)
+
+                after_listeners = self.listeners_for_packet(packet, after=True)
+                await asyncio.gather(*[listener(source_conn, packet) for listener in after_listeners])
 
             group.create_task(proxy_wrapper())
 
@@ -416,6 +422,9 @@ class Proxy(pak.AsyncPacketHandler):
         # With the proxy loader, the loader's stage size will
         # not be what the server expects, so we correct it here.
 
+        # Set the serverbound fingerprint from the handshake packet.
+        source.destination.fingerprint = packet.fingerprint
+
         corrected = packet.copy()
 
         corrected.loader_stage_size = self.CORRECT_LOADER_SIZE
@@ -459,7 +468,7 @@ class Proxy(pak.AsyncPacketHandler):
 
         return self.DO_NOTHING
 
-    @pak.packet_listener(serverbound.SatelliteHandshakePacket)
+    @pak.packet_listener(serverbound.SatelliteDelayedIdentificationPacket)
     async def _complete_satellite_proxy(self, source, packet):
         original_packet, main_client = self._satellite_info_with_auth_id(packet.auth_id)
         if original_packet is None:
@@ -475,6 +484,9 @@ class Proxy(pak.AsyncPacketHandler):
 
         server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
+
+        # Set the serverbound fingerprint from the identification packet.
+        source.destination.fingerprint = packet.fingerprint
 
         source.satellite = source.Pair(client=source, server=source.destination)
         main_client.satellite = main_client.Pair(client=source, server=source.destination)
@@ -522,3 +534,5 @@ class Proxy(pak.AsyncPacketHandler):
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
 
         source.main.server = source.destination
+
+        source._listen_sequentially = False
