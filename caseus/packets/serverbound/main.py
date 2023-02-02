@@ -275,7 +275,7 @@ class AddFashionSquadOutfitPacket(ServerboundPacket):
     id = (149, 13)
 
     outfit_name: types.String
-    background:  pak.Enum(types.Short, enums.FashionSquadOutfitBackground) # TODO: EnumOr.
+    background:  pak.EnumOr(types.Short, enums.FashionSquadOutfitBackground)
     date:        types.String
     outfit_code: types.String # TODO: Parse outfit.
 
