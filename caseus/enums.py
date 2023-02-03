@@ -113,3 +113,15 @@ class FashionSquadOutfitBackground(enum.Enum):
     @property
     def url(self):
         return f"https://www.transformice.com/images/x_transformice/x_interface/fonds_shop/{self.value}.jpg"
+
+@public
+class IceCubeAction(enum.Enum):
+    Unfreeze = 0
+    Freeze   = 1
+
+    # NOTE: Not defined in game, just a value which isn't explicitly used.
+    SetRemainingTime = 2
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.SetRemainingTime

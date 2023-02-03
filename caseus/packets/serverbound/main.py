@@ -29,7 +29,7 @@ class LegacyWrapperPacket(ServerboundPacket):
     nested: _NestedLegacyType(ServerboundLegacyPacket)
 
 @public
-class CreateShamanLabel(ServerboundPacket):
+class CreateShamanLabelPacket(ServerboundPacket):
     """Sent to the satellite server to create a shaman label.
 
     .. note::
@@ -42,6 +42,13 @@ class CreateShamanLabel(ServerboundPacket):
     label: pak.Enum(types.Byte, enums.ShamanLabel)
     x:     types.Short
     y:     types.Short
+
+@public
+class PreviousWorldGravityPacket(ServerboundPacket):
+    id = (5, 21)
+
+    x: types.Short
+    y: types.Short
 
 @public
 class JoinRoomPacket(ServerboundPacket):
@@ -95,6 +102,15 @@ class CommandPacket(ServerboundPacket):
 
     # The command without the '/' prefix.
     command: types.String
+
+@public
+class SetIceCubePacket(ServerboundPacket):
+    id = (8, 45)
+
+    # Only ever sent with 'Unfreeze' and '0' as 'action' and 'frozen_seconds'.
+
+    action:  pak.Enum(types.Byte, enums.IceCubeAction)
+    seconds: types.Short
 
 @public
 class VampireInfectPacket(ServerboundPacket):
@@ -236,12 +252,12 @@ class KeyboardPacket(ServerboundPacket):
 
     key_code: types.Short
     down:     types.Boolean
-    player_x: types.Short
-    player_y: types.Short
+    x:        types.Short
+    y:        types.Short
 
-    # Seem to always be '0'?
-    unk_short_5: types.Short
-    unk_short_6: types.Short
+    # NOTE: Units are in pixels.
+    velocity_x: types.Short
+    velocity_y: types.Short
 
 @public
 class MouseDownPacket(ServerboundPacket):

@@ -73,36 +73,40 @@ class InputListeningProxy(Proxy):
 
             self._mouse_info.proxy_listening = listen
 
-        async def listen_to_keyboard(self, key_code, listen=True, *, down=True):
+        async def listen_to_keyboard(self, key_codes, listen=True, *, down=True):
+            if isinstance(key_codes, int):
+                key_codes = (key_codes,)
+
             proxy_listeners = self._key_info.proxy_listeners(down=down)
 
-            previously_listening = key_code in proxy_listeners
+            for key_code in key_codes:
+                previously_listening = key_code in proxy_listeners
 
-            if (
-                key_code not in self._key_info.game_listeners(down=down) and
+                if (
+                    key_code not in self._key_info.game_listeners(down=down) and
 
-                listen is not previously_listening
-            ):
-                await self.write_packet(
-                    clientbound.BindKeyboardPacket,
+                    listen is not previously_listening
+                ):
+                    await self.write_packet(
+                        clientbound.BindKeyboardPacket,
 
-                    key_code = key_code,
-                    down     = down,
-                    active   = listen,
-                )
+                        key_code = key_code,
+                        down     = down,
+                        active   = listen,
+                    )
 
-            if listen:
-                proxy_listeners.add(key_code)
-            else:
-                proxy_listeners.remove(key_code)
+                if listen:
+                    proxy_listeners.add(key_code)
+                else:
+                    proxy_listeners.remove(key_code)
 
     @pak.packet_listener(clientbound.BindMouseDownPacket)
     async def _track_mouse_game_listening(self, source, packet):
-        source._mouse_info.game_listening = packet.enable
+        source._mouse_info.game_listening = packet.active
 
     @pak.packet_listener(clientbound.BindKeyboardPacket)
     async def _track_key_game_listeners(self, source, packet):
-        if packet.enable:
+        if packet.active:
             source._key_info.game_listeners(down=packet.down).add(packet.key_code)
         else:
             try:

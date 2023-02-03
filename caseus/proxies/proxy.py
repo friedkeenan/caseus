@@ -40,6 +40,10 @@ class Proxy(pak.AsyncPacketHandler):
         #
         # We make explicit calls to 'Connection' at times to avoid recursion.
 
+        # NOTE: We also listen sequentially because the order of packets
+        # seems to be important for clientbound packets, and for serverbound
+        # packets, the fingerprints need to be correctly ordered, especially
+        # in the case of unknown packets which are xor-ciphered.
         _listen_sequentially = True
 
         class Pair:
@@ -534,5 +538,3 @@ class Proxy(pak.AsyncPacketHandler):
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
 
         source.main.server = source.destination
-
-        source._listen_sequentially = False

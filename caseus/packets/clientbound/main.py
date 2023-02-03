@@ -194,6 +194,32 @@ class SetMapTimerPacket(ClientboundPacket):
     seconds: types.Short
 
 @public
+class SetWorldGravityPacket(ClientboundPacket):
+    id = (5, 28)
+
+    # Ignored if '0'.
+    milliseconds_to_send_previous: types.Int
+
+    x: types.Int
+    y: types.Int
+
+@public
+class FreezePacket(ClientboundPacket):
+    id = (5, 34)
+
+    session_id: types.Int
+    freeze:     types.Boolean
+    show_ice:   types.Boolean
+
+@public
+class SpawnParticlePacket(ClientboundPacket):
+    id = (5, 50)
+
+    particle_id: types.Byte
+    x:           types.Short
+    y:           types.Short
+
+@public
 class RoomMessagePacket(ClientboundPacket):
     id = (6, 6)
 
@@ -249,6 +275,25 @@ class MakeShamanPacket(ClientboundPacket):
     unk_ushort_4:  types.UnsignedShort
     unk_boolean_5: types.Boolean
     unk_int_6:     types.Int
+
+@public
+class MovePlayerPacket(ClientboundPacket):
+    id = (8, 3)
+
+    x:                 types.Short
+    y:                 types.Short
+    position_relative: types.ByteBoolean
+    velocity_x:        types.Short
+    velocity_y:        types.Short
+    velocity_relative: types.ByteBoolean
+
+@public
+class SetIceCubePacket(ClientboundPacket):
+    id = (8, 45)
+
+    session_id: types.Int
+    action:     pak.Enum(types.Byte, enums.IceCubeAction)
+    seconds:    types.Short
 
 @public
 class SetVampirePacket(ClientboundPacket):
@@ -356,6 +401,12 @@ class SetTransformationPacket(ClientboundPacket):
     transformation: pak.Enum(types.Short, enums.Transformation)
 
 @public
+class LoadAndExecutePacket(ClientboundPacket):
+    id = (28, 1)
+
+    swf_data: pak.RawByte[None]
+
+@public
 class ReaffirmServerAddressPacket(ClientboundPacket):
     """Sent to the client to make sure it's connected to the expected server."""
 
@@ -457,6 +508,14 @@ class UpdateActivePlayerPacket(ClientboundPacket):
     unk_boolean_3: types.Boolean
 
 @public
+class SetCheesesPacket(ClientboundPacket):
+    id = (144, 6)
+
+    session_id: types.Int
+
+    cheeses: types.Byte
+
+@public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
     id = (144, 22)
 
@@ -509,6 +568,16 @@ class SetLoginBannerPacket(ClientboundPacket):
         # TODO: Docs.
 
         return self.IMAGE_URL_FMT.format(week_number=self.week_number)
+
+@public
+class SetGravityScalePacket(ClientboundPacket):
+    id = (144, 32)
+
+    session_id: types.LimitedLEB128
+
+    # These appear to be in units of pixels.
+    x: types.LimitedLEB128
+    y: types.LimitedLEB128
 
 @public
 class QueueLoadFurTexturesPacket(ClientboundPacket):

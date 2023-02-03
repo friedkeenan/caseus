@@ -17,7 +17,7 @@ async def get_translations(language):
             data = [line.split("=", 1) for line in data if len(line) != 0]
 
             return {
-                key: value
+                pair[0]: pair[1]
 
-                for key, value in data
+                for pair in data if len(pair) > 1
             }
