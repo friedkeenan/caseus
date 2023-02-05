@@ -20,6 +20,9 @@ class InputListeningProxy(Proxy):
         async def listen_to_mouse(self, listen=True):
             await source.destination.listen_to_mouse(listen)
 
+        async def listen_to_keyboard(self, key_codes, listen=True, *, down=True):
+            await self.destination.listen_to_keyboard(key_codes, listen, down=down)
+
     class ClientConnection(Proxy.ClientConnection):
         class _MouseListenerInfo:
             def __init__(self):
@@ -28,25 +31,18 @@ class InputListeningProxy(Proxy):
 
         class _KeyListenerInfo:
             def __init__(self):
-                self._game_listeners = {
-                    True:  set(),
-                    False: set(),
-                }
-
-                self._proxy_listeners = {
-                    True:  set(),
-                    False: set(),
-                }
+                self._game_listeners  = [set(), set()]
+                self._proxy_listeners = [set(), set()]
 
             def reset_game_listeners(self):
-                self._game_listeners[True].clear()
-                self._game_listeners[False].clear()
+                self._game_listeners[0].clear()
+                self._game_listeners[1].clear()
 
             def game_listeners(self, *, down):
-                return self._game_listeners[down]
+                return self._game_listeners[int(down)]
 
             def proxy_listeners(self, *, down):
-                return self._proxy_listeners[down]
+                return self._proxy_listeners[int(down)]
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

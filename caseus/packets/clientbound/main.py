@@ -173,6 +173,20 @@ class CreateShamanLabel(ClientboundPacket):
     y:     types.Short
 
 @public
+class AddShamanObjectPacket(ClientboundPacket):
+    id = (5, 20)
+
+    object_id:        types.Int # If '-1' then automatically assigned.
+    shaman_object_id: types.Short
+    x:                types.Short
+    y:                types.Short
+    angle:            types.Short
+    velocity_x:       types.Byte
+    velocity_y:       types.Byte
+    mice_collidable:  types.ByteBoolean
+    colors:           types.Int[types.Byte]
+
+@public
 class JoinedRoomPacket(ClientboundPacket):
     id = (5, 21)
 
@@ -192,6 +206,13 @@ class SetMapTimerPacket(ClientboundPacket):
     id = (5, 22)
 
     seconds: types.Short
+
+@public
+class SetSnowingPacket(ClientboundPacket):
+    id = (5, 23)
+
+    snowing:        types.ByteBoolean
+    snowball_power: types.Short
 
 @public
 class SetWorldGravityPacket(ClientboundPacket):
@@ -215,7 +236,7 @@ class FreezePacket(ClientboundPacket):
 class SpawnParticlePacket(ClientboundPacket):
     id = (5, 50)
 
-    particle_id: types.Byte
+    particle_id: types.Byte # TODO: Enum?
     x:           types.Short
     y:           types.Short
 
@@ -440,6 +461,41 @@ class CleanupLuaScriptingPacket(ClientboundPacket):
     id = (29, 5)
 
 @public
+class LoadInventoryPacket(ClientboundPacket):
+    id = (31, 1)
+
+    consumables: pak.Compound(
+        "ConsumableInfo",
+
+        consumable_id       = types.Short,
+        quantity            = types.UnsignedByte, # NOTE: If consumable id already received, then this quantity is just added.
+        priority            = types.UnsignedByte, # Only used for sorting.
+        is_event            = types.Boolean,      # Is this correct?
+        can_use             = types.Boolean,      # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
+        can_equip           = types.Boolean,
+        unk_boolean_7       = types.Boolean,
+        category            = pak.Enum(types.Byte, enums.ConsumableCategory),
+        can_use_immediately = types.Boolean,
+        can_use_when_dead   = types.Boolean,
+        image_name          = pak.Optional(types.String, types.Boolean),
+        slot                = types.Byte,
+    )[types.Short]
+
+@public
+class UpdateInventoryPacket(ClientboundPacket):
+    id = (31, 2)
+
+    consumable_id: types.Short
+    quantity:      types.UnsignedByte
+
+@public
+class UseConsumablePacket(ClientboundPacket):
+    id = (31, 3)
+
+    session_id:    types.Int
+    consumable_id: types.Short
+
+@public
 class ChangeSatelliteServerPacket(ClientboundPacket):
     """Sent by the main server to tell the client to change the satellite server."""
 
@@ -512,8 +568,7 @@ class SetCheesesPacket(ClientboundPacket):
     id = (144, 6)
 
     session_id: types.Int
-
-    cheeses: types.Byte
+    cheeses:    types.Byte
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
@@ -575,7 +630,6 @@ class SetGravityScalePacket(ClientboundPacket):
 
     session_id: types.LimitedLEB128
 
-    # These appear to be in units of pixels.
     x: types.LimitedLEB128
     y: types.LimitedLEB128
 

@@ -125,3 +125,12 @@ class IceCubeAction(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.SetRemainingTime
+
+@public
+class ConsumableCategory(enum.Enum):
+    Coins           = 10
+    Adventure       = 20
+    Throwables      = 30
+    Arts            = 40
+    CostumesAndPets = 50
+    Miscellaneous   = 100

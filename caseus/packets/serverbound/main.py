@@ -29,6 +29,30 @@ class LegacyWrapperPacket(ServerboundPacket):
     nested: _NestedLegacyType(ServerboundLegacyPacket)
 
 @public
+class PlayerMovementPacket(ServerboundPacket):
+    id = (4, 4)
+
+    unk_int_1: types.Int # Same as unk_byte_3 in NewMapPacket
+    moving_right: types.Boolean
+    moving_left: types.Boolean
+    x: pak.ScaledInteger(types.Int, 100 / 30)
+    y: pak.ScaledInteger(types.Int, 100 / 30)
+    velocity_x: types.Short
+    velocity_y: types.Short
+    jumping: types.Boolean
+
+    # Only present if transformed.
+    angle_info: pak.Optional(
+        pak.Compound(
+            "AngleInfo",
+
+            unk_short_1 = types.Short,
+            rotation = pak.ScaledInteger(types.Short, 100),
+            fixed_rotation = types.Boolean,
+        )
+    )
+
+@public
 class CreateShamanLabelPacket(ServerboundPacket):
     """Sent to the satellite server to create a shaman label.
 
@@ -265,6 +289,19 @@ class MouseDownPacket(ServerboundPacket):
 
     x: types.Short
     y: types.Short
+
+@public
+class UseConsumablePacket(ServerboundPacket):
+    id = (31, 3)
+
+    consumable_id: types.Short
+
+@public
+class SetEquippedConsumablePacket(ServerboundPacket):
+    id = (31, 4)
+
+    consumable_id: types.Short
+    equipped:      types.Boolean
 
 @public
 class SatelliteDelayedIdentificationPacket(ServerboundPacket):
