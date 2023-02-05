@@ -32,23 +32,25 @@ class LegacyWrapperPacket(ServerboundPacket):
 class PlayerMovementPacket(ServerboundPacket):
     id = (4, 4)
 
-    unk_int_1: types.Int # Same as unk_byte_3 in NewMapPacket
-    moving_right: types.Boolean
-    moving_left: types.Boolean
-    x: pak.ScaledInteger(types.Int, 100 / 30)
-    y: pak.ScaledInteger(types.Int, 100 / 30)
-    velocity_x: types.Short
-    velocity_y: types.Short
-    jumping: types.Boolean
+    room_map_id:         types.Int
+    moving_right:        types.Boolean
+    moving_left:         types.Boolean
+    x:                   pak.ScaledInteger(types.Int,   100 / 30)
+    y:                   pak.ScaledInteger(types.Int,   100 / 30)
+    velocity_x:          pak.ScaledInteger(types.Short, 10)
+    velocity_y:          pak.ScaledInteger(types.Short, 10)
+    jumping:             types.Boolean
+    jumping_frame_index: types.Byte
+    entered_portal:      pak.Enum(types.Byte, enums.Portal)
 
     # Only present if transformed.
-    angle_info: pak.Optional(
+    rotation_info: pak.Optional(
         pak.Compound(
-            "AngleInfo",
+            "RotationInfo",
 
-            unk_short_1 = types.Short,
-            rotation = pak.ScaledInteger(types.Short, 100),
-            fixed_rotation = types.Boolean,
+            rotation         = pak.ScaledInteger(types.Short, 100),
+            angular_velocity = pak.ScaledInteger(types.Short, 100),
+            fixed_rotation   = types.Boolean,
         )
     )
 
@@ -318,6 +320,27 @@ class TribulleWrapperPacket(ServerboundPacket):
     id = (60, 3)
 
     nested: _NestedTribulleType(ServerboundTribullePacket)
+
+@public
+class MovePotentialShamanObjectPacket(ServerboundPacket):
+    id = (100, 2)
+
+    shaman_object_id: types.Short
+    x:                types.Short
+    y:                types.Short
+
+    # If a rock with children, then the first child's rotation.
+    # Else the object's rotation.
+    rotation: types.Short
+
+    # Only non-empty if it's a rock.
+    # Has format like '2;3,4;5,6' where '2' is the number
+    # of children, and then each semicolon-separated pair
+    # of numbers is the x,y offset within the parent coordinate
+    # system.
+    child_offsets: types.String
+
+    is_spawning: types.Boolean
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):

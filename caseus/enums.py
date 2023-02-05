@@ -134,3 +134,16 @@ class ConsumableCategory(enum.Enum):
     Arts            = 40
     CostumesAndPets = 50
     Miscellaneous   = 100
+
+@public
+class Portal(enum.Enum):
+    NONE   = 0
+    Blue   = 1
+    Orange = 2
+
+    @classmethod
+    def _missing_(cls, value):
+        # NOTE: Should never happen, but the game
+        # would treat unexpected values as 'NONE'.
+
+        return cls.NONE

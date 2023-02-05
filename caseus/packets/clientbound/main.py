@@ -29,117 +29,31 @@ class LegacyWrapperPacket(ClientboundPacket):
     nested: _NestedLegacyType(ClientboundLegacyPacket)
 
 @public
-class Unknown_4_2_Packet(ClientboundPacket):
-    id = (4, 2)
+class PlayerMovementPacket(ClientboundPacket):
+    id = (4, 4)
 
-    unk_byte_1:    types.Byte
-    unk_short_2:   types.Short
-    unk_short_3:   types.Short
-    unk_byte_4:    types.Byte
-    unk_boolean_5: types.Boolean
-    unk_short_6:   types.Short
+    session_id:          types.Int
+    room_map_id:         types.Int
+    moving_right:        types.Boolean
+    moving_left:         types.Boolean
+    x:                   pak.ScaledInteger(types.Int,   100 / 30)
+    y:                   pak.ScaledInteger(types.Int,   100 / 30)
+    velocity_x:          pak.ScaledInteger(types.Short, 10)
+    velocity_y:          pak.ScaledInteger(types.Short, 10)
+    jumping:             types.Boolean
+    jumping_frame_index: types.Byte
+    entered_portal:      pak.Enum(types.Byte, enums.Portal)
 
-@public
-class Unknown_4_3_Packet(ClientboundPacket):
-    id = (4, 3)
+    # Only present if transformed.
+    rotation_info: pak.Optional(
+        pak.Compound(
+            "RotationInfo",
 
-    class UnknownType(pak.Type):
-        @dataclasses.dataclass
-        class Value:
-            attr_1:  int
-            attr_2:  int
-            attr_3:  bool
-            attr_4:  float
-            attr_5:  float
-            attr_6:  float
-            attr_7:  float
-            attr_8:  float
-            attr_9:  float
-            attr_10: bool
-            attr_11: bool
-            attr_12: bool
-
-            def __init__(
-                self,
-
-                param_1,
-                param_2,
-                param_3 = 0,
-                param_4 = 0,
-                param_5 = 0,
-                param_6 = 0,
-                param_7 = 0,
-                param_8 = 0,
-                param_9 = False,
-                param_10 = False,
-                param_11 = False,
-            ):
-                self.attr_1 = param_1
-                self.attr_2 = param_2
-                self.attr_3 = (param_2 == -1)
-
-                self.attr_4 = param_3 / 100
-                self.attr_5 = param_4 / 100
-                self.attr_6 = param_5 / 100
-                self.attr_7 = param_6 / 100
-                self.attr_8 = param_7 / 100
-                self.attr_9 = param_8 / 100
-
-                self.attr_10 = param_9
-                self.attr_11 = param_10
-                self.attr_12 = param_11
-
-        @classmethod
-        def _unpack(cls, buf, *, ctx):
-            unk_1 = types.Int.unpack(buf, ctx=ctx)
-            unk_2 = types.Short.unpack(buf, ctx=ctx)
-
-            if unk_2 == -1:
-                return cls.Value(unk_1, -1)
-
-            return cls.Value(
-                unk_1,
-                unk_2,
-
-                types.Int.unpack(buf, ctx=ctx),
-                types.Int.unpack(buf, ctx=ctx),
-
-                types.Short.unpack(buf, ctx=ctx),
-                types.Short.unpack(buf, ctx=ctx),
-                types.Short.unpack(buf, ctx=ctx),
-                types.Short.unpack(buf, ctx=ctx),
-
-                types.Boolean.unpack(buf, ctx=ctx),
-                types.Boolean.unpack(buf, ctx=ctx),
-
-                types.Byte.unpack(buf, ctx=ctx) == 1
-            )
-
-        @classmethod
-        def _pack(cls, value, *, ctx):
-            data = (
-                types.Int.pack(value.attr_1, ctx=ctx) +
-                types.Short.pack(value.attr_2, ctx=ctx)
-            )
-
-            if value.attr_2 == -1:
-                return data
-
-            return data + (
-                types.Int.pack(int(value.attr_4 * 100)) +
-                types.Int.pack(int(value.attr_5 * 100)) +
-                types.Int.pack(int(value.attr_6 * 100)) +
-                types.Int.pack(int(value.attr_7 * 100)) +
-                types.Int.pack(int(value.attr_8 * 100)) +
-                types.Int.pack(int(value.attr_9 * 100)) +
-
-                types.Boolean.pack(value.attr_10) +
-                types.Boolean.pack(value.attr_11) +
-
-                types.Byte.pack(1 if value.attr_11 else 0)
-            )
-
-    values: UnknownType[None]
+            rotation         = pak.ScaledInteger(types.Short, 100),
+            angular_velocity = pak.ScaledInteger(types.Short, 100),
+            fixed_rotation   = types.Boolean
+        )
+    )
 
 @public
 class NewMapPacket(ClientboundPacket):
@@ -148,16 +62,15 @@ class NewMapPacket(ClientboundPacket):
     code: types.Int
 
     unk_short_2: types.Short
-    unk_byte_3: types.Byte
 
-    xml: types.CompressedString
+    room_map_id: types.Byte
+    xml:         types.CompressedString
+    author:      types.String
+    perm_code:   types.Byte
+    mirrored:    types.Boolean
 
-    author: types.String
-    perm_code: types.Byte
-    mirrored: types.Boolean
-
-    unk_boolean_8: types.Boolean
-    unk_boolean_9: types.Boolean
+    unk_boolean_8:  types.Boolean
+    unk_boolean_9:  types.Boolean
     unk_boolean_10: types.Boolean
 
     unk_int_11: types.Int

@@ -8,6 +8,20 @@ the same terminology, despite the imprecise nature of the names.
 All numeric types are big endian.
 """
 
+# NOTE: In actionscript, 'writeByte' and 'writeShort'
+# are able to write both signed and unsigned values,
+# only taking the bottom 8 or 16 bits of their parameters.
+# This poses a problem for us, as writing a byte could
+# write values from -128 to 255, but reading a byte
+# could only result in values from -128 to 127. For
+# clientbound packets this is largely okay, since
+# 'readByte' and 'readShort' will only ever read signed
+# values, however for serverbound packets, the client
+# could use 'writeByte' or 'writeShort' to write unsigned
+# values without it being readily apparent, and we are
+# unable to look at how the server interprets such fields
+# to see if they are signed or unsigned. This is quite annoying.
+
 import math
 import pak
 
