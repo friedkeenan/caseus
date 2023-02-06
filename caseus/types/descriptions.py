@@ -123,7 +123,7 @@ class ObjectDescription(pak.Type):
         rotation:         float = 0.0
         angular_velocity: float = 0.0
         mice_collidable:  bool  = False
-        skip_physics:     bool  = False # Skip physics iteration?
+        skip_physics:     bool  = False
 
     @dataclasses.dataclass
     class ClientboundDescription(ServerboundDescription):
