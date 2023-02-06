@@ -29,11 +29,17 @@ class LegacyWrapperPacket(ClientboundPacket):
     nested: _NestedLegacyType(ClientboundLegacyPacket)
 
 @public
+class ObjectSyncPacket(ClientboundPacket):
+    id = (4, 3)
+
+    objects: types.ObjectDescription(serverbound=False)[None]
+
+@public
 class PlayerMovementPacket(ClientboundPacket):
     id = (4, 4)
 
     session_id:          types.Int
-    room_map_id:         types.Int
+    round:               types.Int
     moving_right:        types.Boolean
     moving_left:         types.Boolean
     x:                   pak.ScaledInteger(types.Int,   100 / 30)
@@ -63,11 +69,11 @@ class NewMapPacket(ClientboundPacket):
 
     unk_short_2: types.Short
 
-    room_map_id: types.Byte
-    xml:         types.CompressedString
-    author:      types.String
-    perm_code:   types.Byte
-    mirrored:    types.Boolean
+    round:     types.Byte
+    xml:       types.CompressedString
+    author:    types.String
+    perm_code: types.Byte
+    mirrored:  types.Boolean
 
     unk_boolean_8:  types.Boolean
     unk_boolean_9:  types.Boolean

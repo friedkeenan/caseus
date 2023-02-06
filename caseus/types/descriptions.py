@@ -8,6 +8,7 @@ from .. import enums
 from .numeric import (
     Boolean,
     Byte,
+    ByteBoolean,
     UnsignedByte,
     Short,
     Int,
@@ -108,3 +109,112 @@ public(
         unk_ubyte_17   = UnsignedByte,
     )
 )
+
+@public
+class ObjectDescription(pak.Type):
+    @dataclasses.dataclass
+    class ServerboundDescription:
+        object_id:        int
+        shaman_object_id: int
+        x:                float = 0.0
+        y:                float = 0.0
+        velocity_x:       float = 0.0
+        velocity_y:       float = 0.0
+        rotation:         float = 0.0
+        angular_velocity: float = 0.0
+        mice_collidable:  bool  = False
+        skip_physics:     bool  = False # Skip physics iteration?
+
+    @dataclasses.dataclass
+    class ClientboundDescription(ServerboundDescription):
+        add_if_missing: bool  = False
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        cls._serverbound = issubclass(cls.Description, cls.ServerboundDescription)
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        object_id = Int.unpack(buf, ctx=ctx)
+        shaman_object_id = Short.unpack(buf, ctx=ctx)
+
+        if shaman_object_id == -1:
+            return cls.Description(object_id, -1)
+
+        if cls._serverbound:
+            return cls.Description(
+                object_id        = object_id,
+                shaman_object_id = shaman_object_id,
+
+                x                = Int.unpack(buf, ctx=ctx) * 30 / 100,
+                y                = Int.unpack(buf, ctx=ctx) * 30 / 100,
+                velocity_x       = Short.unpack(buf, ctx=ctx) / 10,
+                velocity_y       = Short.unpack(buf, ctx=ctx) / 10,
+                rotation         = Short.unpack(buf, ctx=ctx) / 100,
+                angular_velocity = Short.unpack(buf, ctx=ctx) / 100,
+                mice_collidable  = Boolean.unpack(buf, ctx=ctx),
+                skip_physics     = Boolean.unpack(buf, ctx=ctx),
+            )
+
+        return cls.Description(
+            object_id        = object_id,
+            shaman_object_id = shaman_object_id,
+
+            x                = Int.unpack(buf, ctx=ctx) * 30 / 100,
+            y                = Int.unpack(buf, ctx=ctx) * 30 / 100,
+            velocity_x       = Short.unpack(buf, ctx=ctx) / 10,
+            velocity_y       = Short.unpack(buf, ctx=ctx) / 10,
+            rotation         = Short.unpack(buf, ctx=ctx) / 100,
+            angular_velocity = Short.unpack(buf, ctx=ctx) / 100,
+            mice_collidable  = Boolean.unpack(buf, ctx=ctx),
+            skip_physics     = Boolean.unpack(buf, ctx=ctx),
+
+            add_if_missing = ByteBoolean.unpack(buf, ctx=ctx),
+        )
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        data = (
+            Int.pack(value.object_id, ctx=ctx) +
+
+            Short.pack(value.shaman_object_id, ctx=ctx)
+        )
+
+        if value.shaman_object_id == -1:
+            return data
+
+        data += (
+            Int.pack(int(value.x * 100 / 30), ctx=ctx) +
+            Int.pack(int(value.y * 100 / 30), ctx=ctx) +
+
+            Short.pack(int(value.velocity_x * 10), ctx=ctx) +
+            Short.pack(int(value.velocity_y * 10), ctx=ctx) +
+
+            Short.pack(int(value.rotation         * 100), ctx=ctx) +
+            Short.pack(int(value.angular_velocity * 100), ctx=ctx) +
+
+            Boolean.pack(value.mice_collidable, ctx=ctx) +
+            Boolean.pack(value.skip_physics,    ctx=ctx)
+        )
+
+        if cls._serverbound:
+            return data
+
+        return data + ByteBoolean.pack(value.add_if_missing, ctx=ctx)
+
+    @classmethod
+    def _call(cls, *, serverbound):
+        if serverbound:
+            return cls.make_type(
+                cls.__name__,
+
+                Description = cls.ServerboundDescription,
+            )
+
+        return cls.make_type(
+            cls.__name__,
+
+            Description = cls.ClientboundDescription,
+        )

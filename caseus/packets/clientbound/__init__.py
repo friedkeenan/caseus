@@ -1,2 +1,3 @@
-from .main import *
+from .legacy   import *
+from .main     import *
 from .tribulle import *

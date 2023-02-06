@@ -29,10 +29,17 @@ class LegacyWrapperPacket(ServerboundPacket):
     nested: _NestedLegacyType(ServerboundLegacyPacket)
 
 @public
+class ObjectSyncPacket(ServerboundPacket):
+    id = (4, 3)
+
+    round:   types.Int
+    objects: types.ObjectDescription(serverbound=True)[None]
+
+@public
 class PlayerMovementPacket(ServerboundPacket):
     id = (4, 4)
 
-    room_map_id:         types.Int
+    round:               types.Int
     moving_right:        types.Boolean
     moving_left:         types.Boolean
     x:                   pak.ScaledInteger(types.Int,   100 / 30)
