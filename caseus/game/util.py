@@ -21,3 +21,13 @@ async def get_translations(language):
 
                 for pair in data if len(pair) > 1
             }
+
+@public
+def shaman_object_id_parts(shaman_object_id):
+    if shaman_object_id > 9999:
+        return (shaman_object_id - 10_000) // 10_0000, (shaman_object_id - 10_000) % 10_000
+
+    if shaman_object_id > 99:
+        return shaman_object_id // 100, shaman_object_id % 100
+
+    return shaman_object_id, 0

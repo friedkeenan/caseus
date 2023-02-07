@@ -92,6 +92,12 @@ class CreateShamanLabel(ClientboundPacket):
     y:     types.Short
 
 @public
+class RemoveObjectPacket(ClientboundPacket):
+    id = (5, 15)
+
+    object_id: types.Int
+
+@public
 class AddShamanObjectPacket(ClientboundPacket):
     id = (5, 20)
 
@@ -380,6 +386,44 @@ class CleanupLuaScriptingPacket(ClientboundPacket):
     id = (29, 5)
 
 @public
+class RemoveImagePacket(ClientboundPacket):
+    id = (29, 18)
+
+    image_id: types.Int
+    fade_out: types.Boolean
+
+@public
+class AddImagePacket(ClientboundPacket):
+    id = (29, 19)
+
+    image_id:    types.Int
+    image_name:  types.String
+    target_type: pak.Enum(types.Byte, enums.ImageTargetType)
+    target:      types.Int
+    x:           types.Short
+    y:           types.Short
+    scale_x:     types.Float
+    scale_y:     types.Float
+    rotation:    types.Float
+    alpha:       types.Float
+    anchor_x:    types.Float
+    anchor_y:    types.Float
+    fade_in:     types.Boolean
+
+    @property
+    def image_url(self):
+        if self.image_name == "test":
+            return "https://images.atelier801.com/ArmorGame.png"
+
+        if self.image_name.startswith("discord@"):
+            return f"https://media.discordapp.net/attachments/{self.image_name.remove_prefix('discord@')}"
+
+        if len(self.image_name) > 12:
+            return f"http://images.atelier801.com/{self.image_name}"
+
+        return f"http://i.imgur.com/{self.image_name}"
+
+@public
 class LoadInventoryPacket(ClientboundPacket):
     id = (31, 1)
 
@@ -457,6 +501,34 @@ class SetHandlingTribullePackets(ClientboundPacket):
     id = (60, 4)
 
     handle_tribulle_packets: types.Boolean
+
+@public
+class ShamanObjectPreviewPacket(ClientboundPacket):
+    id = (100, 2)
+
+    session_id:       types.Int
+    shaman_object_id: types.Short
+    x:                types.Short
+    y:                types.Short
+
+    # If a rock with children, then the first child's rotation.
+    # Else the object's rotation.
+    rotation: types.Short
+
+    # Only non-empty if it's a rock.
+    # Has format like '2;3,4;5,6' where '2' is the number
+    # of children, and then each semicolon-separated pair
+    # of numbers is the x,y offset within the parent coordinate
+    # system.
+    child_offsets: types.String
+
+    is_spawning: types.Boolean
+
+@public
+class RemoveShamanObjectPreviewPacket(ClientboundPacket):
+    id = (100, 3)
+
+    session_id: types.Int
 
 @public
 class SetTitlePacket(ClientboundPacket):

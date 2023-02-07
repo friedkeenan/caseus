@@ -77,6 +77,28 @@ class CreateShamanLabelPacket(ServerboundPacket):
     y:     types.Short
 
 @public
+class RemoveObjectPacket(ServerboundPacket):
+    id = (5, 15)
+
+    object_id: types.Int
+
+@public
+class AddShamanObjectPacket(ServerboundPacket):
+    id = (5, 20)
+
+    round:             types.Byte
+    object_id:         types.Int
+    shaman_object_id:  types.Short
+    x:                 types.Short
+    y:                 types.Short
+    angle:             types.Short
+    velocity_x:        types.Byte
+    velocity_y:        types.Byte
+    mice_collidable:   types.ByteBoolean
+    spawned_by_player: types.ByteBoolean
+    session_id:        types.UnsignedInt
+
+@public
 class PreviousWorldGravityPacket(ServerboundPacket):
     id = (5, 21)
 
@@ -329,7 +351,7 @@ class TribulleWrapperPacket(ServerboundPacket):
     nested: _NestedTribulleType(ServerboundTribullePacket)
 
 @public
-class MovePotentialShamanObjectPacket(ServerboundPacket):
+class ShamanObjectPreviewPacket(ServerboundPacket):
     id = (100, 2)
 
     shaman_object_id: types.Short
@@ -348,6 +370,10 @@ class MovePotentialShamanObjectPacket(ServerboundPacket):
     child_offsets: types.String
 
     is_spawning: types.Boolean
+
+@public
+class RemoveShamanObjectPreviewPacket(ServerboundPacket):
+    id = (100, 3)
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):

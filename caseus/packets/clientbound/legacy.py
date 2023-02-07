@@ -3,7 +3,7 @@ from public import public
 from ..packet import ClientboundLegacyPacket
 
 @public
-class SetSyncingPlayerPacket(ClientboundLegacyPacket):
+class SetSynchronizerPacket(ClientboundLegacyPacket):
     id = (8, 21)
 
     def __init__(self, session_id, spawn_initial_objects):

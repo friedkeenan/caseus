@@ -115,7 +115,7 @@ class ObjectDescription(pak.Type):
     @dataclasses.dataclass
     class ServerboundDescription:
         object_id:        int
-        shaman_object_id: int
+        shaman_object_id: int # If '-1' then the object is removed.
         x:                float = 0.0
         y:                float = 0.0
         velocity_x:       float = 0.0
@@ -123,7 +123,7 @@ class ObjectDescription(pak.Type):
         rotation:         float = 0.0
         angular_velocity: float = 0.0
         mice_collidable:  bool  = False
-        skip_physics:     bool  = False
+        inactive:         bool  = False
 
     @dataclasses.dataclass
     class ClientboundDescription(ServerboundDescription):
@@ -155,7 +155,7 @@ class ObjectDescription(pak.Type):
                 rotation         = Short.unpack(buf, ctx=ctx) / 100,
                 angular_velocity = Short.unpack(buf, ctx=ctx) / 100,
                 mice_collidable  = Boolean.unpack(buf, ctx=ctx),
-                skip_physics     = Boolean.unpack(buf, ctx=ctx),
+                inactive         = Boolean.unpack(buf, ctx=ctx),
             )
 
         return cls.Description(
@@ -169,7 +169,7 @@ class ObjectDescription(pak.Type):
             rotation         = Short.unpack(buf, ctx=ctx) / 100,
             angular_velocity = Short.unpack(buf, ctx=ctx) / 100,
             mice_collidable  = Boolean.unpack(buf, ctx=ctx),
-            skip_physics     = Boolean.unpack(buf, ctx=ctx),
+            inactive         = Boolean.unpack(buf, ctx=ctx),
 
             add_if_missing = ByteBoolean.unpack(buf, ctx=ctx),
         )
@@ -196,7 +196,7 @@ class ObjectDescription(pak.Type):
             Short.pack(int(value.angular_velocity * 100), ctx=ctx) +
 
             Boolean.pack(value.mice_collidable, ctx=ctx) +
-            Boolean.pack(value.skip_physics,    ctx=ctx)
+            Boolean.pack(value.inactive,        ctx=ctx)
         )
 
         if cls._serverbound:

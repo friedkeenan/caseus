@@ -147,3 +147,17 @@ class Portal(enum.Enum):
         # would treat unexpected values as 'NONE'.
 
         return cls.NONE
+
+@public
+class ImageTargetType(enum.Enum):
+    ReplaceShamanObject = 1
+    OverlayPlayer       = 2
+    ReplacePlayer       = 3
+    BackgroundLayer     = 4
+    GroundLayer         = 5
+    ForegroundLayer     = 6
+    FixedLayerBeforeLua = 7
+    FixedLayerBehindLua = 8
+    PhysicObject        = 9
+    InterfaceLayer      = 10
+    OverlayShamanObject = 11
