@@ -113,9 +113,9 @@ public(
 @public
 class ObjectDescription(pak.Type):
     @dataclasses.dataclass
-    class ServerboundDescription:
+    class _Description:
         object_id:        int
-        shaman_object_id: int # If '-1' then the object is removed.
+        shaman_object_id: int
         x:                float = 0.0
         y:                float = 0.0
         velocity_x:       float = 0.0
@@ -125,8 +125,15 @@ class ObjectDescription(pak.Type):
         mice_collidable:  bool  = False
         inactive:         bool  = False
 
+        @property
+        def should_remove(self):
+            return self.shaman_object_id == -1
+
+    class ServerboundDescription(_Description):
+        pass
+
     @dataclasses.dataclass
-    class ClientboundDescription(ServerboundDescription):
+    class ClientboundDescription(_Description):
         add_if_missing: bool  = False
 
     @classmethod

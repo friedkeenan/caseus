@@ -27,6 +27,7 @@ dependencies = [
     "atpublic",
     "fixedint",
     "aioconsole",
+    "aiohttp",
     "scapy",
 ]
 

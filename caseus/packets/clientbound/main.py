@@ -150,6 +150,14 @@ class SetWorldGravityPacket(ClientboundPacket):
     y: types.Int
 
 @public
+class SetPlayerSizePacket(ClientboundPacket):
+    id = (5, 31)
+
+    session_id:     types.Int
+    percentage:     types.UnsignedShort
+    exclude_shaman: types.Boolean
+
+@public
 class FreezePacket(ClientboundPacket):
     id = (5, 34)
 
@@ -175,6 +183,19 @@ class RoomMessagePacket(ClientboundPacket):
     # Seems to always be 'False', and the value
     # doesn't seem to matter in the game code.
     unk_boolean_3: types.Boolean
+
+@public
+class GeneralMessagePacket(ClientboundPacket):
+    id = (6, 9)
+
+    message: types.String
+
+    @property
+    def should_display(self):
+        return not (
+            "<img" in self.message or
+            "<a"   in self.message
+        )
 
 @public
 class StaffMessagePacket(ClientboundPacket):
@@ -579,6 +600,20 @@ class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
     )[types.Int]
 
 @public
+class LoadShamanObjectSpritesPacket(ClientboundPacket):
+    id = (144, 27)
+
+    shaman_object_id_list: types.LimitedLEB128[types.LimitedLEB128]
+
+    SWF_URL_FMT = "http://www.transformice.com/images/x_bibliotheques/chamanes/o{base_id},{skin_id}.swf"
+
+    @classmethod
+    def swf_url(cls, shaman_object_id):
+        base_id, skin_id = game.shaman_object_id_parts(shaman_object_id)
+
+        return cls.SWF_URL_FMT.format(base_id=base_id, skin_id=skin_id)
+
+@public
 class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
     id = (144, 29)
 
@@ -625,7 +660,7 @@ class SetGravityScalePacket(ClientboundPacket):
     y: types.LimitedLEB128
 
 @public
-class QueueLoadFurTexturesPacket(ClientboundPacket):
+class LoadFurSpritesPacket(ClientboundPacket):
     id = (144, 34)
 
     fur_id_list: types.LimitedLEB128[types.LimitedLEB128]
