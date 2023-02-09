@@ -62,18 +62,23 @@ class PlayerMovementPacket(ClientboundPacket):
     )
 
 @public
-class NewMapPacket(ClientboundPacket):
+class SetFacingPacket(ClientboundPacket):
+    id = (4, 6)
+
+    session_id:   types.Int
+    facing_right: types.ByteBoolean
+
+@public
+class NewRoundPacket(ClientboundPacket):
     id = (5, 2)
 
-    code: types.Int
-
-    unk_short_2: types.Short
-
-    round:     types.Byte
-    xml:       types.CompressedString
-    author:    types.String
-    perm_code: types.Byte
-    mirrored:  types.Boolean
+    map_code:    types.Int
+    num_players: types.Short
+    round:       types.Byte
+    xml:         types.CompressedString
+    author:      types.String
+    perm_code:   types.Byte
+    mirrored:    types.Boolean
 
     unk_boolean_8:  types.Boolean
     unk_boolean_9:  types.Boolean
@@ -127,7 +132,7 @@ class JoinedRoomPacket(ClientboundPacket):
         )
 
 @public
-class SetMapTimerPacket(ClientboundPacket):
+class SetRoundTimerPacket(ClientboundPacket):
     id = (5, 22)
 
     seconds: types.Short
@@ -166,10 +171,10 @@ class FreezePacket(ClientboundPacket):
     show_ice:   types.Boolean
 
 @public
-class SpawnParticlePacket(ClientboundPacket):
+class SpawnStaticParticlePacket(ClientboundPacket):
     id = (5, 50)
 
-    particle_id: types.Byte # TODO: Enum?
+    particle_id: types.Byte
     x:           types.Short
     y:           types.Short
 
@@ -233,15 +238,13 @@ class ServerMessagePacket(ClientboundPacket):
     translation_args: types.String[types.Byte]
 
 @public
-class MakeShamanPacket(ClientboundPacket):
-    id = (8, 12)
+class PlayEmotePacket(ClientboundPacket):
+    id = (8, 1)
 
-    session_id:    types.Int
-    unk_byte_2:    types.Byte
-    unk_short_3:   types.Short
-    unk_ushort_4:  types.UnsignedShort
-    unk_boolean_5: types.Boolean
-    unk_int_6:     types.Int
+    session_id: types.Int
+    emote:      pak.Enum(types.Byte, enums.Emote)
+    argument:   pak.Optional(types.String, lambda packet: packet.emote is enums.Emote.Flag)
+    from_lua:   types.Boolean
 
 @public
 class MovePlayerPacket(ClientboundPacket):
@@ -253,6 +256,17 @@ class MovePlayerPacket(ClientboundPacket):
     velocity_x:        types.Short
     velocity_y:        types.Short
     velocity_relative: types.ByteBoolean
+
+@public
+class MakeShamanPacket(ClientboundPacket):
+    id = (8, 12)
+
+    session_id:    types.Int
+    unk_byte_2:    types.Byte
+    unk_short_3:   types.Short
+    unk_ushort_4:  types.UnsignedShort
+    unk_boolean_5: types.Boolean
+    unk_int_6:     types.Int
 
 @public
 class SetIceCubePacket(ClientboundPacket):
@@ -443,6 +457,18 @@ class AddImagePacket(ClientboundPacket):
             return f"http://images.atelier801.com/{self.image_name}"
 
         return f"http://i.imgur.com/{self.image_name}"
+
+@public
+class DisplayParticlePacket(ClientboundPacket):
+    id = (29, 27)
+
+    particle_id:    types.Byte
+    x:              types.Short
+    y:              types.Short
+    velocity_x:     pak.ScaledInteger(types.Short, 100)
+    velocity_y:     pak.ScaledInteger(types.Short, 100)
+    acceleration_x: pak.ScaledInteger(types.Short, 100)
+    acceleration_y: pak.ScaledInteger(types.Short, 100)
 
 @public
 class LoadInventoryPacket(ClientboundPacket):

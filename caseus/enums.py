@@ -161,3 +161,34 @@ class ImageTargetType(enum.Enum):
     PhysicObject        = 9
     InterfaceLayer      = 10
     OverlayShamanObject = 11
+
+@public
+class Emote(enum.Enum):
+    Dance               = 0
+    Laugh               = 1
+    Cry                 = 2
+    Kiss                = 3
+    Mad                 = 4
+    Clap                = 5
+    Sleep               = 6
+    Facepalm            = 7
+    Sit                 = 8
+    Confetti            = 9
+    Flag                = 10
+    Marshmallow         = 11
+    Selfie              = 12
+    Highfive            = 13
+    Highfive_1          = 14
+    Highfive_2          = 15
+    PartyHorn           = 16
+    Hug                 = 17
+    Hug_1               = 18
+    Hug_2               = 19
+    Jigglypuff          = 20
+    Kissing             = 21
+    Kissing_1           = 22
+    Kissing_2           = 23
+    Feathers            = 24
+    RockPaperScissors   = 25
+    RockPaperScissors_1 = 26
+    RockPaperScissors_2 = 27

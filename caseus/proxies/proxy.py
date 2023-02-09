@@ -429,9 +429,9 @@ class Proxy(pak.AsyncPacketHandler):
         # Set the serverbound fingerprint from the handshake packet.
         source.destination.fingerprint = packet.fingerprint
 
-        corrected = packet.copy()
-
-        corrected.loader_stage_size = self.CORRECT_LOADER_SIZE
+        corrected = packet.copy(
+            loader_stage_size = self.CORRECT_LOADER_SIZE,
+        )
 
         await source.destination.write_packet_instance(corrected)
 
@@ -445,9 +445,9 @@ class Proxy(pak.AsyncPacketHandler):
         # and replace the contained address with a more
         # complacent one.
 
-        protected = packet.copy()
-
-        protected.address = self.expected_address
+        protected = packet.copy(
+            address = self.expected_address,
+        )
 
         await source.destination.write_packet_instance(protected)
 
@@ -464,9 +464,10 @@ class Proxy(pak.AsyncPacketHandler):
 
         self._satellite_packets.append((packet, source.destination))
 
-        proxied         = packet.copy()
-        proxied.address = self.expected_address
-        proxied.ports   = [self.host_satellite_port]
+        proxied = packet.copy(
+            address = self.expected_address,
+            ports   = [self.host_satellite_port],
+        )
 
         await source.destination.write_packet_instance(proxied)
 

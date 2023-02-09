@@ -62,6 +62,14 @@ class PlayerMovementPacket(ServerboundPacket):
     )
 
 @public
+class SetFacingPacket(ServerboundPacket):
+    # NOTE: I don't think this is ever sent by the game.
+
+    id = (4, 6)
+
+    facing_right: types.ByteBoolean
+
+@public
 class CreateShamanLabelPacket(ServerboundPacket):
     """Sent to the satellite server to create a shaman label.
 
@@ -157,6 +165,18 @@ class CommandPacket(ServerboundPacket):
 
     # The command without the '/' prefix.
     command: types.String
+
+@public
+class PlayEmotePacket(ServerboundPacket):
+    id = (8, 1)
+
+    emote:              pak.Enum(types.Byte, enums.Emote)
+    partner_session_id: types.Int
+    argument:           pak.Optional(types.String)
+
+    @property
+    def is_multi(self):
+        return self.partner_session_id != -1
 
 @public
 class SetIceCubePacket(ServerboundPacket):
@@ -305,14 +325,12 @@ class KeyboardPacket(ServerboundPacket):
 
     id = (29, 2)
 
-    key_code: types.Short
-    down:     types.Boolean
-    x:        types.Short
-    y:        types.Short
-
-    # NOTE: Units are in pixels.
-    velocity_x: types.Short
-    velocity_y: types.Short
+    key_code:   types.Short
+    down:       types.Boolean
+    x:          types.Short
+    y:          types.Short
+    velocity_x: pak.ScaledInteger(types.Short, 10)
+    velocity_y: pak.ScaledInteger(types.Short, 10)
 
 @public
 class MouseDownPacket(ServerboundPacket):
