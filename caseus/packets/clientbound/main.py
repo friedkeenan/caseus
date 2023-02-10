@@ -1,5 +1,7 @@
 r"""Clientbound :class:`~.Packet`\s."""
 
+# TODO: Split this file up. Seriously.
+
 import dataclasses
 import pak
 
@@ -9,6 +11,7 @@ from ..common import (
     _NestedLegacyType,
     _NestedTribulleType,
     _NestedExtensionType,
+    _NestedVisualConsumableInfoType,
 )
 
 from ..packet import (
@@ -258,6 +261,16 @@ class MovePlayerPacket(ClientboundPacket):
     velocity_relative: types.ByteBoolean
 
 @public
+class PlayerVictoryPacket(ClientboundPacket):
+    id = (8, 6)
+
+    type:         pak.Enum(types.Byte, enums.VictoryType)
+    session_id:   types.Int
+    score:        types.Short
+    place:        types.Byte
+    centiseconds: types.UnsignedShort
+
+@public
 class MakeShamanPacket(ClientboundPacket):
     id = (8, 12)
 
@@ -396,6 +409,10 @@ class ReaffirmServerAddressPacket(ClientboundPacket):
     address: types.String
 
 @public
+class InitializeLuaScriptingPacket(ClientboundPacket):
+    id = (29, 1)
+
+@public
 class BindKeyboardPacket(ClientboundPacket):
     id = (29, 2)
 
@@ -469,6 +486,19 @@ class DisplayParticlePacket(ClientboundPacket):
     velocity_y:     pak.ScaledInteger(types.Short, 100)
     acceleration_x: pak.ScaledInteger(types.Short, 100)
     acceleration_y: pak.ScaledInteger(types.Short, 100)
+
+@public
+class ShowColorPickerPacket(ClientboundPacket):
+    id = (29, 32)
+
+    # NOTE: Lua scripting must have been initialized
+    # at least once for this to show the interface to
+    # the player. When lua scripting gets cleaned up,
+    # color pickers are still able to be shown.
+
+    color_picker_id: types.Int
+    default_color:   types.Int
+    title:           types.String
 
 @public
 class LoadInventoryPacket(ClientboundPacket):
@@ -576,6 +606,50 @@ class RemoveShamanObjectPreviewPacket(ClientboundPacket):
     id = (100, 3)
 
     session_id: types.Int
+
+@public
+class VisualConsumableInfoPacket(ClientboundPacket):
+    id = (100, 40)
+
+    class _InfoPacket(pak.Packet):
+        class Header(pak.Packet.Header):
+            id: types.UnsignedByte
+
+    class StartPainting(_InfoPacket):
+        id = 1
+
+        max_distance: pak.ScaledInteger(types.UnsignedShort, 10)
+        color:        types.Int
+
+    class PaintLine(_InfoPacket):
+        id = 2
+
+        session_id: types.Int
+        color:      types.Int
+        start_x:    pak.ScaledInteger(types.Int, 10)
+        start_y:    pak.ScaledInteger(types.Int, 10)
+        end_x:      pak.ScaledInteger(types.Int, 10)
+        end_y:      pak.ScaledInteger(types.Int, 10)
+
+    class RemovePaint(_InfoPacket):
+        id = 3
+
+        artist_name: types.String
+
+    class ShopCheeseCounter(_InfoPacket):
+        id = 4
+
+        session_id:  types.Int
+        shop_cheese: types.Int
+
+    class PlaytimeCounter(_InfoPacket):
+        id = 5
+
+        session_id: types.Int
+        days:       types.UnsignedShort
+        hours:      types.Byte
+
+    info: _NestedVisualConsumableInfoType(_InfoPacket)
 
 @public
 class SetTitlePacket(ClientboundPacket):
@@ -738,6 +812,16 @@ class SetNewsPopupFlyerPacket(ClientboundPacket):
         """
 
         return self.IMAGE_URL_FMT.format(image_name=self.image_name)
+
+@public
+class SetLanguagePacket(ClientboundPacket):
+    id = (176, 5)
+
+    language:               types.String
+    country:                types.String
+    right_to_left:          types.Boolean
+    has_special_characters: types.Boolean
+    font:                   types.String
 
 @public
 class LanguageSelectionInformationPacket(ClientboundPacket):

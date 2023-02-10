@@ -97,3 +97,37 @@ class _NestedExtensionType(pak.Type):
 
             parent_cls = parent_cls,
         )
+
+class _NestedVisualConsumableInfoType(pak.Type):
+    parent_cls = None
+
+    @classmethod
+    def _default(cls, *, ctx):
+        return None
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        # NOTE: We forgo contexts here.
+
+        header = cls.parent_cls.Header.unpack(buf)
+
+        packet_cls = cls.parent_cls.subclass_with_id(header.id)
+        if packet_cls is None:
+            return None
+
+        return packet_cls.unpack(buf)
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        if value is None:
+            return b""
+
+        return value.pack()
+
+    @classmethod
+    def _call(cls, parent_cls):
+        return cls.make_type(
+            cls.__qualname__,
+
+            parent_cls = parent_cls,
+        )

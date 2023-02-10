@@ -192,3 +192,12 @@ class Emote(enum.Enum):
     RockPaperScissors   = 25
     RockPaperScissors_1 = 26
     RockPaperScissors_2 = 27
+
+@public
+class VictoryType(enum.Enum):
+    Normal    = 0
+    Defilante = 1
+
+    # These are used for Mulodrome.
+    BlueTeam = 2
+    RedTeam  = 3

@@ -8,6 +8,7 @@ from ..common import (
     _NestedLegacyType,
     _NestedTribulleType,
     _NestedExtensionType,
+    _NestedVisualConsumableInfoType,
 )
 
 from ..packet import (
@@ -340,6 +341,13 @@ class MouseDownPacket(ServerboundPacket):
     y: types.Short
 
 @public
+class PickColorPacket(ServerboundPacket):
+    id = (29, 32)
+
+    color_picker_id: types.Int
+    color:           types.Int
+
+@public
 class UseConsumablePacket(ServerboundPacket):
     id = (31, 3)
 
@@ -392,6 +400,34 @@ class ShamanObjectPreviewPacket(ServerboundPacket):
 @public
 class RemoveShamanObjectPreviewPacket(ServerboundPacket):
     id = (100, 3)
+
+@public
+class VisualConsumableInfoPacket(ServerboundPacket):
+    id = (100, 40)
+
+    class _InfoPacket(pak.Packet):
+        class Header(pak.Packet.Header):
+            id: types.UnsignedByte
+
+    class PaintLine(_InfoPacket):
+        id = 2
+
+        start_x: pak.ScaledInteger(types.Int, 10)
+        start_y: pak.ScaledInteger(types.Int, 10)
+        end_x:   pak.ScaledInteger(types.Int, 10)
+        end_y:   pak.ScaledInteger(types.Int, 10)
+
+    class RemovePaint(_InfoPacket):
+        id = 3
+
+        # Normally only sent by those with the
+        # 'Arbitre' and 'Modo' staff roles. They
+        # can hold the CTRL key while clicking on
+        # someone's painting to send this packet.
+
+        artist_name: types.String
+
+    info: _NestedVisualConsumableInfoType(_InfoPacket)
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):

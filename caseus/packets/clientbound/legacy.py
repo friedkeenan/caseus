@@ -3,6 +3,35 @@ from public import public
 from ..packet import ClientboundLegacyPacket
 
 @public
+class PlayerDiedPacket(ClientboundLegacyPacket):
+    id = (8, 5)
+
+    def __init__(self, session_id, unk_attr_2, score, unk_attr_4):
+        self.session_id = session_id
+        self.unk_attr_2 = unk_attr_2
+        self.score      = score
+        self.unk_attr_4 = unk_attr_4
+
+    @classmethod
+    def _from_body_components(cls, components, *, ctx):
+        return cls(int(components[0]), int(components[1]), int(components[2]), int(components[3]))
+
+    def _body_components(self, *, ctx):
+        return [
+            str(self.session_id),
+            str(self.unk_attr_2),
+            str(self.score),
+            str(self.unk_attr_4),
+        ]
+
+    __repr__ = ClientboundLegacyPacket.repr_for_attrs(
+        "session_id",
+        "unk_attr_2",
+        "score",
+        "unk_attr_4",
+    )
+
+@public
 class SetSynchronizerPacket(ClientboundLegacyPacket):
     id = (8, 21)
 
