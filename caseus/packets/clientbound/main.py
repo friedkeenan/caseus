@@ -618,8 +618,8 @@ class VisualConsumableInfoPacket(ClientboundPacket):
     class StartPainting(_InfoPacket):
         id = 1
 
-        max_distance: pak.ScaledInteger(types.UnsignedShort, 10)
-        color:        types.Int
+        paintable_length: pak.ScaledInteger(types.UnsignedShort, 10)
+        color:            types.Int
 
     class PaintLine(_InfoPacket):
         id = 2
