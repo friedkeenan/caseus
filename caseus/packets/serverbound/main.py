@@ -180,6 +180,12 @@ class PlayEmotePacket(ServerboundPacket):
         return self.partner_session_id != -1
 
 @public
+class ShowEmoticonPacket(ServerboundPacket):
+    id = (8, 5)
+
+    emoticon: pak.Enum(types.Byte, enums.Emoticon)
+
+@public
 class SetIceCubePacket(ServerboundPacket):
     id = (8, 45)
 
@@ -348,17 +354,17 @@ class PickColorPacket(ServerboundPacket):
     color:           types.Int
 
 @public
-class UseConsumablePacket(ServerboundPacket):
+class UseItemPacket(ServerboundPacket):
     id = (31, 3)
 
-    consumable_id: types.Short
+    item_id: types.Short
 
 @public
-class SetEquippedConsumablePacket(ServerboundPacket):
+class SetEquippedItemPacket(ServerboundPacket):
     id = (31, 4)
 
-    consumable_id: types.Short
-    equipped:      types.Boolean
+    item_id:  types.Short
+    equipped: types.Boolean
 
 @public
 class SatelliteDelayedIdentificationPacket(ServerboundPacket):
@@ -430,6 +436,38 @@ class VisualConsumableInfoPacket(ServerboundPacket):
     info: _NestedVisualConsumableInfoType(_InfoPacket)
 
 @public
+class InteractWithOfficialNPCPacket(ServerboundPacket):
+    id = (100, 75)
+
+    class _Interaction(pak.Packet):
+        class Header(pak.Packet.Header):
+            id: types.Byte
+
+    class ClickNPC(_Interaction):
+        id = 4
+
+        name: types.String
+
+    class PurchaseItem(_Interaction):
+        id = 10
+
+        item_index: types.UnsignedByte
+
+    class _InteractionType(pak.Type):
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            header     = InteractWithOfficialNPCPacket._Interaction.Header.unpack(buf)
+            packet_cls = InteractWithOfficialNPCPacket._Interaction.subclass_with_id(header.id)
+
+            return packet_cls.unpack(buf)
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            return value.pack()
+
+    interaction: _InteractionType
+
+@public
 class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):
     id = (149, 12)
 
@@ -466,6 +504,12 @@ class AddFashionSquadSalePacket(ServerboundPacket):
     starting_date: types.String
     ending_date:   types.String
     percentage:    types.Byte
+
+@public
+class InteractWithLuaNPCPacket(ServerboundPacket):
+    id = (149, 20)
+
+    name: types.String
 
 @public
 class SetLanguagePacket(ServerboundPacket):

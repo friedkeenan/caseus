@@ -261,6 +261,13 @@ class MovePlayerPacket(ClientboundPacket):
     velocity_relative: types.ByteBoolean
 
 @public
+class ShowEmoticonPacket(ClientboundPacket):
+    id = (8, 5)
+
+    session_id: types.Int
+    emoticon:   pak.Enum(types.Byte, enums.Emoticon)
+
+@public
 class PlayerVictoryPacket(ClientboundPacket):
     id = (8, 6)
 
@@ -282,6 +289,22 @@ class MakeShamanPacket(ClientboundPacket):
     unk_int_6:     types.Int
 
 @public
+class AddNPCPacket(ClientboundPacket):
+    id = (8, 30)
+
+    session_id:       types.Int
+    name:             types.String
+    title_id:         types.Short
+    feminine:         types.Boolean
+    outfit_code:      types.String # TODO: Parse outfit.
+    x:                types.Short
+    y:                types.Short
+    facing_right:     types.Boolean
+    face_player:      types.Boolean
+    interface:        pak.Enum(types.Byte, enums.NPCInterface)
+    periodic_message: types.String
+
+@public
 class SetIceCubePacket(ClientboundPacket):
     id = (8, 45)
 
@@ -296,11 +319,7 @@ class SetVampirePacket(ClientboundPacket):
     session_id: types.Int
     vampire:    types.Boolean
 
-    # I'm at least *pretty* sure
-    # that this corresponds to
-    # transmissiblity. It is
-    # stored globally and not
-    # per-player however.
+    # Stored globally and not per-player.
     transmissible: types.Boolean
 
 @public
@@ -380,6 +399,31 @@ class HandshakeResponsePacket(ClientboundPacket):
 @public
 class PongPacket(ClientboundPacket):
     id = (26, 25)
+
+@public
+class OpenNPCShopPacket(ClientboundPacket):
+    id = (26, 38)
+
+    name: types.String
+
+    items: pak.Compound(
+        "ItemInfo",
+
+        status = pak.Enum(types.UnsignedByte, enums.NPCItemStatus),
+
+        type = pak.Enum(types.UnsignedByte, enums.NPCItemType),
+        id = types.Int,
+        quantity = types.Short,
+
+        # Cost type is always 'NPCItemType.Normal' because you
+        # always spend normal items to buy items from an NPC.
+        cost_type = pak.Enum(types.UnsignedByte, enums.NPCItemType),
+        cost_id = types.Int,
+        cost_quantity = types.Short,
+
+        hover_translation_key = types.String,
+        hover_translation_arg = types.String,
+    )[types.UnsignedByte]
 
 @public
 class SetCanTransformPacket(ClientboundPacket):
@@ -504,17 +548,17 @@ class ShowColorPickerPacket(ClientboundPacket):
 class LoadInventoryPacket(ClientboundPacket):
     id = (31, 1)
 
-    consumables: pak.Compound(
-        "ConsumableInfo",
+    items: pak.Compound(
+        "ItemInfo",
 
-        consumable_id       = types.Short,
+        item_id             = types.Short,
         quantity            = types.UnsignedByte, # NOTE: If consumable id already received, then this quantity is just added.
         priority            = types.UnsignedByte, # Only used for sorting.
-        is_event            = types.Boolean,      # Is this correct?
+        unk_boolean_4       = types.Boolean,      # Marked as 'is_event' by aiotfm, but I think that's wrong.
         can_use             = types.Boolean,      # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
         can_equip           = types.Boolean,
         unk_boolean_7       = types.Boolean,
-        category            = pak.Enum(types.Byte, enums.ConsumableCategory),
+        category            = pak.Enum(types.Byte, enums.ItemCategory),
         can_use_immediately = types.Boolean,
         can_use_when_dead   = types.Boolean,
         image_name          = pak.Optional(types.String, types.Boolean),
@@ -525,15 +569,15 @@ class LoadInventoryPacket(ClientboundPacket):
 class UpdateInventoryPacket(ClientboundPacket):
     id = (31, 2)
 
-    consumable_id: types.Short
-    quantity:      types.UnsignedByte
+    item_id:  types.Short
+    quantity: types.UnsignedByte
 
 @public
-class UseConsumablePacket(ClientboundPacket):
+class UseItemPacket(ClientboundPacket):
     id = (31, 3)
 
-    session_id:    types.Int
-    consumable_id: types.Short
+    session_id: types.Int
+    item_id:    types.Short
 
 @public
 class ChangeSatelliteServerPacket(ClientboundPacket):
@@ -698,6 +742,14 @@ class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
         # Might have similar meaning as unk_leb128_6 of sales menu packet.
         unk_byte_6 = types.Byte,
     )[types.Int]
+
+@public
+class NPCPlayEmotePacket(ClientboundPacket):
+    id = (144, 23)
+
+    name:     types.String
+    emote:    pak.Enum(types.Short, enums.Emote)
+    emoticon: pak.Enum(types.Short, enums.Emoticon)
 
 @public
 class LoadShamanObjectSpritesPacket(ClientboundPacket):

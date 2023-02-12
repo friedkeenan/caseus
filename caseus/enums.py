@@ -127,7 +127,7 @@ class IceCubeAction(enum.Enum):
         return cls.SetRemainingTime
 
 @public
-class ConsumableCategory(enum.Enum):
+class ItemCategory(enum.Enum):
     Coins           = 10
     Adventure       = 20
     Throwables      = 30
@@ -164,6 +164,8 @@ class ImageTargetType(enum.Enum):
 
 @public
 class Emote(enum.Enum):
+    NONE = -1
+
     Dance               = 0
     Laugh               = 1
     Cry                 = 2
@@ -193,6 +195,25 @@ class Emote(enum.Enum):
     RockPaperScissors_1 = 26
     RockPaperScissors_2 = 27
 
+    @classmethod
+    def _missing_(cls, value):
+        return cls.NONE
+
+@public
+class Emoticon(enum.Enum):
+    NONE = -1
+
+    Smiley    = 0
+    Sad       = 1
+    Tongue    = 2
+    Angry     = 3
+    BigSmiley = 4
+    Shades    = 5
+    Blush     = 6
+    Sweatdrop = 7
+    Derp      = 8
+    OMG       = 9
+
 @public
 class VictoryType(enum.Enum):
     Normal    = 0
@@ -201,3 +222,45 @@ class VictoryType(enum.Enum):
     # These are used for Mulodrome.
     BlueTeam = 2
     RedTeam  = 3
+
+@public
+class NPCInterface(enum.Enum):
+    # TODO: Is 'NPCInterface' the best name?
+
+    NONE = 0
+
+    # Executes the 'Clique_Magasin' method
+    # on the '$Interface' object. To my
+    # knowledge this doesn't exist and so
+    # does nothing.
+    Unknown1 = 1
+
+    # Value is specified, however
+    # it is never touched in the
+    # client code at all.
+    Unknown2 = 2
+
+    # Code exists for these but
+    # it leads nowhere and can
+    # never actually be executed.
+    Inert3 = 3
+    Inert4 = 4
+    Inert5 = 5
+
+    OfficialEvent = 10
+    Village       = 11
+    Lua           = 12
+
+@public
+class NPCItemStatus(enum.Enum):
+    CanBuy       = 0
+    TooExpensive = 1
+    OwnAlready   = 2
+
+@public
+class NPCItemType(enum.Enum):
+    Badge     = 1
+    ShamanOrb = 2
+    Title     = 3
+    Normal    = 4
+    Costume   = 5
