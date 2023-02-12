@@ -230,10 +230,9 @@ class NPCInterface(enum.Enum):
     NONE = 0
 
     # Executes the 'Clique_Magasin' method
-    # on the '$Interface' object. To my
-    # knowledge this doesn't exist and so
-    # does nothing.
-    Unknown1 = 1
+    # on the '$Interface' object. This no
+    # longer exists and so will do nothing.
+    OldShop = 1
 
     # Value is specified, however
     # it is never touched in the

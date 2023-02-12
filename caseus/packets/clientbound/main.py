@@ -151,7 +151,7 @@ class SetSnowingPacket(ClientboundPacket):
 class SetWorldGravityPacket(ClientboundPacket):
     id = (5, 28)
 
-    # Ignored if '0'.
+    # This field is ignored if '0'.
     milliseconds_to_send_previous: types.Int
 
     x: types.Int
@@ -193,6 +193,21 @@ class RoomMessagePacket(ClientboundPacket):
     unk_boolean_3: types.Boolean
 
 @public
+class OldTribeMessagePacket(ClientboundPacket):
+    id = (6, 8)
+
+    message:  types.String
+    username: types.String
+
+    @property
+    def should_display(self):
+        return "<" not in self.message
+
+    @property
+    def has_username(self):
+        return len(self.event) > 0
+
+@public
 class GeneralMessagePacket(ClientboundPacket):
     id = (6, 9)
 
@@ -220,7 +235,7 @@ class StaffMessagePacket(ClientboundPacket):
     # If it is disabled, then the message will just show up
     # in the general channel with no frill besides being colored.
     # If decoration is disabled for the 'ModeratorRoom' and
-    # 'ModeratorCommunity' messages types, then nothing is displayed.
+    # 'ModeratorCommunity' message types, then nothing is displayed.
     disable_decoration: types.Boolean
 
     # If 'True' then 'message' is treated as a translation key.
@@ -411,14 +426,14 @@ class OpenNPCShopPacket(ClientboundPacket):
 
         status = pak.Enum(types.UnsignedByte, enums.NPCItemStatus),
 
-        type = pak.Enum(types.UnsignedByte, enums.NPCItemType),
-        id = types.Int,
+        type     = pak.Enum(types.UnsignedByte, enums.NPCItemType),
+        id       = types.Int,
         quantity = types.Short,
 
         # Cost type is always 'NPCItemType.Normal' because you
         # always spend normal items to buy items from an NPC.
-        cost_type = pak.Enum(types.UnsignedByte, enums.NPCItemType),
-        cost_id = types.Int,
+        cost_type     = pak.Enum(types.UnsignedByte, enums.NPCItemType),
+        cost_id       = types.Int,
         cost_quantity = types.Short,
 
         hover_translation_key = types.String,
