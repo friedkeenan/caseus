@@ -263,3 +263,40 @@ class NPCItemType(enum.Enum):
     Title     = 3
     Normal    = 4
     Costume   = 5
+
+@public
+class MapCategory(enum.Enum):
+    # NOTE: There aare certain categories
+    # which are listed on the wiki but we
+    # do not list here. This is because the
+    # game does not know about them or treat
+    # them specially at all.
+
+    Standard               = 0
+    Protected              = 1
+    Prime                  = 2
+    PrimeBootcamp          = 3
+    Shaman                 = 4
+    Art                    = 5
+    Mechanism              = 6
+    NoShaman               = 7
+    DualShaman             = 8
+    Miscellaneous          = 9
+    Survivor               = 10
+    VampireSurvivor        = 11
+    Bootcamp               = 13
+    RacingExclusive        = 17
+    Defilante              = 18
+    Music                  = 19
+    SurvivorTest           = 20
+    VampireSurvivorTest    = 21
+    TribeHouse             = 22
+    BootcampTest           = 23
+    DualShamanSurvivor     = 24
+    DualShamanTest         = 32
+    DualShamanSurvivorTest = 34
+    Module                 = 41
+    NoShamanTest           = 42
+    Deleted                = 44
+    Thematic               = 66
+    Vanilla                = 88

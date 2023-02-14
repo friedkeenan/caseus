@@ -80,14 +80,46 @@ class NewRoundPacket(ClientboundPacket):
     round:       types.Byte
     xml:         types.CompressedString
     author:      types.String
-    perm_code:   types.Byte
+    category:    pak.EnumOr(types.Byte, enums.MapCategory) # NOTE: We use 'EnumOr' to preserve the original value.
     mirrored:    types.Boolean
 
-    unk_boolean_8:  types.Boolean
-    unk_boolean_9:  types.Boolean
-    unk_boolean_10: types.Boolean
+    has_conjuration: types.Boolean
+    has_collision:   types.Boolean
 
-    unk_int_11: types.Int
+    # Never actually has an effect because
+    # the game only checks the variable this
+    # gets assigned to if it receives a
+    # 'SetFallDamagePacket', which overrides
+    # the variable this gets set to.
+    #
+    # It's really weird.
+    has_fall_damage: types.Boolean
+
+    # If '0' then ignored.
+    player_mass_scale: pak.ScaledInteger(types.Int, 100)
+
+    # Not always present, and the game does
+    # not parse any extra data at all, but
+    # has code for if there simply *is*
+    # extra data.
+    extra_data: pak.RawByte[None]
+
+    @property
+    def vanilla_overrides_category(self):
+        return (
+            len(self.xml) == 0 or
+
+            len(self.extra_data) > 0 or
+
+            (
+                len(self.author) == 0       or
+                self.author.startswith("_") or
+                self.author.startswith("~")
+            ) or
+
+            # The value for the category is not one the game knows about.
+            not isinstance(self.category, enums.MapCategory)
+        )
 
 @public
 class CreateShamanLabel(ClientboundPacket):
@@ -293,6 +325,20 @@ class PlayerVictoryPacket(ClientboundPacket):
     centiseconds: types.UnsignedShort
 
 @public
+class SetPlayerScorePacket(ClientboundPacket):
+    id = (8, 7)
+
+    session_id: types.Int
+    score:      types.Short
+
+@public
+class EnableSkillPacket(ClientboundPacket):
+    id = (8, 10)
+
+    skill_id: types.UnsignedByte # TODO: Enum?
+    quantity: types.UnsignedByte
+
+@public
 class MakeShamanPacket(ClientboundPacket):
     id = (8, 12)
 
@@ -387,10 +433,8 @@ class LoginSuccessPacket(ClientboundPacket):
 
     staff_role_ids: pak.Enum(types.Byte, enums.StaffRoleID)[types.Byte]
 
-    # Seems like you can repeat the same message if this is true.
-    # Also seems connected to staff roles. Maybe it's true if you
-    # have a moderator-ish role?
-    unk_boolean_8: types.Boolean
+    # You can also repeat the same message if this is true.
+    modo_can_speak_in_all_staff_channels: types.Boolean
 
     # Never used despite having maybe meaningful values.
     unk_ushort_9: types.UnsignedShort
@@ -458,6 +502,21 @@ class LoadAndExecutePacket(ClientboundPacket):
     id = (28, 1)
 
     swf_data: pak.RawByte[None]
+
+@public
+class TranslatedGeneralMessage(ClientboundPacket):
+    id = (28, 5)
+
+    # If an empty string, then fallback to the client's
+    # selected language. If there is no selected language,
+    # then fallback to 'en'.
+    #
+    # If the client does not have the translations for
+    # the language loaded, then it will retrieve them.
+    language: types.String
+
+    translation_key:  types.String
+    translation_args: types.String[types.Byte]
 
 @public
 class ReaffirmServerAddressPacket(ClientboundPacket):
@@ -801,7 +860,14 @@ class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
         # Other values are possible and cannot
         # cancel the sale and have color '0x60608F'.
         unk_leb128_6 = types.LimitedLEB128,
-    )[types.VarInt]
+    )[types.LimitedLEB128]
+
+@public
+class SetFallDamagePacket(ClientboundPacket):
+    id = (144, 30)
+
+    enabled:     types.ByteBoolean
+    sensibility: pak.ScaledInteger(types.LimitedLEB128, 1000)
 
 @public
 class SetLoginBannerPacket(ClientboundPacket):
