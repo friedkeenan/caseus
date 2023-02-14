@@ -266,7 +266,7 @@ class NPCItemType(enum.Enum):
 
 @public
 class MapCategory(enum.Enum):
-    # NOTE: There aare certain categories
+    # NOTE: There are certain categories
     # which are listed on the wiki but we
     # do not list here. This is because the
     # game does not know about them or treat
