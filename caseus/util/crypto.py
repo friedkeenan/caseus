@@ -41,7 +41,7 @@ def shakikoo(data):
     # Convert the binary digest to base64.
     return base64.b64encode(extra_hash.digest())
 
-_XXTEA_DELTA = 0x9e3779b9
+_XXTEA_DELTA = 0x9E3779B9
 _MAX_UINT32  = 0xFFFFFFFF
 
 def _MX(e, p, y, z, sum, key):

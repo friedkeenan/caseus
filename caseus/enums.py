@@ -3,6 +3,17 @@ import enum
 from public import public
 
 @public
+class RefereeID(enum.Enum):
+    # The non-zero values seem to have
+    # been taken from creating an account
+    # and then deleting the account, freeing
+    # up the ID for these specific referees.
+
+    Unknown  = 0
+    Facebook = 58524153
+    Steam    = 65102833
+
+@public
 class Gender(enum.Enum):
     """A player's gender as described by Transformice."""
 

@@ -80,7 +80,7 @@ class _NestedExtensionType(pak.Type):
     def _unpack(cls, buf, *, ctx):
         header = cls.parent_cls.Header.unpack(buf, ctx=ctx.extension_ctx)
 
-        packet_cls = cls.parent_cls.subclass_with_id(header.id)
+        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.extension_ctx)
         if packet_cls is None:
             packet_cls = GenericExtensionPacketWithID(header.id, cls.parent_cls)
 

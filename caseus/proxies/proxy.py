@@ -23,8 +23,6 @@ from .. import types
 class Proxy(pak.AsyncPacketHandler):
     MAIN_SERVER_PORTS_FALLBACK = [11801, 12801, 13801, 14801]
 
-    CORRECT_LOADER_SIZE = 0x7EE88
-
     # NOTE: Be careful when sending packets to the server with this.
     # Take great care to ensure that the fingerprints of packets
     # would never get out of sync, else the server will kick you.
@@ -140,6 +138,26 @@ class Proxy(pak.AsyncPacketHandler):
                 packet_data
             )
 
+        @property
+        def secrets(self):
+            # TODO: It would be nice to always get these from the main client,
+            # but that would then need to involve sourcing the packet context
+            # from the main client, which would be a little funky.
+
+            return self.ctx.secrets
+
+        @secrets.setter
+        def secrets(self, value):
+            self.ctx = Packet.Context(value)
+
+        @property
+        def session_id(self):
+            return self.main.client._session_id
+
+        @session_id.setter
+        def session_id(self, value):
+            self.main.client._session_id = value
+
     # TODO: Do some sort of inheritance shenanigans for connections
     # to better support multiple inheritance of proxies? Maybe also
     # allow for 'CommonConnection'.
@@ -149,10 +167,6 @@ class Proxy(pak.AsyncPacketHandler):
             super().__init__(*args, **kwargs)
 
             self.fingerprint = None
-
-        @property
-        def secrets(self):
-            return self.destination.secrets
 
         @property
         def is_satellite(self):
@@ -165,10 +179,6 @@ class Proxy(pak.AsyncPacketHandler):
         @property
         def satellite(self):
             return self.destination.satellite
-
-        @property
-        def session_id(self):
-            return self.destination.session_id
 
         async def _replace_packet(self, packet):
             await self.write_packet(
@@ -187,7 +197,7 @@ class Proxy(pak.AsyncPacketHandler):
             self.fingerprint = (self.fingerprint + 1) % 100
 
             packet_body = packet.pack_without_header(ctx=self.ctx)
-            packet_body = packet.cipher_data(packet_body, secrets=self.secrets, fingerprint=header.fingerprint)
+            packet_body = packet.cipher_data(packet_body, ctx=self.ctx, fingerprint=header.fingerprint)
 
             return header.pack(ctx=self.ctx) + packet_body
 
@@ -204,13 +214,11 @@ class Proxy(pak.AsyncPacketHandler):
         def __init__(self, proxy, *, is_satellite=False, main=None, **kwargs):
             super().__init__(proxy, **kwargs)
 
-            self.secrets = None
-
             self.is_satellite = is_satellite
 
             if is_satellite:
                 self.main      = main
-                self.satellite = self.Pair(client=self, server=None)
+                self.satellite = self.Pair(client=self, server=self.destination)
 
                 self.proxy.satellite_clients.append(self)
             else:
@@ -219,7 +227,7 @@ class Proxy(pak.AsyncPacketHandler):
 
                 self.proxy.main_clients.append(self)
 
-            self.session_id = None
+            self._session_id = None
 
         def close(self):
             try:
@@ -250,7 +258,7 @@ class Proxy(pak.AsyncPacketHandler):
                 packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
 
             if self.secrets is not None:
-                buf = packet_cls.decipher_data(buf, secrets=self.secrets, fingerprint=header.fingerprint)
+                buf = packet_cls.decipher_data(buf, ctx=self.ctx, fingerprint=header.fingerprint)
             elif packet_cls.CIPHER is not None:
                 packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
 
@@ -429,8 +437,11 @@ class Proxy(pak.AsyncPacketHandler):
         # Set the serverbound fingerprint from the handshake packet.
         source.destination.fingerprint = packet.fingerprint
 
+        source.secrets             = source.secrets.copy(version=packet.game_version)
+        source.destination.secrets = source.secrets
+
         corrected = packet.copy(
-            loader_stage_size = self.CORRECT_LOADER_SIZE,
+            loader_stage_size = source.secrets.correct_loader_size,
         )
 
         await source.destination.write_packet_instance(corrected)
@@ -455,7 +466,7 @@ class Proxy(pak.AsyncPacketHandler):
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
     async def _on_login_success(self, source, packet):
-        source.destination.session_id = packet.session_id
+        source.session_id = packet.session_id
 
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _proxy_satellite_server(self, source, packet):
@@ -485,7 +496,6 @@ class Proxy(pak.AsyncPacketHandler):
 
         source.main       = source.Pair(client=main_client, server=main_client.destination)
         source.secrets    = main_client.secrets
-        source.session_id = main_client.session_id
 
         server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
@@ -495,6 +505,8 @@ class Proxy(pak.AsyncPacketHandler):
 
         source.satellite = source.Pair(client=source, server=source.destination)
         main_client.satellite = main_client.Pair(client=source, server=source.destination)
+
+        source.destination.secrets = main_client.secrets
 
     # Listen to various nested packets.
 
@@ -527,7 +539,8 @@ class Proxy(pak.AsyncPacketHandler):
 
     @pak.packet_listener(serverbound.KeySourcesPacket)
     async def _load_packet_key_sources(self, source, packet):
-        source.secrets = Secrets(packet.packet_key_sources)
+        # At this point there is no server connection or satellite connection.
+        source.secrets = source.secrets.copy(packet_key_sources=packet.packet_key_sources)
 
     @pak.packet_listener(serverbound.MainServerInfoPacket)
     async def _connect_to_main_server(self, source, packet):

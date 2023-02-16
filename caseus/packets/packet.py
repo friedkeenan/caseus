@@ -5,6 +5,8 @@ import pak
 
 from public import public
 
+from ..secrets import Secrets
+
 from .. import types
 from .. import util
 
@@ -50,24 +52,25 @@ class Packet(pak.Packet):
     """
 
     class Context(pak.Packet.Context):
-        def __init__(self):
-            self.tribulle_ctx  = TribullePacket.Context()
-            self.legacy_ctx    = LegacyPacket.Context()
-            self.extension_ctx = ExtensionPacket.Context()
+        def __init__(self, secrets=Secrets()):
+            self.secrets = secrets
+
+            self.tribulle_ctx  = TribullePacket.Context(self)
+            self.legacy_ctx    = LegacyPacket.Context(self)
+            self.extension_ctx = ExtensionPacket.Context(self)
 
             super().__init__()
-
 
         # At the moment we have no unique
         # data stored in a packet context.
         def __hash__(self):
-            return 0
+            return hash(self.secrets)
 
         def __eq__(self, other):
             if not isinstance(other, Packet.Context):
                 return NotImplemented
 
-            return True
+            return self.secrets == other.secrets
 
     class Header(pak.Packet.Header):
         id: PacketCode
@@ -149,18 +152,18 @@ class ServerboundPacket(Packet):
         )
 
     @classmethod
-    def cipher_data(cls, data, *, fingerprint, secrets):
+    def cipher_data(cls, data, *, fingerprint, ctx):
         if cls.CIPHER is None:
             return data
 
-        return secrets.cipher(cls.CIPHER, data, fingerprint=fingerprint)
+        return ctx.secrets.cipher(cls.CIPHER, data, fingerprint=fingerprint)
 
     @classmethod
-    def decipher_data(cls, buf, *, fingerprint, secrets):
+    def decipher_data(cls, buf, *, fingerprint, ctx):
         if cls.CIPHER is None:
             return buf.read()
 
-        return secrets.decipher(cls.CIPHER, buf, fingerprint=fingerprint)
+        return ctx.secrets.decipher(cls.CIPHER, buf, fingerprint=fingerprint)
 
 @public
 class ClientboundPacket(Packet):
@@ -169,6 +172,43 @@ class ClientboundPacket(Packet):
     :class:`Packet`\s which are sent to the client should inherit
     from :class:`ClientboundPacket` to be registered as such.
     """
+
+class _NestedPacketContext(pak.Packet.Context):
+    def __init__(self, main_ctx=None):
+        # NOTE: We don't just make this a default
+        # parameter because constructing 'Packet.Context'
+        # will try to construct nested packet contexts,
+        # which inherit from this class, creating a
+        # circular dependency.
+        if main_ctx is None:
+            main_ctx = Packet.Context()
+
+        self.main_ctx = main_ctx
+
+        super().__init__()
+
+    def __getattr__(self, attr):
+        if attr == "main_ctx":
+            return super().__getattr__(attr)
+
+        return getattr(self.main_ctx, attr)
+
+    def __dir__(self):
+        native_attrs = super().__dir__()
+
+        if self.packet_ctx is None:
+            return native_attrs
+
+        return native_attrs + [attr for attr in dir(self.main_ctx) if attr not in native_attrs]
+
+    def __hash__(self):
+        return hash(self.main_ctx)
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+
+        return self.main_ctx == other.main_ctx
 
 @public
 class TribullePacket(pak.Packet):
@@ -184,6 +224,10 @@ class TribullePacket(pak.Packet):
     and "bulle", meaning "bubble", which is the jargon the
     game uses to name rooms.
     """
+
+    class Context(_NestedPacketContext):
+        __hash__ = _NestedPacketContext.__hash__
+        __eq__   = _NestedPacketContext.__eq__
 
     class Header(pak.Packet.Header):
         id: types.Short
@@ -238,6 +282,10 @@ class LegacyPacket(pak.Packet, abc.ABC):
     # format, we will provide alternatives to
     # certain parts of the normal 'pak.Packet'
     # machinery.
+
+    class Context(_NestedPacketContext):
+        __hash__ = _NestedPacketContext.__hash__
+        __eq__   = _NestedPacketContext.__eq__
 
     @classmethod
     @abc.abstractmethod
@@ -325,6 +373,10 @@ def GenericLegacyPacketWithID(id, base_cls=LegacyPacket):
 @public
 class ExtensionPacket(pak.Packet):
     """A packet not contained in the vanilla protocol."""
+
+    class Context(_NestedPacketContext):
+        __hash__ = _NestedPacketContext.__hash__
+        __eq__   = _NestedPacketContext.__eq__
 
     class Header(pak.Packet.Header):
         id: types.String

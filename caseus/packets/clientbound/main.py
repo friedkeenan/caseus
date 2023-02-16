@@ -336,7 +336,7 @@ class EnableSkillPacket(ClientboundPacket):
     id = (8, 10)
 
     skill_id: types.UnsignedByte # TODO: Enum?
-    quantity: types.UnsignedByte
+    quantity: types.UnsignedByte # TODO: Figure out if this is the best name.
 
 @public
 class MakeShamanPacket(ClientboundPacket):
@@ -382,6 +382,14 @@ class SetVampirePacket(ClientboundPacket):
 
     # Stored globally and not per-player.
     transmissible: types.Boolean
+
+@public
+class AdventureBannersPacket(ClientboundPacket):
+    id = (16, 9)
+
+    banner_id_list: types.Byte[types.Byte]
+    add_banner:     types.Boolean
+    new_adventure:  types.Boolean
 
 @public
 class Unknown_20_4_Packet(ClientboundPacket):
@@ -517,6 +525,12 @@ class TranslatedGeneralMessage(ClientboundPacket):
 
     translation_key:  types.String
     translation_args: types.String[types.Byte]
+
+@public
+class SetAllowEmailAddressPacket(ClientboundPacket):
+    id = (28, 62)
+
+    allow_email: types.Boolean
 
 @public
 class ReaffirmServerAddressPacket(ClientboundPacket):
@@ -870,18 +884,16 @@ class SetFallDamagePacket(ClientboundPacket):
     sensibility: pak.ScaledInteger(types.LimitedLEB128, 1000)
 
 @public
-class SetLoginBannerPacket(ClientboundPacket):
+class SetAdventureBannerPacket(ClientboundPacket):
     id = (144, 31)
 
-    week_number: types.LimitedLEB128
+    banner_id: types.LimitedLEB128
 
-    IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_aventure/x_banniere/x_{week_number}.jpg"
+    IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_aventure/x_banniere/x_{banner_id}.jpg"
 
     @property
     def image_url(self):
-        # TODO: Docs.
-
-        return self.IMAGE_URL_FMT.format(week_number=self.week_number)
+        return self.IMAGE_URL_FMT.format(banner_id=self.banner_id)
 
 @public
 class SetGravityScalePacket(ClientboundPacket):
@@ -972,6 +984,12 @@ class LanguageSelectionInformationPacket(ClientboundPacket):
 
     def flag_url(self, flag_code):
         return game.flag_url(flag_code, self.FLAG_SIZE)
+
+@public
+class ClientVerificationPacket(ClientboundPacket):
+    id = (176, 7)
+
+    verification_token: types.Int
 
 @public
 class ExtensionWrapperPacket(ClientboundPacket):

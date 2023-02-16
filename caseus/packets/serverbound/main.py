@@ -201,6 +201,30 @@ class VampireInfectPacket(ServerboundPacket):
     session_id: types.Int
 
 @public
+class LoginPacket(ServerboundPacket):
+    id = (26, 8)
+
+    CIPHER = IDENTIFICATION
+
+    username: types.String
+
+    # An empty string when logging in as a guest.
+    password_hash: types.String
+    loader_url:    types.String
+    start_room:    types.String
+
+    ciphered_auth_token: types.Int
+
+    # Hardcoded as '18' in game.
+    unk_short_6: types.Short
+
+    login_method: pak.Enum(types.Byte, enums.LoginMethod)
+
+    # Seems to have something do with registering an account.
+    # Maybe the previously tried username?
+    unk_string_8: types.String
+
+@public
 class EnvironmentUserIdPacket(ServerboundPacket):
     id = (26, 12)
 
@@ -242,7 +266,7 @@ class SetTransformationPacket(ServerboundPacket):
 
 @public
 class HandshakePacket(ServerboundPacket):
-    """Sent by the client to start the :class:`~.Connection`."""
+    """Sent by the client to start the connection."""
 
     id = (28, 1)
 
@@ -275,38 +299,16 @@ class HandshakePacket(ServerboundPacket):
     # Unescaped 'Capabilities.serverString'.
     server_string: types.String
 
-    # Seemingly random hardcoded number set to different values
-    # depending on a bunch of stuff. Seemingly always 0 though.
-    unk_int_10: types.Int
+    # How the client got referred the game. If not a
+    # value from the 'ReferralID' enum, then the value
+    # is a player's global id from the old referral system.
+    referee: pak.EnumOr(types.Int, enums.RefereeID)
 
     milliseconds_since_start: types.Int
 
     # Set by 'x_defNomJeuModule801', but is never set by Transformice,
     # and so it is always empty.
     game_name: types.String
-
-@public
-class LoginPacket(ServerboundPacket):
-    id = (26, 8)
-
-    CIPHER = IDENTIFICATION
-
-    username: types.String
-
-    # An empty string when logging in as a guest.
-    password_hash: types.String
-    loader_url:    types.String
-    start_room:    types.String
-
-    ciphered_auth_token: types.Int
-
-    # Hardcoded as '18' in game.
-    unk_short_6: types.Short
-
-    login_method: pak.Enum(types.Byte, enums.LoginMethod)
-
-    # Has something to do with the username it looks like.
-    unk_string_8: types.String
 
 @public
 class SystemInformationPacket(ServerboundPacket):
@@ -516,6 +518,21 @@ class SetLanguagePacket(ServerboundPacket):
     id = (176, 1)
 
     language: types.String
+
+@public
+class ClientVerificationPacket(ServerboundPacket):
+    id = (176, 47)
+
+    # There really isn't a good way to handle
+    # the contents of this packet because it is
+    # ciphered with a key that depends on a previous
+    # clientbound 'ClientVerificationPacket' and
+    # furthermore its format changes like other
+    # game secrets do.
+    #
+    # So to deal with this, we just have a single
+    # bytearray field to hold all the ciphered data.
+    ciphered_data: pak.RawByte[None]
 
 @public
 class ExtensionWrapperPacket(ServerboundPacket):
