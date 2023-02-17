@@ -98,8 +98,6 @@ class Secrets:
         "client_verification_template",
     )
 
-    correct_loader_size = 0x7EE88
-
     def __init__(
         self,
         *,
@@ -275,3 +273,14 @@ class Secrets:
 
     def decipher(self, cipher, buf, *, fingerprint=None):
         return cipher.decipher_data(buf, self.key(cipher.name), fingerprint=fingerprint)
+
+    def client_verification_data(self, verification_token, *, ctx):
+        type_ctx = pak.Type.Context(ctx=ctx)
+
+        data = self.client_verification_template.replace(
+            b"\xAA\xBB\xCC\xDD",
+
+            types.Int.pack(verification_token, ctx=type_ctx)
+        )
+
+        return self.cipher(XXTEACipher(str(verification_token)), data)

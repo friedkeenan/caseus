@@ -23,6 +23,8 @@ from .. import types
 class Proxy(pak.AsyncPacketHandler):
     MAIN_SERVER_PORTS_FALLBACK = [11801, 12801, 13801, 14801]
 
+    CORRECTED_LOADER_SIZE = 0x7EE88
+
     # NOTE: Be careful when sending packets to the server with this.
     # Take great care to ensure that the fingerprints of packets
     # would never get out of sync, else the server will kick you.
@@ -404,6 +406,7 @@ class Proxy(pak.AsyncPacketHandler):
         return await asyncio.start_server(self.new_satellite_connection, self.host_address, self.host_satellite_port)
 
     async def open_streams(self, address, ports):
+        # TODO: Retry connection on different port.
         return await asyncio.open_connection(address, random.choice(ports))
 
     async def startup(self):
@@ -441,7 +444,7 @@ class Proxy(pak.AsyncPacketHandler):
         source.destination.secrets = source.secrets
 
         corrected = packet.copy(
-            loader_stage_size = source.secrets.correct_loader_size,
+            loader_stage_size = self.CORRECTED_LOADER_SIZE,
         )
 
         await source.destination.write_packet_instance(corrected)

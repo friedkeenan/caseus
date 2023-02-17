@@ -464,7 +464,7 @@ class HandshakeResponsePacket(ClientboundPacket):
     unk_boolean_5: types.Boolean
 
 @public
-class PongPacket(ClientboundPacket):
+class IPSPongPacket(ClientboundPacket):
     id = (26, 25)
 
 @public
@@ -525,6 +525,13 @@ class TranslatedGeneralMessage(ClientboundPacket):
 
     translation_key:  types.String
     translation_args: types.String[types.Byte]
+
+@public
+class PingPacket(ClientboundPacket):
+    id = (28, 6)
+
+    payload:     types.Byte
+    main_server: types.Boolean
 
 @public
 class SetAllowEmailAddressPacket(ClientboundPacket):

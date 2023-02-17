@@ -201,6 +201,10 @@ class VampireInfectPacket(ServerboundPacket):
     session_id: types.Int
 
 @public
+class EnterTribeHousePacket(ServerboundPacket):
+    id = (16, 1)
+
+@public
 class LoginPacket(ServerboundPacket):
     id = (26, 8)
 
@@ -225,23 +229,20 @@ class LoginPacket(ServerboundPacket):
     unk_string_8: types.String
 
 @public
-class EnvironmentUserIdPacket(ServerboundPacket):
+class SteamInfoPacket(ServerboundPacket):
     id = (26, 12)
 
-    # This seems to always be the player's Steam ID.
-    user_id: types.String
-
-    # Seems to always be empty.
-    unk_string_2: types.String
+    user_id:      types.String
+    empty_string: types.String
 
 @public
-class PingPacket(ServerboundPacket):
+class IPSPingPacket(ServerboundPacket):
     """A packet to test the ping of the satellite server.
 
     Most staff roles are able to get ping information in
     their ``/ips`` screen. When doing so, this is the packet
     that the client sends to the satellite server, expecting a
-    :class:`clientbound.PongPacket <.PongPacket>` in return.
+    :class:`clientbound.IPSPongPacket <.IPSPongPacket>` in return.
     If it does not get one within 10 seconds, then it gives up
     trying to ping. If it does get one however, it will send
     another one, and another, and so on.
@@ -309,6 +310,12 @@ class HandshakePacket(ServerboundPacket):
     # Set by 'x_defNomJeuModule801', but is never set by Transformice,
     # and so it is always empty.
     game_name: types.String
+
+@public
+class PongPacket(ServerboundPacket):
+    id = (28, 6)
+
+    payload: types.Byte
 
 @public
 class SystemInformationPacket(ServerboundPacket):

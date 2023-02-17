@@ -12,6 +12,7 @@ __version__ = importlib_metadata.version(__name__)
 del importlib_metadata
 
 from . import types
+from . import clients
 from . import proxies
 from . import sniffers
 from . import game
@@ -19,5 +20,6 @@ from . import game
 from .secrets import *
 from .packets import *
 
+from .clients  import Client
 from .proxies  import Proxy
 from .sniffers import Sniffer

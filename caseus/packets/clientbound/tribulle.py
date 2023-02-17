@@ -7,7 +7,7 @@ from ... import types
 from ... import enums
 
 @public
-class LoginInformation(ClientboundTribullePacket):
+class ConnectedToCommunityPlatformPacket(ClientboundTribullePacket):
     id = 3
 
     gender:    pak.Enum(types.Byte, enums.Gender)
