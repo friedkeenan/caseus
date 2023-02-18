@@ -20,3 +20,12 @@ class ConnectedToCommunityPlatformPacket(ClientboundTribullePacket):
     tribe:             types.TribeDescription
     tribe_rank:        types.SignedLengthString
     tribe_permissions: types.Int
+
+@public
+class WhisperPacket(ClientboundTribullePacket):
+    id = 66
+
+    sender:    types.SignedLengthString
+    community: pak.Enum(types.Int, enums.TribulleCommunity)
+    receiver:  types.SignedLengthString
+    message:   types.SignedLengthString

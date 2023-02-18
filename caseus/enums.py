@@ -65,6 +65,40 @@ class Community(enum.Enum):
     PT = 31
 
 @public
+class TribulleCommunity(enum.Enum):
+    EN = 1
+    FR = 2
+    RU = 3
+    BR = 4
+    ES = 5
+    CN = 6
+    TR = 7
+    VK = 8
+    PL = 9
+    HU = 10
+    NL = 11
+    RO = 12
+    ID = 13
+    DE = 14
+    E2 = 15
+    AR = 16
+    PH = 17
+    LT = 18
+    JP = 19
+    CH = 20
+    FI = 21
+    CZ = 22
+    HR = 23
+    SK = 24
+    BG = 25
+    LV = 26
+    HE = 27
+    IT = 28
+    ET = 29
+    AZ = 30
+    PT = 31
+
+@public
 class ShamanLabel(enum.Enum):
     StayThere      = 0
     FollowMe       = 1
