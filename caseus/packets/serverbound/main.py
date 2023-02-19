@@ -92,6 +92,31 @@ class RemoveObjectPacket(ServerboundPacket):
     object_id: types.Int
 
 @public
+class EnterHolePacket(ServerboundPacket):
+    id = (5, 18)
+
+    hole_type: pak.Enum(types.Byte, enums.HoleType)
+    round:     types.Int
+    map_code:  types.Int
+
+    distance_from_nearest_hole: pak.ScaledInteger(types.UnsignedShort, 30)
+
+    x: types.Short
+    y: types.Short
+
+@public
+class GetCheesePacket(ServerboundPacket):
+    id = (5, 19)
+
+    round:        types.Int
+    x:            types.Short
+    y:            types.Short
+    cheese_index: types.UnsignedByte
+    context_id:   types.UnsignedByte
+
+    distance_from_nearest_cheese: pak.ScaledInteger(types.UnsignedShort, 30)
+
+@public
 class AddShamanObjectPacket(ServerboundPacket):
     id = (5, 20)
 
@@ -334,6 +359,12 @@ class SystemInformationPacket(ServerboundPacket):
 
     # Always written as '0'.
     zero_byte: types.Byte
+
+@public
+class LuaScriptPacket(ServerboundPacket):
+    id = (29, 1)
+
+    script: types.LargeString
 
 @public
 class KeyboardPacket(ServerboundPacket):

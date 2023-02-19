@@ -106,7 +106,7 @@ public(
         shaman_color   = Int,
         unk_int_15     = Int, # Staff name color?
         name_color     = Int,
-        unk_ubyte_17   = UnsignedByte,
+        context_id     = UnsignedByte,
     )
 )
 

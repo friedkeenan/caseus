@@ -345,3 +345,9 @@ class MapCategory(enum.Enum):
     Deleted                = 44
     Thematic               = 66
     Vanilla                = 88
+
+@public
+class HoleType(enum.Enum):
+    Normal = 0
+    Blue   = 1
+    Pink   = 2
