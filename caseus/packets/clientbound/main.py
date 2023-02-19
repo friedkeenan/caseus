@@ -122,7 +122,7 @@ class NewRoundPacket(ClientboundPacket):
         )
 
 @public
-class CreateShamanLabel(ClientboundPacket):
+class CreateShamanLabelPacket(ClientboundPacket):
     """Sent by the satellite server to create a shaman label."""
 
     id = (5, 9)
@@ -512,7 +512,7 @@ class LoadAndExecutePacket(ClientboundPacket):
     swf_data: pak.RawByte[None]
 
 @public
-class TranslatedGeneralMessage(ClientboundPacket):
+class TranslatedGeneralMessagePacket(ClientboundPacket):
     id = (28, 5)
 
     # If an empty string, then fallback to the client's
@@ -713,10 +713,10 @@ class TribulleWrapperPacket(ClientboundPacket):
     nested: _NestedTribulleType(ClientboundTribullePacket)
 
 @public
-class SetHandlingTribullePackets(ClientboundPacket):
+class SetTribulleHandlingPacket(ClientboundPacket):
     id = (60, 4)
 
-    handle_tribulle_packets: types.Boolean
+    enabled: types.Boolean
 
 @public
 class ShamanObjectPreviewPacket(ClientboundPacket):

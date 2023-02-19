@@ -27,3 +27,29 @@ jobs:
 
       - name: Run codespell
         run: codespell *
+
+  test:
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTEST_ADDOPTS: "--color=yes"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install caseus
+        run: pip install .[tests]
+
+      - name: Run tests
+        run: pytest
+
