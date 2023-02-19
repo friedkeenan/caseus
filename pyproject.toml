@@ -16,11 +16,12 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "License :: OSI Approved :: ISC License (ISCL)",
     "Operating System :: OS Independent",
 ]
 
 dependencies = [
+    # TODO: Actually put pak on pypi...
     "pak",
 
     "importlib_metadata; python_version < '3.8'",
