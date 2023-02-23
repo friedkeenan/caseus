@@ -100,7 +100,7 @@ class NewRoundPacket(ClientboundPacket):
     # Never actually has an effect because
     # the game only checks the variable this
     # gets assigned to if it receives a
-    # 'SetFallDamagePacket', which overrides
+    # 'SetCollisionDamagePacket', which overrides
     # the variable this gets set to.
     #
     # It's really weird.
@@ -215,6 +215,13 @@ class FreezePacket(ClientboundPacket):
     session_id: types.Int
     freeze:     types.Boolean
     show_ice:   types.Boolean
+
+@public
+class AddSpidermouseWebPacket(ClientboundPacket):
+    id = (5, 30)
+
+    x: types.Short
+    y: types.Short
 
 @public
 class SpawnStaticParticlePacket(ClientboundPacket):
@@ -902,7 +909,7 @@ class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
     )[types.LimitedLEB128]
 
 @public
-class SetFallDamagePacket(ClientboundPacket):
+class SetCollisionDamagePacket(ClientboundPacket):
     id = (144, 30)
 
     enabled:     types.ByteBoolean
