@@ -33,14 +33,14 @@ class LegacyWrapperPacket(ServerboundPacket):
 class ObjectSyncPacket(ServerboundPacket):
     id = (4, 3)
 
-    round:   types.Int
-    objects: types.ObjectDescription(serverbound=True)[None]
+    round_id: types.Int
+    objects:  types.ObjectDescription(serverbound=True)[None]
 
 @public
 class PlayerMovementPacket(ServerboundPacket):
     id = (4, 4)
 
-    round:               types.Int
+    round_id:            types.Int
     moving_right:        types.Boolean
     moving_left:         types.Boolean
     x:                   pak.ScaledInteger(types.Int,   100 / 30)
@@ -96,7 +96,7 @@ class EnterHolePacket(ServerboundPacket):
     id = (5, 18)
 
     hole_type: pak.Enum(types.Byte, enums.HoleType)
-    round:     types.Int
+    round_id:  types.Int
     map_code:  types.Int
 
     distance_from_nearest_hole: pak.ScaledInteger(types.UnsignedShort, 30)
@@ -108,7 +108,7 @@ class EnterHolePacket(ServerboundPacket):
 class GetCheesePacket(ServerboundPacket):
     id = (5, 19)
 
-    round:        types.Int
+    round_id:     types.Int
     x:            types.Short
     y:            types.Short
     cheese_index: types.UnsignedByte
@@ -120,7 +120,7 @@ class GetCheesePacket(ServerboundPacket):
 class AddShamanObjectPacket(ServerboundPacket):
     id = (5, 20)
 
-    round:             types.Byte
+    round_id:          types.Byte
     object_id:         types.Int
     shaman_object_id:  types.Short
     x:                 types.Short

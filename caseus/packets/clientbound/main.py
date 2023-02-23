@@ -42,7 +42,7 @@ class PlayerMovementPacket(ClientboundPacket):
     id = (4, 4)
 
     session_id:          types.Int
-    round:               types.Int
+    round_id:            types.Int
     moving_right:        types.Boolean
     moving_left:         types.Boolean
     x:                   pak.ScaledInteger(types.Int,   100 / 30)
@@ -72,12 +72,23 @@ class SetFacingPacket(ClientboundPacket):
     facing_right: types.ByteBoolean
 
 @public
+class SetOtherFacingPacket(ClientboundPacket):
+    id = (4, 10)
+
+    # NOTE: Unlike 'SetFacingPacket', this
+    # packet will have no effect on the player
+    # that the client controls.
+
+    session_id:   types.Int
+    facing_right: types.ByteBoolean
+
+@public
 class NewRoundPacket(ClientboundPacket):
     id = (5, 2)
 
     map_code:    types.Int
     num_players: types.Short
-    round:       types.Byte
+    round_id:    types.Byte
     xml:         types.CompressedString
     author:      types.String
     category:    pak.EnumOr(types.Byte, enums.MapCategory) # NOTE: We use 'EnumOr' to preserve the original value.
@@ -295,6 +306,13 @@ class PlayEmotePacket(ClientboundPacket):
     emote:      pak.Enum(types.Byte, enums.Emote)
     argument:   pak.Optional(types.String, lambda packet: packet.emote is enums.Emote.Flag)
     from_lua:   types.Boolean
+
+@public
+class GainCurrencyNotificationPacket(ClientboundPacket):
+    id = (8, 2)
+
+    currency: pak.Enum(types.Byte, enums.Currency)
+    quantity: types.Byte
 
 @public
 class MovePlayerPacket(ClientboundPacket):
@@ -713,10 +731,10 @@ class TribulleWrapperPacket(ClientboundPacket):
     nested: _NestedTribulleType(ClientboundTribullePacket)
 
 @public
-class SetTribulleHandlingPacket(ClientboundPacket):
+class SetTribulleProtocolPacket(ClientboundPacket):
     id = (60, 4)
 
-    enabled: types.Boolean
+    new_protocol: types.Boolean
 
 @public
 class ShamanObjectPreviewPacket(ClientboundPacket):

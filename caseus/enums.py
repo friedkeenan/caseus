@@ -351,3 +351,17 @@ class HoleType(enum.Enum):
     Normal = 0
     Blue   = 1
     Pink   = 2
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Normal
+
+@public
+class Currency(enum.Enum):
+    Cheese = 0
+
+    Unknown = -1
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Unknown
