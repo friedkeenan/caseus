@@ -427,6 +427,8 @@ class SatelliteDelayedIdentificationPacket(ServerboundPacket):
 class TribulleWrapperPacket(ServerboundPacket):
     id = (60, 3)
 
+    CIPHER = XOR
+
     nested: _NestedTribulleType(ServerboundTribullePacket)
 
 @public
