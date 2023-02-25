@@ -107,7 +107,7 @@ class NewRoundPacket(ClientboundPacket):
     has_fall_damage: types.Boolean
 
     # If '0' then ignored.
-    player_mass_scale: pak.ScaledInteger(types.Int, 100)
+    player_mass_percentage: types.Int
 
     # Not always present, and the game does
     # not parse any extra data at all, but
@@ -222,6 +222,33 @@ class AddSpidermouseWebPacket(ClientboundPacket):
 
     x: types.Short
     y: types.Short
+
+@public
+class SetIndianaMousePacket(ClientboundPacket):
+    id = (5, 46)
+
+    # NOTE: This only actually works if a
+    # static const boolean in the game is
+    # true (which it is not), and the author
+    # of the current map is '_Museum' or '_peche'.
+
+    session_id: types.Int
+    enabled:    types.Boolean
+
+    @property
+    def all_players(self):
+        return self.session_id == -1
+
+@public
+class AddTrapPacket(ClientboundPacket):
+    id = (5, 47)
+
+    trap:              pak.Enum(types.Short, enums.Trap)
+    x:                 types.Short
+    y:                 types.Short
+    width_percentage:  types.Short
+    height_percentage: types.Short
+    angle:             types.Short
 
 @public
 class SpawnStaticParticlePacket(ClientboundPacket):

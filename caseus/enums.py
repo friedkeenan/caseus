@@ -365,3 +365,32 @@ class Currency(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.Unknown
+
+@public
+class Trap(enum.Enum):
+    Crusher       = 0
+    Pendulum      = 1
+    SwingingBlade = 2
+    Acid          = 3
+    Spikes        = 20
+    Fire          = 21
+    Snap          = 22
+    SpinningBlade = 23
+
+@public
+class DeathType(enum.Enum):
+    Normal          = 0
+    CollisionDamage = 1
+    NoBubbleSound   = 3
+
+    Crushed     = 50
+    Spiked      = 51
+    Burned      = 52
+    Decapitated = 53
+    Dissolved   = 54
+    Snapped     = 55
+    Halved      = 56
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Normal

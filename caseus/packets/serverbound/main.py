@@ -63,6 +63,13 @@ class PlayerMovementPacket(ServerboundPacket):
     )
 
 @public
+class PlayerDiedPacket(ServerboundPacket):
+    id = (4, 5)
+
+    round_id: types.Int
+    type:     pak.Enum(types.UnsignedByte, enums.DeathType)
+
+@public
 class SetFacingPacket(ServerboundPacket):
     # NOTE: I don't think this is ever sent by the game.
 
