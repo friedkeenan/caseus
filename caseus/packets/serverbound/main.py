@@ -166,6 +166,13 @@ class JoinRoomPacket(ServerboundPacket):
     # onto this packet, however it is never used.
 
 @public
+class RoomPasswordPacket(ServerboundPacket):
+    id = (5, 39)
+
+    password:  types.String
+    room_name: types.String
+
+@public
 class RoomMessagePacket(ServerboundPacket):
     id = (6, 6)
 
@@ -399,6 +406,10 @@ class PickColorPacket(ServerboundPacket):
 
     color_picker_id: types.Int
     color:           types.Int
+
+@public
+class OpenInventoryPacket(ServerboundPacket):
+    id = (31, 1)
 
 @public
 class UseItemPacket(ServerboundPacket):

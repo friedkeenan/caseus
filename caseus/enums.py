@@ -330,7 +330,7 @@ class MapCategory(enum.Enum):
     Survivor               = 10
     VampireSurvivor        = 11
     Bootcamp               = 13
-    RacingExclusive        = 17
+    Racing                 = 17
     Defilante              = 18
     Music                  = 19
     SurvivorTest           = 20

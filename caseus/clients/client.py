@@ -16,6 +16,13 @@ from .. import enums
 from .. import types
 
 @public
+class AccountError(Exception):
+    def __init__(self, error_code):
+        self.error_code = error_code
+
+        super().__init__(f"Error code: '{error_code}'")
+
+@public
 class Client(pak.AsyncPacketHandler):
     MAIN_SERVER_PORTS = [11801, 12801, 13801, 14801]
 
@@ -122,6 +129,8 @@ class Client(pak.AsyncPacketHandler):
 
         language = "en",
         steam_id = None,
+
+        listen_sequentially = False,
     ):
         super().__init__()
 
@@ -141,6 +150,7 @@ class Client(pak.AsyncPacketHandler):
 
         self.steam_id = steam_id
 
+        self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True
 
     def register_packet_listener(self, listener, *packet_types, outgoing=False, **fields):
@@ -211,27 +221,35 @@ class Client(pak.AsyncPacketHandler):
         # exceptions like for being in a tribe house map. We neglect to
         # do so here.
 
-        # TODO: Should we check satellite here too?
-        while not self.main.is_closing():
-            # NOTE: The game sends the keep alive packets
-            # 15 seconds after sending the handshake packet,
-            # and then repeats every 15 seconds after that.
-            # To mimic this, we sleep 15 seconds at the start
-            # of each loop.
-            await asyncio.sleep(15)
+        try:
+            # TODO: Should we check satellite here too?
+            while not self.main.is_closing():
+                # NOTE: The game sends the keep alive packets
+                # 15 seconds after sending the handshake packet,
+                # and then repeats every 15 seconds after that.
+                # To mimic this, we sleep 15 seconds at the start
+                # of each loop.
+                await asyncio.sleep(15)
 
-            await self.main.write_packet(serverbound.KeepAlivePacket)
-            await self.satellite.write_packet(serverbound.KeepAlivePacket)
+                await self.main.write_packet(serverbound.KeepAlivePacket)
+                await self.satellite.write_packet(serverbound.KeepAlivePacket)
+
+        except asyncio.CancelledError:
+            return
 
     async def _satellite_listen(self):
-        while not self.main.is_closing():
-            if self.satellite is self.main or self.satellite.is_closing():
-                await pak.util.yield_exec()
+        try:
+            while not self.main.is_closing():
+                if self.satellite is self.main or self.satellite.is_closing():
+                    await pak.util.yield_exec()
 
-                continue
+                    continue
 
-            async with self.satellite:
-                await self.listen(self.satellite)
+                async with self.satellite:
+                    await self.listen(self.satellite)
+
+        except asyncio.CancelledError:
+            return
 
     async def on_start(self):
         language = self.language
@@ -259,12 +277,15 @@ class Client(pak.AsyncPacketHandler):
         keep_alive_task       = asyncio.create_task(self._keep_alive())
         satellite_listen_task = asyncio.create_task(self._satellite_listen())
 
-        await self.listen(self.main)
+        try:
+            await self.listen(self.main)
 
-        self.satellite.close()
+        finally:
+            satellite_listen_task.cancel()
+            keep_alive_task.cancel()
 
-        await satellite_listen_task
-        await keep_alive_task
+            await satellite_listen_task
+            await keep_alive_task
 
     async def start(self):
         await self.startup()
@@ -337,13 +358,16 @@ class Client(pak.AsyncPacketHandler):
                 unk_short_6         = 18,
             )
 
-    # TODO: Handle login error.
+    @pak.packet_listener(clientbound.AccountErrorPacket)
+    async def _on_account_error(self, conn, packet):
+        raise AccountError(packet.error_code)
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
     async def _on_login_success(self, conn, packet):
         self.session_id = packet.session_id
 
-        self._listen_sequentially = False
+        if not self.listen_sequentially:
+            self._listen_sequentially = False
 
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _on_change_satellite_server(self, conn, packet):

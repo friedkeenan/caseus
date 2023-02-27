@@ -104,7 +104,7 @@ class NewRoundPacket(ClientboundPacket):
     # the variable this gets set to.
     #
     # It's really weird.
-    has_fall_damage: types.Boolean
+    has_collision_damage: types.Boolean
 
     # If '0' then ignored.
     player_mass_percentage: types.Int
@@ -222,6 +222,12 @@ class AddSpidermouseWebPacket(ClientboundPacket):
 
     x: types.Short
     y: types.Short
+
+@public
+class RoomPasswordPacket(ClientboundPacket):
+    id = (5, 39)
+
+    room_name: types.String
 
 @public
 class SetIndianaMousePacket(ClientboundPacket):
@@ -514,6 +520,17 @@ class HandshakeResponsePacket(ClientboundPacket):
 
     # If 'True' then the game calls an empty function.
     unk_boolean_5: types.Boolean
+
+@public
+class AccountErrorPacket(ClientboundPacket):
+    id = (26, 12)
+
+    # TODO: Enum? Might not be feasible if it
+    # has different meanings in different contexts.
+    error_code: types.Byte
+
+    unk_string_2: types.String
+    unk_string_3: types.String
 
 @public
 class IPSPongPacket(ClientboundPacket):
@@ -850,21 +867,18 @@ class SetTitlePacket(ClientboundPacket):
     title_id: types.UnsignedShort
 
 @public
-class SetActivePlayersPacket(ClientboundPacket):
+class SetPlayerListPacket(ClientboundPacket):
     id = (144, 1)
 
     players: types.PlayerDescription[types.Short]
 
 @public
-class UpdateActivePlayerPacket(ClientboundPacket):
+class UpdatePlayerPacket(ClientboundPacket):
     id = (144, 2)
 
-    player: types.PlayerDescription
-
-    unk_boolean_2: types.Boolean
-
-    # If 'True', then it resets a timer which calls an empty function every second.
-    unk_boolean_3: types.Boolean
+    player:                  types.PlayerDescription
+    skip_prepare_animations: types.Boolean
+    refresh_player_menu:     types.Boolean
 
 @public
 class SetCheesesPacket(ClientboundPacket):
