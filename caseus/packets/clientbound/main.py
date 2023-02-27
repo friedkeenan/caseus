@@ -744,6 +744,46 @@ class UseItemPacket(ClientboundPacket):
     item_id:    types.Short
 
 @public
+class TradeInvitePacket(ClientboundPacket):
+    id = (31, 5)
+
+    session_id: types.Int
+
+@public
+class TradeErrorPacket(ClientboundPacket):
+    id = (31, 6)
+
+    username: types.String
+    error:    pak.Enum(types.Byte, enums.TradeError)
+
+@public
+class TradeStartPacket(ClientboundPacket):
+    id = (31, 7)
+
+    session_id: types.Int
+
+@public
+class UpdateTradeContentsPacket(ClientboundPacket):
+    id = (31, 8)
+
+    export:     types.Boolean
+    item_id:    types.Short
+    increase:   types.Boolean
+    quantity:   types.Byte
+    image_name: pak.Optional(types.String, types.Boolean)
+
+@public
+class TradeLockPacket(ClientboundPacket):
+    id = (31, 9)
+
+    trader: pak.Enum(types.Byte, enums.Trader)
+    locked: types.Boolean
+
+@public
+class TradeCompletePacket(ClientboundPacket):
+    id = (31, 10)
+
+@public
 class ChangeSatelliteServerPacket(ClientboundPacket):
     """Sent by the main server to tell the client to change the satellite server."""
 

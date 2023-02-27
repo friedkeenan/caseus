@@ -394,3 +394,24 @@ class DeathType(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.Normal
+
+@public
+class TradeError(enum.Enum):
+    AlreadyInTrade    = 0
+    TradeRejected     = 1
+    TradeEnded        = 2
+    DifferentRoom     = 3
+    TradeCompleted    = 4
+    ShamanCannotTrade = 5
+    NotConnected      = 6
+    InternalError     = 7
+
+@public
+class Trader(enum.Enum):
+    Partner = 0
+    Self    = 1
+    Both    = 2
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Both

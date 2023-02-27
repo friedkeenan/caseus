@@ -280,6 +280,9 @@ class Proxy(pak.AsyncPacketHandler):
         host_satellite_port = 12801,
 
         expected_address = "localhost",
+
+        main_server_address = None,
+        main_server_ports   = None,
     ):
         super().__init__()
 
@@ -288,6 +291,12 @@ class Proxy(pak.AsyncPacketHandler):
         self.host_satellite_port = host_satellite_port
 
         self.expected_address = expected_address
+
+        self.main_server_address = main_server_address
+        self.main_server_ports   = main_server_ports
+
+        if main_server_address is None or main_server_ports is None:
+            self.register_packet_listener(self._connect_to_main_server, clientbound.MainServerInfoPacket)
 
         self.main_srv     = None
         self.main_clients = []
@@ -382,6 +391,14 @@ class Proxy(pak.AsyncPacketHandler):
 
     async def new_main_connection(self, client_reader, client_writer):
         client = self.ClientConnection(self, reader=client_reader, writer=client_writer)
+
+        if self.main_server_address is not None and self.main_server_ports is not None:
+            server_reader, server_writer = await self.open_streams(self.main_server_address, self.main_server_ports)
+
+            server = self.ServerConnection(self, destination=client, reader=server_reader, writer=server_writer)
+
+            client.destination = server
+            client.main.server = server
 
         async with client:
             await self.listen(client)
@@ -545,13 +562,19 @@ class Proxy(pak.AsyncPacketHandler):
         # At this point there is no server connection or satellite connection.
         source.secrets = source.secrets.copy(packet_key_sources=packet.packet_key_sources)
 
-    @pak.packet_listener(serverbound.MainServerInfoPacket)
     async def _connect_to_main_server(self, source, packet):
+        address = packet.address
+        if self.main_server_address is not None:
+            address = self.main_server_address
+
         ports = packet.ports
-        if len(ports) == 0:
+        if self.main_server_ports is not None:
+            ports = self.main_server_ports
+
+        elif len(ports) == 0:
             ports = self.MAIN_SERVER_PORTS_FALLBACK
 
-        server_reader, server_writer = await self.open_streams(packet.address, ports)
+        server_reader, server_writer = await self.open_streams(address, ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
 
         source.main.server = source.destination

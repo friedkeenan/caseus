@@ -425,6 +425,36 @@ class SetEquippedItemPacket(ServerboundPacket):
     equipped: types.Boolean
 
 @public
+class TradeInvitePacket(ServerboundPacket):
+    id = (31, 5)
+
+    # NOTE: This packet is also used for
+    # accepting a trade invitiation.
+
+    username: types.String
+
+@public
+class CancelTradePacket(ServerboundPacket):
+    id = (31, 6)
+
+    username:       types.String
+    because_shaman: types.Boolean
+
+@public
+class UpdateTradeContentsPacket(ServerboundPacket):
+    id = (31, 8)
+
+    item_id:    types.Short
+    increase:   types.Boolean
+    held_shift: types.Boolean
+
+@public
+class TradeLockPacket(ServerboundPacket):
+    id = (31, 9)
+
+    locked: types.Boolean
+
+@public
 class SatelliteDelayedIdentificationPacket(ServerboundPacket):
     """Sent by the client to the satellite server after switching to it."""
 
