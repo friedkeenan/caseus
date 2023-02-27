@@ -444,9 +444,9 @@ class CancelTradePacket(ServerboundPacket):
 class UpdateTradeContentsPacket(ServerboundPacket):
     id = (31, 8)
 
-    item_id:    types.Short
-    increase:   types.Boolean
-    held_shift: types.Boolean
+    item_id:  types.Short
+    increase: types.Boolean
+    several:  types.Boolean
 
 @public
 class TradeLockPacket(ServerboundPacket):
