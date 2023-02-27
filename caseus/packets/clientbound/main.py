@@ -390,6 +390,12 @@ class SetPlayerScorePacket(ClientboundPacket):
     score:      types.Short
 
 @public
+class EarnExperiencePacket(ClientboundPacket):
+    id = (8, 9)
+
+    quantity: types.Int
+
+@public
 class EnableSkillPacket(ClientboundPacket):
     id = (8, 10)
 
