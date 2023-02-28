@@ -296,7 +296,7 @@ class Proxy(pak.AsyncPacketHandler):
         self.main_server_ports   = main_server_ports
 
         if main_server_address is None or main_server_ports is None:
-            self.register_packet_listener(self._connect_to_main_server, clientbound.MainServerInfoPacket)
+            self.register_packet_listener(self._connect_to_main_server, serverbound.MainServerInfoPacket)
 
         self.main_srv     = None
         self.main_clients = []
