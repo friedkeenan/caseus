@@ -143,6 +143,17 @@ class CreateShamanLabelPacket(ClientboundPacket):
     y:     types.Short
 
 @public
+class AddBonusPacket(ClientboundPacket):
+    id = (5, 14)
+
+    x:        types.LimitedLEB128
+    y:        types.LimitedLEB128
+    bonus:    pak.Enum(types.LimitedLEB128, enums.Bonus)
+    angle:    types.LimitedLEB128
+    bonus_id: types.LimitedLEB128
+    visible:  types.ByteBoolean
+
+@public
 class RemoveObjectPacket(ClientboundPacket):
     id = (5, 15)
 
@@ -153,12 +164,12 @@ class AddShamanObjectPacket(ClientboundPacket):
     id = (5, 20)
 
     object_id:        types.Int # If '-1' then automatically assigned.
-    shaman_object_id: types.Short
-    x:                types.Short
-    y:                types.Short
-    angle:            types.Short
-    velocity_x:       types.Byte
-    velocity_y:       types.Byte
+    shaman_object_id: types.LimitedLEB128
+    x:                types.LimitedLEB128
+    y:                types.LimitedLEB128
+    angle:            pak.ScaledInteger(types.LimitedLEB128, 100)
+    velocity_x:       pak.ScaledInteger(types.LimitedLEB128, 100)
+    velocity_y:       pak.ScaledInteger(types.LimitedLEB128, 100)
     mice_collidable:  types.ByteBoolean
     colors:           types.Int[types.Byte]
 
@@ -194,11 +205,18 @@ class SetSnowingPacket(ClientboundPacket):
 class SetWorldGravityPacket(ClientboundPacket):
     id = (5, 28)
 
-    # This field is ignored if '0'.
-    milliseconds_to_send_previous: types.Int
+    # When this is positive, after the
+    # specified time, the client will
+    # send a 'SetWorldGravityPacket' to
+    # the server with the previous gravity
+    # information to set it back to normal.
+    #
+    # This is used for the 'Gravitational'
+    # shaman skill.
+    milliseconds: types.Int
 
-    x: types.Int
-    y: types.Int
+    x: pak.ScaledInteger(types.Int, 1000)
+    y: pak.ScaledInteger(types.Int, 1000)
 
 @public
 class SetPlayerSizePacket(ClientboundPacket):
@@ -218,7 +236,7 @@ class FreezePacket(ClientboundPacket):
 
 @public
 class AddSpidermouseWebPacket(ClientboundPacket):
-    id = (5, 30)
+    id = (5, 36)
 
     x: types.Short
     y: types.Short
@@ -358,11 +376,37 @@ class GainCurrencyNotificationPacket(ClientboundPacket):
 class MovePlayerPacket(ClientboundPacket):
     id = (8, 3)
 
-    x:                 types.Short
-    y:                 types.Short
+    IGNORE = pak.util.UniqueSentinel("IGNORE")
+
+    class _Velocity(pak.Type):
+        IGNORE_VALUE = -9998
+
+        @classmethod
+        def _default(cls, *, ctx):
+            return MovePlayerPacket.IGNORE
+
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            value = types.LimitedLEB128.unpack(buf, ctx=ctx)
+            if value == cls.IGNORE_VALUE:
+                return MovePlayerPacket.IGNORE
+
+            return value / 10
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            if value is MovePlayerPacket.IGNORE:
+                value = cls.IGNORE_VALUE
+            else:
+                value = int(value * 10)
+
+            return types.LimitedLEB128.pack(value, ctx=ctx)
+
+    x:                 types.LimitedLEB128
+    y:                 types.LimitedLEB128
     position_relative: types.ByteBoolean
-    velocity_x:        types.Short
-    velocity_y:        types.Short
+    velocity_x:        _Velocity
+    velocity_y:        _Velocity
     velocity_relative: types.ByteBoolean
 
 @public
@@ -422,12 +466,27 @@ class AddNPCPacket(ClientboundPacket):
     title_id:         types.Short
     feminine:         types.Boolean
     outfit_code:      types.String # TODO: Parse outfit.
-    x:                types.Short
-    y:                types.Short
+    x:                types.LimitedLEB128
+    y:                types.LimitedLEB128
     facing_right:     types.Boolean
     face_player:      types.Boolean
     interface:        pak.Enum(types.Byte, enums.NPCInterface)
     periodic_message: types.String
+
+@public
+class MeepExplosionPacket(ClientboundPacket):
+    id = (8, 38)
+
+    session_id: types.Int
+    x:          types.Short
+    y:          types.Short
+    power:      types.Int
+
+@public
+class SetCanMeepPacket(ClientboundPacket):
+    id = (8, 39)
+
+    enabled: types.Boolean
 
 @public
 class SetIceCubePacket(ClientboundPacket):
@@ -666,8 +725,8 @@ class AddImagePacket(ClientboundPacket):
     image_name:  types.String
     target_type: pak.Enum(types.Byte, enums.ImageTargetType)
     target:      types.Int
-    x:           types.Short
-    y:           types.Short
+    x:           types.Int
+    y:           types.Int
     scale_x:     types.Float
     scale_y:     types.Float
     rotation:    types.Float
@@ -694,12 +753,12 @@ class DisplayParticlePacket(ClientboundPacket):
     id = (29, 27)
 
     particle_id:    types.Byte
-    x:              types.Short
-    y:              types.Short
-    velocity_x:     pak.ScaledInteger(types.Short, 100)
-    velocity_y:     pak.ScaledInteger(types.Short, 100)
-    acceleration_x: pak.ScaledInteger(types.Short, 100)
-    acceleration_y: pak.ScaledInteger(types.Short, 100)
+    x:              types.LimitedLEB128
+    y:              types.LimitedLEB128
+    velocity_x:     pak.ScaledInteger(types.LimitedLEB128, 100)
+    velocity_y:     pak.ScaledInteger(types.LimitedLEB128, 100)
+    acceleration_x: pak.ScaledInteger(types.LimitedLEB128, 100)
+    acceleration_y: pak.ScaledInteger(types.LimitedLEB128, 100)
 
 @public
 class ShowColorPickerPacket(ClientboundPacket):
@@ -722,7 +781,7 @@ class LoadInventoryPacket(ClientboundPacket):
         "ItemInfo",
 
         item_id             = types.Short,
-        quantity            = types.UnsignedByte, # NOTE: If consumable id already received, then this quantity is just added.
+        quantity            = types.UnsignedByte, # NOTE: If item id already received, then this quantity is just added.
         priority            = types.UnsignedByte, # Only used for sorting.
         unk_boolean_4       = types.Boolean,      # Marked as 'is_event' by aiotfm, but I think that's wrong.
         can_use             = types.Boolean,      # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
@@ -1020,8 +1079,8 @@ class SetGravityScalePacket(ClientboundPacket):
 
     session_id: types.LimitedLEB128
 
-    x: types.LimitedLEB128
-    y: types.LimitedLEB128
+    x: pak.ScaledInteger(types.LimitedLEB128, 1000)
+    y: pak.ScaledInteger(types.LimitedLEB128, 1000)
 
 @public
 class LoadFurSpritesPacket(ClientboundPacket):

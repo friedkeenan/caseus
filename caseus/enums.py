@@ -415,3 +415,13 @@ class Trader(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.Both
+
+@public
+class Bonus(enum.Enum):
+    Point          = 0
+    Speed          = 1
+    Death          = 2
+    Spring         = 3
+    EasterEgg      = 4
+    Booster        = 5
+    Disintegration = 6

@@ -128,20 +128,26 @@ class AddShamanObjectPacket(ServerboundPacket):
     id = (5, 20)
 
     round_id:          types.Byte
-    object_id:         types.Int
-    shaman_object_id:  types.Short
-    x:                 types.Short
-    y:                 types.Short
-    angle:             types.Short
-    velocity_x:        types.Byte
-    velocity_y:        types.Byte
-    mice_collidable:   types.ByteBoolean
+    object_id:         types.LimitedLEB128
+    shaman_object_id:  types.LimitedLEB128
+    x:                 types.LimitedLEB128
+    y:                 types.LimitedLEB128
+    angle:             types.LimitedLEB128
+    velocity_x:        types.LimitedLEB128
+    velocity_y:        types.LimitedLEB128
+    mice_collidable:   types.Boolean
     spawned_by_player: types.ByteBoolean
-    session_id:        types.UnsignedInt
+    session_id:        types.LimitedLEB128
 
 @public
-class PreviousWorldGravityPacket(ServerboundPacket):
-    id = (5, 21)
+class CollectBonusPointPacket(ServerboundPacket):
+    id = (5, 25)
+
+    bonus_id: types.Int
+
+@public
+class SetWorldGravityPacket(ServerboundPacket):
+    id = (5, 28)
 
     x: types.Short
     y: types.Short
@@ -225,10 +231,21 @@ class ShowEmoticonPacket(ServerboundPacket):
     emoticon: pak.Enum(types.Byte, enums.Emoticon)
 
 @public
+class CollectEasterEggPacket(ServerboundPacket):
+    id = (8, 6)
+
+@public
+class MeepPacket(ServerboundPacket):
+    id = (8, 39)
+
+    x: types.LimitedLEB128
+    y: types.LimitedLEB128
+
+@public
 class SetIceCubePacket(ServerboundPacket):
     id = (8, 45)
 
-    # Only ever sent with 'Unfreeze' and '0' as 'action' and 'frozen_seconds'.
+    # Only ever sent with 'Unfreeze' and '0' as 'action' and 'seconds'.
 
     action:  pak.Enum(types.Byte, enums.IceCubeAction)
     seconds: types.Short
@@ -386,19 +403,19 @@ class KeyboardPacket(ServerboundPacket):
 
     id = (29, 2)
 
-    key_code:   types.Short
+    key_code:   types.LimitedLEB128
     down:       types.Boolean
-    x:          types.Short
-    y:          types.Short
-    velocity_x: pak.ScaledInteger(types.Short, 10)
-    velocity_y: pak.ScaledInteger(types.Short, 10)
+    x:          types.LimitedLEB128
+    y:          types.LimitedLEB128
+    velocity_x: pak.ScaledInteger(types.LimitedLEB128, 10)
+    velocity_y: pak.ScaledInteger(types.LimitedLEB128, 10)
 
 @public
 class MouseDownPacket(ServerboundPacket):
     id = (29, 3)
 
-    x: types.Short
-    y: types.Short
+    x: types.LimitedLEB128
+    y: types.LimitedLEB128
 
 @public
 class PickColorPacket(ServerboundPacket):
@@ -476,13 +493,13 @@ class TribulleWrapperPacket(ServerboundPacket):
 class ShamanObjectPreviewPacket(ServerboundPacket):
     id = (100, 2)
 
-    shaman_object_id: types.Short
-    x:                types.Short
-    y:                types.Short
+    shaman_object_id: types.LimitedLEB128
+    x:                types.LimitedLEB128
+    y:                types.LimitedLEB128
 
     # If a rock with children, then the first child's rotation.
     # Else the object's rotation.
-    rotation: types.Short
+    rotation: types.LimitedLEB128
 
     # Only non-empty if it's a rock.
     # Has format like '2;3,4;5,6' where '2' is the number
