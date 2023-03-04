@@ -251,7 +251,7 @@ class RoomPasswordPacket(ClientboundPacket):
 class EventMapActionPacket(ClientboundPacket):
     id = (5, 44)
 
-    # Only certain actions are avaiable baased on
+    # Only certain actions are available baased on
     # the event type seemingly set in the 'S'
     # attribute of the "settings" element of the
     # map XML when the map author is 'Tigrounette'
