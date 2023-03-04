@@ -711,6 +711,12 @@ class CleanupLuaScriptingPacket(ClientboundPacket):
     id = (29, 5)
 
 @public
+class LuaScriptingLogPacket(ClientboundPacket):
+    id = (29, 6)
+
+    message: types.String
+
+@public
 class RemoveImagePacket(ClientboundPacket):
     id = (29, 18)
 
