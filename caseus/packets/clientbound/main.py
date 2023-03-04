@@ -248,6 +248,17 @@ class RoomPasswordPacket(ClientboundPacket):
     room_name: types.String
 
 @public
+class EventMapActionPacket(ClientboundPacket):
+    id = (5, 44)
+
+    # Only certain actions are avaiable baased on
+    # the event type seemingly set in the 'S'
+    # attribute of the "settings" element of the
+    # map XML when the map author is 'Tigrounette'
+    # or 'Transformice' or starts with '_'.
+    action: pak.Enum(types.Short, enums.EventMapAction)
+
+@public
 class SetIndianaMousePacket(ClientboundPacket):
     id = (5, 46)
 
@@ -585,6 +596,53 @@ class HandshakeResponsePacket(ClientboundPacket):
 
     # If 'True' then the game calls an empty function.
     unk_boolean_5: types.Boolean
+
+@public
+class SetPlayerHealthPacket(ClientboundPacket):
+    id = (26, 4)
+
+    health: types.Byte
+
+@public
+class HitMonsterPacket(ClientboundPacket):
+    id = (26, 5)
+
+    monster_id: types.Int
+    push_right: types.ByteBoolean
+
+@public
+class SpawnMonsterPacket(ClientboundPacket):
+    id = (26, 6)
+
+    monster_id: types.Int
+    x:          types.Int
+    y:          types.Int
+    type:       pak.Enum(types.String, enums.Monster)
+
+@public
+class RemoveMonsterPacket(ClientboundPacket):
+    id = (26, 7)
+
+    monster_id: types.Int
+
+@public
+class SetMonsterSpeedPacket(ClientboundPacket):
+    id = (26, 8)
+
+    monster_id: types.Int
+    speed:      types.Int
+
+@public
+class PlayerAttackPacket(ClientboundPacket):
+    id = (26, 9)
+
+    session_id: types.Int
+
+@public
+class PlayerDamagedPacket(ClientboundPacket):
+    id = (26, 11)
+
+    session_id: types.Int
 
 @public
 class AccountErrorPacket(ClientboundPacket):

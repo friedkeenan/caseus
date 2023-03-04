@@ -425,3 +425,26 @@ class Bonus(enum.Enum):
     EasterEgg      = 4
     Booster        = 5
     Disintegration = 6
+
+@public
+class Monster(enum.Enum):
+    # 'sq' is short for 'Squelette'.
+    Skeleton = "sq"
+
+    # 'f' is short for 'Fantome'.
+    Ghost = "f"
+
+    # 'Chat' is French for 'Cat'.
+    SkeletonCat = "chat"
+
+@public
+class EventMapAction(enum.Enum):
+    LightWind       = 1
+    StartSailing    = 2
+    HeavyWind       = 3
+    LightRain       = 4
+    HeavyRain       = 5
+    SpawnBoat       = 6
+    LightningStrike = 7
+
+    SkeletonCatAttack = 10

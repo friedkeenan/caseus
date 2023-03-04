@@ -285,6 +285,33 @@ class LoginPacket(ServerboundPacket):
     unk_string_8: types.String
 
 @public
+class HitMonsterPacket(ServerboundPacket):
+    id = (26, 5)
+
+    monster_id: types.Int
+    push_right: types.ByteBoolean
+
+@public
+class PlayerAttackPacket(ServerboundPacket):
+    id = (26, 9)
+
+@public
+class MonsterSyncPacket(ServerboundPacket):
+    id = (26, 10)
+
+    monsters: pak.Compound(
+        "MonsterInfo",
+
+        monster_id = types.Int,
+        x          = types.Int,
+        y          = types.Int,
+    )[types.UnsignedShort]
+
+@public
+class PlayerDamagedPacket(ServerboundPacket):
+    id = (26, 11)
+
+@public
 class SteamInfoPacket(ServerboundPacket):
     id = (26, 12)
 
