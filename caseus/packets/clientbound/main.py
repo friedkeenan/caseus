@@ -518,12 +518,20 @@ class SetVampirePacket(ClientboundPacket):
     transmissible: types.Boolean
 
 @public
-class AdventureBannersPacket(ClientboundPacket):
+class UpdateAdventuresPacket(ClientboundPacket):
     id = (16, 9)
 
-    banner_id_list: types.Byte[types.Byte]
-    add_banner:     types.Boolean
-    new_adventure:  types.Boolean
+    adventure_id_list:  types.Byte[types.Byte]
+    enable:             types.Boolean
+    announce_adventure: types.Boolean
+
+@public
+class AdventureActionPacket(ClientboundPacket):
+    id = (16, 10)
+
+    adventure_id: types.UnsignedByte
+    action_id:    types.UnsignedByte
+    arguments:    types.String[types.UnsignedByte]
 
 @public
 class Unknown_20_4_Packet(ClientboundPacket):

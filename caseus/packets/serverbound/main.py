@@ -261,6 +261,14 @@ class EnterTribeHousePacket(ServerboundPacket):
     id = (16, 1)
 
 @public
+class AdventureActionPacket(ServerboundPacket):
+    id = (16, 10)
+
+    adventure_id: types.UnsignedByte
+    action_id:    types.UnsignedByte
+    arguments:    types.String[types.UnsignedByte]
+
+@public
 class LoginPacket(ServerboundPacket):
     id = (26, 8)
 
