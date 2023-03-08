@@ -14,10 +14,6 @@ from .. import util
 class PacketCode(pak.Type):
     # TODO: Docs.
 
-    # NOTE: The game reads unsigned bytes for clientbound packets,
-    # but writes signed bytes for serverbound packets. We choose
-    # here to only use unsigned bytes.
-
     @classmethod
     def _unpack(cls, buf, *, ctx):
         C  = types.UnsignedByte.unpack(buf, ctx=ctx)
@@ -61,8 +57,6 @@ class Packet(pak.Packet):
 
             super().__init__()
 
-        # At the moment we have no unique
-        # data stored in a packet context.
         def __hash__(self):
             return hash(self.secrets)
 

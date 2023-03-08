@@ -364,6 +364,7 @@ class Client(pak.AsyncPacketHandler):
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
     async def _on_login_success(self, conn, packet):
+        # TODO: Does it make sense for this class to track this?
         self.session_id = packet.session_id
 
         if not self.listen_sequentially:

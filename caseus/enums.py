@@ -135,7 +135,7 @@ class StaffMessageType(enum.Enum):
     FashionSquad        = 10
 
 @public
-class StaffRoleID(enum.Enum):
+class StaffRole(enum.Enum):
     NONE = 0
 
     Arbitre       = 3

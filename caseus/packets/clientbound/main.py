@@ -469,6 +469,112 @@ class MakeShamanPacket(ClientboundPacket):
     unk_int_6:     types.Int
 
 @public
+class BasePlayerInformationPacket(ClientboundPacket):
+    username:          types.String
+    global_id:         types.Int
+    registration_time: types.Int
+    staff_role:        pak.Enum(types.Byte, enums.StaffRole)
+    gender:            pak.Enum(types.Byte, enums.Gender)
+    tribe_name:        types.String
+    soulmate:          types.String
+
+@public
+class PlayerProfilePacket(BasePlayerInformationPacket):
+    id = (8, 16)
+
+    class _Badges(pak.Type):
+        _default = []
+
+        elem_type = pak.Compound(
+            "BadgeInfo",
+
+            badge_id = types.UnsignedShort,
+            quantity = types.UnsignedShort,
+        )
+
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            length = types.UnsignedShort.unpack(buf, ctx=ctx) // 2
+
+            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            length = len(value) * 2
+
+            return (
+                types.UnsignedShort.pack(length, ctx=ctx) +
+
+                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+            )
+
+    # NOTE: The game stores these as a vector
+    # but manually reads each out. This is likely
+    # done to be symmetric with the stats in
+    # the 'OldNekodancerProfilePacket'.
+    normal_saves:                types.Int
+    shaman_cheese:               types.Int
+    firsts:                      types.Int
+    cheese:                      types.Int
+    hard_saves:                  types.Int
+    completed_bootcamps:         types.Int
+    divine_saves:                types.Int
+    normal_saves_without_skills: types.Int
+    hard_saves_without_skills:   types.Int
+    divine_saves_without_skills: types.Int
+
+    title_id: types.Short
+
+    unlocked_titles: pak.Compound(
+        "TitleInfo",
+
+        title_id = types.Short,
+        stars    = types.Byte,
+    )[types.Short]
+
+    outfit_code: types.String # TODO: Parse outfit.
+    level:       types.Short
+    badges:      _Badges
+
+    gamemode_stats: pak.Compound(
+        "GamemodeStatInfo",
+
+        stat_id           = types.UnsignedByte,
+        quantity          = types.Int,
+        needed_quantity   = types.Int,
+        unlocked_badge_id = types.Short,
+    )[types.Byte]
+
+    shaman_orb_id:            types.UnsignedByte
+    shaman_orb_id_list:       types.UnsignedByte[types.UnsignedByte]
+    display_adventure_points: types.Boolean
+    adventure_points:         types.Int
+
+@public
+class OldNekodancerProfilePacket(BasePlayerInformationPacket):
+    id = (8, 17)
+
+    stats: pak.Compound(
+        "StatInfo",
+
+        stat_id  = types.Byte,
+        quantity = types.Int,
+    )[types.Byte]
+
+    # NOTE: Not used in Transformice
+    # or technically Nekodancer, but
+    # is named the same as the profile
+    # packet that Nekodancer *does* use
+    # where it is the fur ID.
+    fur_id: types.Byte
+
+    # Not used anywhere either in Transformice or
+    # Nekodancer. Probably other outfit elements,
+    # perhaps shirt and pants?
+    unk_byte_3: types.Byte
+    unk_byte_4: types.Byte
+
+@public
 class AddNPCPacket(ClientboundPacket):
     id = (8, 30)
 
@@ -581,7 +687,7 @@ class LoginSuccessPacket(ClientboundPacket):
     # Whether you are using a registered account or a guest account.
     registered: types.Boolean
 
-    staff_role_ids: pak.Enum(types.Byte, enums.StaffRoleID)[types.Byte]
+    staff_roles: pak.Enum(types.Byte, enums.StaffRole)[types.Byte]
 
     # You can also repeat the same message if this is true.
     modo_can_speak_in_all_staff_channels: types.Boolean
