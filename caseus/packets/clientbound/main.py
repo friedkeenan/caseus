@@ -454,19 +454,34 @@ class EarnExperiencePacket(ClientboundPacket):
 class EnableSkillPacket(ClientboundPacket):
     id = (8, 10)
 
-    skill_id: types.UnsignedByte # TODO: Enum?
-    quantity: types.UnsignedByte # TODO: Figure out if this is the best name.
+    skill_id: types.UnsignedByte
+    argument: types.UnsignedByte
 
 @public
-class MakeShamanPacket(ClientboundPacket):
+class ShamanInfoPacket(ClientboundPacket):
+    id = (8, 11)
+
+    blue_session_id:     types.Int
+    pink_session_id:     types.Int
+    blue_shaman_mode:    pak.Enum(types.Byte, enums.ShamanMode)
+    pink_shaman_mode:    pak.Enum(types.Byte, enums.ShamanMode)
+    blue_level:          types.UnsignedShort
+    pink_level:          types.UnsignedShort
+    blue_shaman_orb_id:  types.Short
+    pink_shaman_orb_id:  types.Short
+    blue_without_skills: types.Boolean
+    pink_without_skills: types.Boolean
+
+@public
+class SetShamanPacket(ClientboundPacket):
     id = (8, 12)
 
-    session_id:    types.Int
-    unk_byte_2:    types.Byte
-    unk_short_3:   types.Short
-    unk_ushort_4:  types.UnsignedShort
-    unk_boolean_5: types.Boolean
-    unk_int_6:     types.Int
+    session_id:         types.Int
+    shaman_mode:        pak.Enum(types.Byte, enums.ShamanMode)
+    level:              types.Short
+    shaman_orb_id:      types.UnsignedShort
+    without_skills:     types.Boolean
+    starting_object_id: types.Int
 
 @public
 class BasePlayerInformationPacket(ClientboundPacket):
@@ -1169,6 +1184,12 @@ class SetCheesesPacket(ClientboundPacket):
 
     session_id: types.Int
     cheeses:    types.Byte
+
+@public
+class UnsetShamanPacket(ClientboundPacket):
+    id = (144, 7)
+
+    session_id: types.Int
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):

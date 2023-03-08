@@ -448,3 +448,9 @@ class EventMapAction(enum.Enum):
     LightningStrike = 7
 
     SkeletonCatAttack = 10
+
+@public
+class ShamanMode(enum.Enum):
+    Normal = 0
+    Hard   = 1
+    Divine = 2
