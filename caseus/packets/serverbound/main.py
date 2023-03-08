@@ -610,6 +610,67 @@ class InteractWithOfficialNPCPacket(ServerboundPacket):
     interaction: _InteractionType
 
 @public
+class CheesesAndHolesSyncPacket(ServerboundPacket):
+    id = (100, 80)
+
+    class _Cheeses(pak.Type):
+        _default = []
+
+        elem_type = pak.Compound(
+            "CheeseInfo",
+
+            x = types.Short,
+            y = types.Short,
+        )
+
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            length = types.UnsignedByte.unpack(buf, ctx=ctx) // 2
+
+            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            length = len(value) * 2
+
+            return (
+                types.UnsignedByte.pack(length, ctx=ctx) +
+
+                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+            )
+
+    class _Holes(pak.Type):
+        _default = []
+
+        elem_type = pak.Compound(
+            "HoleInfo",
+
+            type = pak.Enum(types.Short, enums.HoleType),
+
+            x = types.Short,
+            y = types.Short,
+        )
+
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            length = types.UnsignedByte.unpack(buf, ctx=ctx) // 3
+
+            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            length = len(value) * 3
+
+            return (
+                types.UnsignedByte.pack(length, ctx=ctx) +
+
+                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+            )
+
+    cheeses: _Cheeses
+    holes:   _Holes
+
+@public
 class OpenFashionSquadOutfitsMenuPacket(ServerboundPacket):
     id = (149, 12)
 
