@@ -268,6 +268,15 @@ class AdventureActionPacket(ServerboundPacket):
     action_id:    types.UnsignedByte
     arguments:    types.String[types.UnsignedByte]
 
+    def int_argument(self, index):
+        return int(self.arguments[index])
+
+    def str_argument(self, index):
+        return self.arguments[index]
+
+    def bool_argument(self, index):
+        return self.arguments[index] == "true"
+
 @public
 class LoginPacket(ServerboundPacket):
     id = (26, 8)
