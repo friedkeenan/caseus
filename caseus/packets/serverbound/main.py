@@ -8,7 +8,7 @@ from ..common import (
     _NestedLegacyType,
     _NestedTribulleType,
     _NestedExtensionType,
-    _NestedVisualConsumableInfoType,
+    _SimpleNestedPacketType,
 )
 
 from ..packet import (
@@ -240,6 +240,23 @@ class MeepPacket(ServerboundPacket):
 
     x: types.LimitedLEB128
     y: types.LimitedLEB128
+
+@public
+class GetCollectablePacket(ServerboundPacket):
+    id = (8, 43)
+
+    round_id:      types.Byte
+    adventure_id:  types.UnsignedByte
+    individual_id: types.UnsignedShort
+    x:             types.Short
+    y:             types.Short
+
+@public
+class InsideAdventureAreaPacket(ServerboundPacket):
+    id = (8, 44)
+
+    adventure_id: types.UnsignedByte
+    area_id:      types.UnsignedShort
 
 @public
 class SetIceCubePacket(ServerboundPacket):
@@ -584,7 +601,7 @@ class VisualConsumableInfoPacket(ServerboundPacket):
 
         artist_name: types.String
 
-    info: _NestedVisualConsumableInfoType(_InfoPacket)
+    info: _SimpleNestedPacketType(_InfoPacket)
 
 @public
 class InteractWithOfficialNPCPacket(ServerboundPacket):

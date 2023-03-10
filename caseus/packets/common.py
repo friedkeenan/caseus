@@ -98,7 +98,8 @@ class _NestedExtensionType(pak.Type):
             parent_cls = parent_cls,
         )
 
-class _NestedVisualConsumableInfoType(pak.Type):
+@public
+class _SimpleNestedPacketType(pak.Type):
     parent_cls = None
 
     @classmethod
@@ -127,7 +128,7 @@ class _NestedVisualConsumableInfoType(pak.Type):
     @classmethod
     def _call(cls, parent_cls):
         return cls.make_type(
-            cls.__qualname__,
+            f"{cls.__qualname__}({parent_cls.__qualname__})",
 
             parent_cls = parent_cls,
         )

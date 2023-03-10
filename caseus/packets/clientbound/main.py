@@ -11,7 +11,7 @@ from ..common import (
     _NestedLegacyType,
     _NestedTribulleType,
     _NestedExtensionType,
-    _NestedVisualConsumableInfoType,
+    _SimpleNestedPacketType,
 )
 
 from ..packet import (
@@ -292,6 +292,29 @@ class SpawnStaticParticlePacket(ClientboundPacket):
     particle_id: types.Byte
     x:           types.Short
     y:           types.Short
+
+@public
+class AddCollectablePacket(ClientboundPacket):
+    id = (5, 51)
+
+    adventure_id:   types.UnsignedByte
+    individual_id:  types.UnsignedShort # TODO: Better name?
+    collectable_id: types.UnsignedByte
+    x:              types.Short
+    y:              types.Short
+
+@public
+class AddAdventureAreaPacket(ClientboundPacket):
+    # TODO: I am not happy with this name.
+
+    id = (5, 54)
+
+    adventure_id: types.UnsignedByte
+    area_id:      types.UnsignedShort
+    x:            types.Short
+    y:            types.Short
+    width:        types.UnsignedShort
+    height:       types.UnsignedShort
 
 @public
 class RoomMessagePacket(ClientboundPacket):
@@ -1164,7 +1187,7 @@ class VisualConsumableInfoPacket(ClientboundPacket):
         days:       types.UnsignedShort
         hours:      types.Byte
 
-    info: _NestedVisualConsumableInfoType(_InfoPacket)
+    info: _SimpleNestedPacketType(_InfoPacket)
 
 @public
 class SetTitlePacket(ClientboundPacket):
@@ -1172,6 +1195,49 @@ class SetTitlePacket(ClientboundPacket):
 
     gender:   pak.Enum(types.UnsignedByte, enums.Gender)
     title_id: types.UnsignedShort
+
+@public
+class CollectableActionPacket(ClientboundPacket):
+    id = (100, 101)
+
+    class _Action(pak.Packet):
+        class Header(pak.Packet.Header):
+            id: types.UnsignedByte
+
+    class SetCanCollect(_Action):
+        id = 1
+
+        can_collect: types.Boolean
+
+    class SetCarrying(_Action):
+        id = 2
+
+        session_id:      types.Int
+        image_path:      types.String
+        offset_x:        types.Short
+        offset_y:        types.Short
+        foreground:      types.Boolean
+        size_percentage: types.Short
+        angle:           types.Short
+
+        @property
+        def all_players(self):
+            return self.session_id == 0
+
+        @property
+        def sprite(self):
+            return self.image_path.startswith("$")
+
+    class RemoveAllCarrying(_Action):
+        id = 3
+
+        session_id: types.Int
+
+        @property
+        def all_players(self):
+            return self.session_id == 0
+
+    action: _SimpleNestedPacketType(_Action)
 
 @public
 class SetPlayerListPacket(ClientboundPacket):

@@ -94,7 +94,11 @@ class InputListeningProxy(Proxy):
                 if listen:
                     proxy_listeners.add(key_code)
                 else:
-                    proxy_listeners.remove(key_code)
+                    try:
+                        proxy_listeners.remove(key_code)
+
+                    except KeyError:
+                        pass
 
     @pak.packet_listener(clientbound.BindMouseDownPacket)
     async def _track_mouse_game_listening(self, source, packet):
