@@ -310,7 +310,7 @@ class AddAdventureAreaPacket(ClientboundPacket):
     id = (5, 54)
 
     adventure_id: types.UnsignedByte
-    area_id:      types.UnsignedShort
+    area_id:      types.UnsignedShort # NOTE: Should not be '0'.
     x:            types.Short
     y:            types.Short
     width:        types.UnsignedShort
@@ -490,8 +490,8 @@ class ShamanInfoPacket(ClientboundPacket):
     pink_shaman_mode:    pak.Enum(types.Byte, enums.ShamanMode)
     blue_level:          types.UnsignedShort
     pink_level:          types.UnsignedShort
-    blue_shaman_orb_id:  types.Short
-    pink_shaman_orb_id:  types.Short
+    blue_cartouche_id:   types.Short
+    pink_cartouche_id:   types.Short
     blue_without_skills: types.Boolean
     pink_without_skills: types.Boolean
 
@@ -502,7 +502,7 @@ class SetShamanPacket(ClientboundPacket):
     session_id:         types.Int
     shaman_mode:        pak.Enum(types.Byte, enums.ShamanMode)
     level:              types.Short
-    shaman_orb_id:      types.UnsignedShort
+    cartouche_id:       types.UnsignedShort
     without_skills:     types.Boolean
     starting_object_id: types.Int
 
@@ -583,8 +583,8 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
         unlocked_badge_id = types.Short,
     )[types.Byte]
 
-    shaman_orb_id:            types.UnsignedByte
-    shaman_orb_id_list:       types.UnsignedByte[types.UnsignedByte]
+    cartouche_id:             types.UnsignedByte
+    cartouche_id_list:        types.UnsignedByte[types.UnsignedByte]
     display_adventure_points: types.Boolean
     adventure_points:         types.Int
 
@@ -1190,6 +1190,16 @@ class VisualConsumableInfoPacket(ClientboundPacket):
     info: _SimpleNestedPacketType(_InfoPacket)
 
 @public
+class LaunchHotAirBalloonPacket(ClientboundPacket):
+    id = (100, 71)
+
+    # Sent by the server when someone uses the
+    # hot air balloon consumable (item ID 35).
+
+    session_id: types.Int
+    badge_id:   types.UnsignedShort
+
+@public
 class SetTitlePacket(ClientboundPacket):
     id = (100, 72)
 
@@ -1209,7 +1219,7 @@ class CollectableActionPacket(ClientboundPacket):
 
         can_collect: types.Boolean
 
-    class SetCarrying(_Action):
+    class AddCarrying(_Action):
         id = 2
 
         session_id:      types.Int
@@ -1228,7 +1238,7 @@ class CollectableActionPacket(ClientboundPacket):
         def sprite(self):
             return self.image_path.startswith("$")
 
-    class RemoveAllCarrying(_Action):
+    class ClearCarrying(_Action):
         id = 3
 
         session_id: types.Int

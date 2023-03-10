@@ -252,7 +252,7 @@ class GetCollectablePacket(ServerboundPacket):
     y:             types.Short
 
 @public
-class InsideAdventureAreaPacket(ServerboundPacket):
+class EnterAdventureAreaPacket(ServerboundPacket):
     id = (8, 44)
 
     adventure_id: types.UnsignedByte

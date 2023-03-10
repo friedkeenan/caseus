@@ -304,7 +304,7 @@ class NPCItemStatus(enum.Enum):
 @public
 class NPCItemType(enum.Enum):
     Badge     = 1
-    ShamanOrb = 2
+    Cartouche = 2
     Title     = 3
     Normal    = 4
     Costume   = 5
