@@ -130,6 +130,8 @@ class Proxy(pak.AsyncPacketHandler):
             return packet.pack(ctx=self.ctx)
 
         async def write_packet_instance(self, packet):
+            # TODO: Do we want to add quality of life writing for nested packets?
+
             packet_data = self._written_packet_data(packet)
 
             type_ctx = pak.Type.Context(ctx=self.ctx)

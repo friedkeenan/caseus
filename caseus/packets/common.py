@@ -21,16 +21,16 @@ class _NestedLegacyType(pak.Type):
 
         id = (ord(components[0][0]), ord(components[0][1]))
 
-        packet_cls = cls.parent_cls.subclass_with_id(id, ctx=ctx.legacy_ctx)
+        packet_cls = cls.parent_cls.subclass_with_id(id, ctx=ctx.packet_ctx)
         if packet_cls is None:
             packet_cls = GenericLegacyPacketWithID(id, cls.parent_cls)
 
-        return packet_cls.from_body_components(components[1:], ctx=ctx.legacy_ctx)
+        return packet_cls.from_body_components(components[1:], ctx=ctx.packet_ctx)
 
     @classmethod
     def _pack(cls, value, *, ctx):
-        id              = value.id(ctx=ctx.legacy_ctx)
-        body_components = value.body_components(ctx=ctx.legacy_ctx)
+        id              = value.id(ctx=ctx.packet_ctx)
+        body_components = value.body_components(ctx=ctx.packet_ctx)
 
         components = [
             chr(id[0]) + chr(id[1]),
@@ -54,17 +54,17 @@ class _NestedTribulleType(pak.Type):
 
     @classmethod
     def _unpack(cls, buf, *, ctx):
-        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.tribulle_ctx)
+        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.packet_ctx)
 
-        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.tribulle_ctx)
+        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
         if packet_cls is None:
             packet_cls = GenericTribullePacketWithID(header.id, cls.parent_cls)
 
-        return packet_cls.unpack(buf, ctx=ctx.tribulle_ctx)
+        return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
 
     @classmethod
     def _pack(cls, value, *, ctx):
-        return value.pack(ctx=ctx.tribulle_ctx)
+        return value.pack(ctx=ctx.packet_ctx)
 
     @classmethod
     def _call(cls, parent_cls):
@@ -78,17 +78,17 @@ class _NestedTribulleType(pak.Type):
 class _NestedExtensionType(pak.Type):
     @classmethod
     def _unpack(cls, buf, *, ctx):
-        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.extension_ctx)
+        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.packet_ctx)
 
-        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.extension_ctx)
+        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
         if packet_cls is None:
             packet_cls = GenericExtensionPacketWithID(header.id, cls.parent_cls)
 
-        return packet_cls.unpack(buf, ctx=ctx.extension_ctx)
+        return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
 
     @classmethod
     def _pack(cls, value, *, ctx):
-        return value.pack(ctx=ctx.extension_ctx)
+        return value.pack(ctx=ctx.packet_ctx)
 
     @classmethod
     def _call(cls, parent_cls):

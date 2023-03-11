@@ -91,9 +91,15 @@ class NewRoundPacket(ClientboundPacket):
     round_id:    types.Byte
     xml:         types.CompressedString
     author:      types.String
-    category:    pak.EnumOr(types.Byte, enums.MapCategory) # NOTE: We use 'EnumOr' to preserve the original value.
-    mirrored:    types.Boolean
 
+    # NOTE: We use 'EnumOr' to make sure we preserve whatever value
+    # the server sends the client. Normally this would be handled with
+    # a fallback value implemented in the enum class, but in particular
+    # for archival purposes, it is important to me to preserve the original
+    # value of the category, even if the client doesn't care about it.
+    category: pak.EnumOr(types.Byte, enums.MapCategory)
+
+    mirrored:        types.Boolean
     has_conjuration: types.Boolean
     has_collision:   types.Boolean
 
@@ -129,7 +135,9 @@ class NewRoundPacket(ClientboundPacket):
             ) or
 
             # The value for the category is not one the game knows about.
-            not isinstance(self.category, enums.MapCategory)
+            not isinstance(self.category, enums.MapCategory) or
+
+            self.category.overridden_by_vanilla
         )
 
 @public

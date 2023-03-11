@@ -346,6 +346,46 @@ class MapCategory(enum.Enum):
     Thematic               = 66
     Vanilla                = 88
 
+    # The client *knows* about the following values
+    # but still presents them as vanilla, not having
+    # a specific sprite like the other categories.
+
+    # NOTE: The client translates this to just 'Racing'.
+    RacingTest = 38
+
+    # NOTE: The client will forget the map author and
+    # map code and insstead just load the vanilla '0'
+    # map if it receives this category.
+    DeletedInappropriate = 43
+
+    # NOTE: The client makes screen decorations
+    # invisible on these maps if the game mode
+    # does not have ID '11', which corresponds
+    # to the now-removed "music" game mode.
+    #
+    # TODO: Investigate game modes.
+    UserMadeVanilla = 87
+
+    # NOTE: if the client does not receive
+    # this category, then the button to return
+    # to the map editor is not made available.
+    MapEditor = 100
+
+    # The client doesn't care about this category,
+    # however it has the same name as other variables
+    # that I can't imagine are named anything but "halloween".
+    Halloween = 666
+
+    @property
+    def overridden_by_vanilla(self):
+        return self in (
+            self.RacingTest,
+            self.DeletedInappropriate,
+            self.UserMadeVanilla,
+            self.MapEditor,
+            self.Halloween,
+        )
+
 @public
 class HoleType(enum.Enum):
     Normal = 0

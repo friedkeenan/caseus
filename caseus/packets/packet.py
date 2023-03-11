@@ -32,6 +32,21 @@ class PacketCode(pak.Type):
 
         return types.UnsignedByte.pack(C, ctx=ctx) + types.UnsignedByte.pack(CC, ctx=ctx)
 
+class _GeneralPacketContext(pak.Packet.Context):
+    def __init__(self, secrets=Secrets()):
+        self.secrets = secrets
+
+        super().__init__()
+
+    def __hash__(self):
+        return hash(self.secrets)
+
+    def __eq__(self, other):
+        if not isinstance(other, Packet.Context):
+            return NotImplemented
+
+        return self.secrets == other.secrets
+
 @public
 class Packet(pak.Packet):
     r"""A Transformice packet.
@@ -47,24 +62,7 @@ class Packet(pak.Packet):
     ``(C, CC)`` or sometimes ``CCC`` altogether.
     """
 
-    class Context(pak.Packet.Context):
-        def __init__(self, secrets=Secrets()):
-            self.secrets = secrets
-
-            self.tribulle_ctx  = TribullePacket.Context(self)
-            self.legacy_ctx    = LegacyPacket.Context(self)
-            self.extension_ctx = ExtensionPacket.Context(self)
-
-            super().__init__()
-
-        def __hash__(self):
-            return hash(self.secrets)
-
-        def __eq__(self, other):
-            if not isinstance(other, Packet.Context):
-                return NotImplemented
-
-            return self.secrets == other.secrets
+    Context = _GeneralPacketContext
 
     class Header(pak.Packet.Header):
         id: PacketCode
@@ -167,43 +165,6 @@ class ClientboundPacket(Packet):
     from :class:`ClientboundPacket` to be registered as such.
     """
 
-class _NestedPacketContext(pak.Packet.Context):
-    def __init__(self, main_ctx=None):
-        # NOTE: We don't just make this a default
-        # parameter because constructing 'Packet.Context'
-        # will try to construct nested packet contexts,
-        # which inherit from this class, creating a
-        # circular dependency.
-        if main_ctx is None:
-            main_ctx = Packet.Context()
-
-        self.main_ctx = main_ctx
-
-        super().__init__()
-
-    def __getattr__(self, attr):
-        if attr == "main_ctx":
-            return super().__getattr__(attr)
-
-        return getattr(self.main_ctx, attr)
-
-    def __dir__(self):
-        native_attrs = super().__dir__()
-
-        if self.packet_ctx is None:
-            return native_attrs
-
-        return native_attrs + [attr for attr in dir(self.main_ctx) if attr not in native_attrs]
-
-    def __hash__(self):
-        return hash(self.main_ctx)
-
-    def __eq__(self, other):
-        if type(self) is not type(other):
-            return NotImplemented
-
-        return self.main_ctx == other.main_ctx
-
 @public
 class TribullePacket(pak.Packet):
     """A packet for the community platform.
@@ -219,9 +180,7 @@ class TribullePacket(pak.Packet):
     game uses to name rooms.
     """
 
-    class Context(_NestedPacketContext):
-        __hash__ = _NestedPacketContext.__hash__
-        __eq__   = _NestedPacketContext.__eq__
+    Context = _GeneralPacketContext
 
     class Header(pak.Packet.Header):
         id: types.Short
@@ -277,9 +236,7 @@ class LegacyPacket(pak.Packet, abc.ABC):
     # certain parts of the normal 'pak.Packet'
     # machinery.
 
-    class Context(_NestedPacketContext):
-        __hash__ = _NestedPacketContext.__hash__
-        __eq__   = _NestedPacketContext.__eq__
+    Context = _GeneralPacketContext
 
     @classmethod
     @abc.abstractmethod
@@ -368,9 +325,7 @@ def GenericLegacyPacketWithID(id, base_cls=LegacyPacket):
 class ExtensionPacket(pak.Packet):
     """A packet not contained in the vanilla protocol."""
 
-    class Context(_NestedPacketContext):
-        __hash__ = _NestedPacketContext.__hash__
-        __eq__   = _NestedPacketContext.__eq__
+    Context = _GeneralPacketContext
 
     class Header(pak.Packet.Header):
         id: types.String
