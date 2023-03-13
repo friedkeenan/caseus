@@ -46,6 +46,8 @@ class Proxy(pak.AsyncPacketHandler):
         # in the case of unknown packets which are xor-ciphered.
         _listen_sequentially = True
 
+        # TODO: SynchronizedAttr.
+
         class Pair:
             def __init__(self, *, client, server):
                 self.client = client
@@ -261,7 +263,7 @@ class Proxy(pak.AsyncPacketHandler):
             if packet_cls is None:
                 packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
 
-            if self.secrets is not None:
+            if self.secrets.packet_key_sources is not None:
                 buf = packet_cls.decipher_data(buf, ctx=self.ctx, fingerprint=header.fingerprint)
             elif packet_cls.CIPHER is not None:
                 packet_cls = GenericPacketWithID(header.id, ServerboundPacket)

@@ -1,15 +1,13 @@
-import pak
-
 from aioconsole import aprint
 
 from public import public
 
-from .client import Client
+from .server import MinimalServer
 
 from ..packets import Packet, GenericPacket
 
 @public
-class LoggingClient(Client):
+class LoggingServer(MinimalServer):
     LOG_GENERIC_PACKETS  = True
     LOG_OUTGOING_PACKETS = True
 
@@ -28,32 +26,28 @@ class LoggingClient(Client):
             if self.LOG_OUTGOING_PACKETS:
                 self.register_packet_listener(self._log_specific_outgoing_packets, Packet, outgoing=True)
 
-    async def _log_packet(self, server, packet, *, bound):
-        # NOTE: It is important that we check
-        # the main connection first, as at the
-        # start of the client process, the
-        # satellite connection is the main connection.
-        if server is self.main:
-            connection_name = "MAIN"
-        else:
+    async def _log_packet(self, client, packet, *, bound):
+        if client.is_satellite:
             connection_name = "SATELLITE"
+        else:
+            connection_name = "MAIN"
 
         await aprint(f"{connection_name}: {bound}: {packet}")
 
-    async def _log_all_incoming_packets(self, server, packet):
-        await self._log_packet(server, packet, bound="Clientbound")
+    async def _log_all_incoming_packets(self, client, packet):
+        await self._log_packet(client, packet, bound="Serverbound")
 
-    async def _log_specific_incoming_packets(self, server, packet):
+    async def _log_specific_incoming_packets(self, client, packet):
         if isinstance(packet, GenericPacket):
             return
 
-        await self._log_packet(server, packet, bound="Clientbound")
+        await self._log_packet(client, packet, bound="Serverbound")
 
-    async def _log_all_outgoing_packets(self, server, packet):
-        await self._log_packet(server, packet, bound="Serverbound")
+    async def _log_all_outgoing_packets(self, client, packet):
+        await self._log_packet(client, packet, bound="Clientbound")
 
-    async def _log_specific_outgoing_packets(self, server, packet):
+    async def _log_specific_outgoing_packets(self, client, packet):
         if isinstance(packet, GenericPacket):
             return
 
-        await self._log_packet(server, packet, bound="Serverbound")
+        await self._log_packet(client, packet, bound="Clientbound")

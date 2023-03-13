@@ -156,7 +156,7 @@ class Client(pak.AsyncPacketHandler):
     def register_packet_listener(self, listener, *packet_types, outgoing=False, **fields):
         super().register_packet_listener(listener, *packet_types, outgoing=outgoing, **fields)
 
-    async def _listen_to_packet_with_fingerprint(self, conn, packet, *, fingerprint):
+    async def _listen_to_packet_with_fingerprint(self, server, packet, *, fingerprint):
         # For listeners that are listening to written packets,
         # the fingerprint may be important to them, and so we
         # make a copy of the packet with the fingerprint set
@@ -171,9 +171,9 @@ class Client(pak.AsyncPacketHandler):
 
         async with self.listener_task_group(listen_sequentially=self._listen_sequentially) as group:
             for listener in listeners:
-                group.create_task(listener(conn, packet))
+                group.create_task(listener(server, packet))
 
-    async def _listen_to_packet(self, conn, packet, *, outgoing):
+    async def _listen_to_packet(self, server, packet, *, outgoing):
         async with self.listener_task_group(listen_sequentially=self._listen_sequentially) as group:
             for listener in self.listeners_for_packet(packet, outgoing=outgoing):
                 # NOTE: The game does not track what connection
@@ -183,14 +183,14 @@ class Client(pak.AsyncPacketHandler):
                 # to know what connection a packet came from,
                 # and as a matter of principle it would be
                 # unfortunate to throw away such information.
-                group.create_task(listener(conn, packet))
+                group.create_task(listener(server, packet))
 
-    async def listen(self, conn):
+    async def listen(self, server):
         try:
-            async for packet in conn.continuously_read_packets():
+            async for packet in server.continuously_read_packets():
                 packet.make_immutable()
 
-                await self._listen_to_packet(conn, packet, outgoing=False)
+                await self._listen_to_packet(server, packet, outgoing=False)
 
         finally:
             await self.end_listener_tasks()
@@ -301,7 +301,7 @@ class Client(pak.AsyncPacketHandler):
             pass
 
     @pak.packet_listener(clientbound.HandshakeResponsePacket)
-    async def _on_handshake_response(self, conn, packet):
+    async def _on_handshake_response(self, server, packet):
         self.auth_token = packet.auth_token
 
         await self.main.write_packet(
@@ -331,7 +331,7 @@ class Client(pak.AsyncPacketHandler):
             )
 
     @pak.packet_listener(clientbound.ClientVerificationPacket)
-    async def _on_client_verification(self, conn, packet):
+    async def _on_client_verification(self, server, packet):
         await self.main.write_packet(
             serverbound.ClientVerificationPacket,
 
@@ -359,11 +359,11 @@ class Client(pak.AsyncPacketHandler):
             )
 
     @pak.packet_listener(clientbound.AccountErrorPacket)
-    async def _on_account_error(self, conn, packet):
+    async def _on_account_error(self, server, packet):
         raise AccountError(packet.error_code)
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
-    async def _on_login_success(self, conn, packet):
+    async def _on_login_success(self, server, packet):
         # TODO: Does it make sense for this class to track this?
         self.session_id = packet.session_id
 
@@ -371,7 +371,7 @@ class Client(pak.AsyncPacketHandler):
             self._listen_sequentially = False
 
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
-    async def _on_change_satellite_server(self, conn, packet):
+    async def _on_change_satellite_server(self, server, packet):
         if packet.should_ignore:
             return
 
@@ -394,7 +394,7 @@ class Client(pak.AsyncPacketHandler):
         )
 
     @pak.packet_listener(clientbound.PingPacket)
-    async def _on_ping(self, conn, packet):
+    async def _on_ping(self, server, packet):
         if packet.main_server:
             await self.main.write_packet(
                 serverbound.PongPacket,
@@ -412,25 +412,25 @@ class Client(pak.AsyncPacketHandler):
     # Listen to nested packets.
 
     @pak.packet_listener(clientbound.TribulleWrapperPacket)
-    async def _on_tribulle_wrapper(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=False)
+    async def _on_tribulle_wrapper(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=False)
 
     @pak.packet_listener(serverbound.TribulleWrapperPacket, outgoing=True)
-    async def _on_tribulle_wrapper_outgoing(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=True)
+    async def _on_tribulle_wrapper_outgoing(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=True)
 
     @pak.packet_listener(clientbound.LegacyWrapperPacket)
-    async def _on_legacy_wrapper(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=False)
+    async def _on_legacy_wrapper(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=False)
 
     @pak.packet_listener(serverbound.LegacyWrapperPacket, outgoing=True)
-    async def _on_legacy_wrapper_outgoing(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=True)
+    async def _on_legacy_wrapper_outgoing(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=True)
 
     @pak.packet_listener(clientbound.ExtensionWrapperPacket)
-    async def _on_extension_wrapper(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=False)
+    async def _on_extension_wrapper(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=False)
 
     @pak.packet_listener(serverbound.ExtensionWrapperPacket, outgoing=True)
-    async def _on_extension_wrapper_outgoing(self, conn, packet):
-        await self._listen_to_packet(conn, packet.nested.immutable_copy(), outgoing=True)
+    async def _on_extension_wrapper_outgoing(self, server, packet):
+        await self._listen_to_packet(server, packet.nested.immutable_copy(), outgoing=True)
