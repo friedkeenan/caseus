@@ -429,7 +429,8 @@ class MinimalServer(pak.AsyncPacketHandler):
         await client.write_packet(
             clientbound.SetLanguagePacket,
 
-            language = packet.language,
+            language = "en",
+            country = "us",
         )
 
     @pak.packet_listener(serverbound.SystemInformationPacket)
