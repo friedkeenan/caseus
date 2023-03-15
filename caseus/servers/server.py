@@ -68,16 +68,18 @@ class MinimalServer(pak.AsyncPacketHandler):
 
                 self.server.main_clients.append(self)
 
+            self._keep_alive_lock = asyncio.Lock()
             self._keep_alive_task = None
 
             self._listen_sequentially = True
 
         async def _refresh_keep_alive(self):
-            if self._keep_alive_task is not None:
-                self._keep_alive_task.cancel()
-                await self._keep_alive_task
+            async with self._keep_alive_lock:
+                if self._keep_alive_task is not None:
+                    self._keep_alive_task.cancel()
+                    await self._keep_alive_task
 
-            self._keep_alive_task = asyncio.create_task(self.server._keep_alive_close(self))
+                self._keep_alive_task = asyncio.create_task(self.server._keep_alive_close(self))
 
         def close(self):
             try:
@@ -357,7 +359,7 @@ class MinimalServer(pak.AsyncPacketHandler):
 
     @property
     def num_online_players(self):
-        return len([x for x in self.main_clients if x.logged_in])
+        return sum(1 if x.logged_in else 0 for x in self.main_clients)
 
     def language_from_handshake(self, packet):
         return "en"
@@ -392,7 +394,7 @@ class MinimalServer(pak.AsyncPacketHandler):
 
         client.did_handshake = True
 
-        client.auth_token = random.randrange(self.MAX_AUTH_TOKEN)
+        client.auth_token = random.randrange(self.MAX_AUTH_TOKEN + 1)
 
         await client.write_packet(
             clientbound.HandshakeResponsePacket,
@@ -404,7 +406,7 @@ class MinimalServer(pak.AsyncPacketHandler):
         )
 
         if self.client_verification_template is not None:
-            client.verification_token = random.randrange(self.MAX_VERIFICATION_TOKEN)
+            client.verification_token = random.randrange(self.MAX_VERIFICATION_TOKEN + 1)
 
             await client.write_packet(
                 clientbound.ClientVerificationPacket,
@@ -466,7 +468,8 @@ class MinimalServer(pak.AsyncPacketHandler):
 
         await self.on_login(client, packet)
 
-        client._listen_sequentially = False
+        if client.logged_in:
+            client._listen_sequentially = False
 
     @pak.packet_listener(serverbound.KeepAlivePacket)
     async def _on_keep_alive(self, client, packet):

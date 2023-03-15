@@ -151,6 +151,12 @@ class CreateShamanLabelPacket(ClientboundPacket):
     y:     types.Short
 
 @public
+class StartRoundCountdownPacket(ClientboundPacket):
+    id = (5, 10)
+
+    activate_countdown: types.Boolean
+
+@public
 class AddBonusPacket(ClientboundPacket):
     id = (5, 14)
 
@@ -711,6 +717,8 @@ class LoginSuccessPacket(ClientboundPacket):
     id = (26, 2)
 
     class CommunityToFlag(pak.Type):
+        _default = {}
+
         @classmethod
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedShort.unpack(buf, ctx=ctx)
@@ -1264,7 +1272,7 @@ class SetPlayerListPacket(ClientboundPacket):
     players: types.PlayerDescription[types.Short]
 
 @public
-class UpdatePlayerPacket(ClientboundPacket):
+class UpdatePlayerListPacket(ClientboundPacket):
     id = (144, 2)
 
     player:                  types.PlayerDescription

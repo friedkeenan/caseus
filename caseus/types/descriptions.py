@@ -93,7 +93,7 @@ public(
         username       = String,
         session_id     = Int,
         is_shaman      = Boolean,
-        deaths         = Byte, # TODO: Better figure out what this is.
+        activity       = pak.Enum(Byte, enums.PlayerActivity),
         score          = Short,
         cheeses        = Byte,
         title_id       = Short,

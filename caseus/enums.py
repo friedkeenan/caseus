@@ -494,3 +494,13 @@ class ShamanMode(enum.Enum):
     Normal = 0
     Hard   = 1
     Divine = 2
+
+@public
+class PlayerActivity(enum.Enum):
+    Alive = 0
+    Dead  = 1
+
+    # This activity will cause the player
+    # to not be added to the record of
+    # players that can be acted on.
+    Inert = 2
