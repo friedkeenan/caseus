@@ -346,12 +346,12 @@ class MapCategory(enum.Enum):
     Thematic               = 66
     Vanilla                = 88
 
+    # NOTE: The client translates this to just 'Racing'.
+    RacingTest = 38
+
     # The client *knows* about the following values
     # but still presents them as vanilla, not having
     # a specific sprite like the other categories.
-
-    # NOTE: The client translates this to just 'Racing'.
-    RacingTest = 38
 
     # NOTE: The client will forget the map author and
     # map code and insstead just load the vanilla '0'
@@ -379,7 +379,6 @@ class MapCategory(enum.Enum):
     @property
     def overridden_by_vanilla(self):
         return self in (
-            self.RacingTest,
             self.DeletedInappropriate,
             self.UserMadeVanilla,
             self.MapEditor,
