@@ -72,6 +72,14 @@ class SetFacingPacket(ClientboundPacket):
     facing_right: types.ByteBoolean
 
 @public
+class PlayerActionPacket(ClientboundPacket):
+    id = (4, 9)
+
+    session_id: types.Int
+    animation:  pak.Enum(types.Byte, enums.PlayerAction)
+    allow_self: types.ByteBoolean
+
+@public
 class SetOtherFacingPacket(ClientboundPacket):
     id = (4, 10)
 

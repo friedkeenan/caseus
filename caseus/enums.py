@@ -503,3 +503,11 @@ class PlayerActivity(enum.Enum):
     # to not be added to the record of
     # players that can be acted on.
     Inert = 2
+
+@public
+class PlayerAction(enum.Enum):
+    Uncrouch       = 0
+    Crouch         = 1
+    Throw          = 2
+    ResetAnimation = 3
+    CastFishingRod = 4

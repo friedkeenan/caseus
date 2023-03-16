@@ -78,6 +78,12 @@ class SetFacingPacket(ServerboundPacket):
     facing_right: types.ByteBoolean
 
 @public
+class PlayerActionPacket(ServerboundPacket):
+    id = (4, 9)
+
+    animation: pak.Enum(types.Byte, enums.PlayerAction)
+
+@public
 class CreateShamanLabelPacket(ServerboundPacket):
     """Sent to the satellite server to create a shaman label.
 

@@ -3,6 +3,23 @@ from public import public
 from ..packet import ClientboundLegacyPacket
 
 from ... import enums
+from ... import game
+
+@public
+class AddAnchorsPacket(ClientboundLegacyPacket):
+    id = (5, 7)
+
+    def __init__(self, anchors):
+        self.anchors = list(anchors)
+
+    @classmethod
+    def _from_body_components(cls, components, *, ctx):
+        return cls(game.Anchor.from_description(description) for description in components)
+
+    def _body_components(self, *, ctx):
+        return [anchor.description for anchor in self.anchors]
+
+    __repr__ = ClientboundLegacyPacket.repr_for_attrs("anchors")
 
 @public
 class PlayerDiedPacket(ClientboundLegacyPacket):
