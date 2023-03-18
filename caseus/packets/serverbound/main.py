@@ -248,7 +248,7 @@ class MeepPacket(ServerboundPacket):
     y: types.LimitedLEB128
 
 @public
-class GetCollectablePacket(ServerboundPacket):
+class GetCollectiblePacket(ServerboundPacket):
     id = (8, 43)
 
     round_id:      types.Byte

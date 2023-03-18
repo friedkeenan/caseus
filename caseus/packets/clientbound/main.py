@@ -316,12 +316,12 @@ class SpawnStaticParticlePacket(ClientboundPacket):
     y:           types.Short
 
 @public
-class AddCollectablePacket(ClientboundPacket):
+class AddCollectiblePacket(ClientboundPacket):
     id = (5, 51)
 
     adventure_id:   types.UnsignedByte
     individual_id:  types.UnsignedShort # TODO: Better name?
-    collectable_id: types.UnsignedByte
+    Collectible_id: types.UnsignedByte
     x:              types.Short
     y:              types.Short
 
@@ -664,6 +664,63 @@ class SetCanMeepPacket(ClientboundPacket):
     id = (8, 39)
 
     enabled: types.Boolean
+
+@public
+class RaiseItemPacket(ClientboundPacket):
+    id = (8, 44)
+
+    class _Item(pak.Packet):
+        class Header(pak.Packet.Header):
+            id: types.Byte
+
+    class ShopItem(_Item):
+        id = 0
+
+        shop_item_id: types.Int
+
+    class ShamanObject(_Item):
+        id = 1
+
+        shaman_object_id: types.Int
+
+    class ConsumableReward(_Item):
+        id = 2
+
+        reward: pak.Enum(types.Int, enums.ConsumableReward)
+
+    class Badge(_Item):
+        id = 3
+
+        badge_id: types.Int
+
+    class InventoryItem(_Item):
+        id = 4
+
+        item_id: types.Int
+
+    class Image(_Item):
+        id = 5
+
+        image_path: types.String
+
+    class Cartouche(_Item):
+        id = 6
+
+        cartouche_id: types.Int
+
+    class Sprite(_Item):
+        id = 7
+
+        name:  types.String
+        frame: types.UnsignedByte
+
+    class ShopItemCustomization(_Item):
+        id = 8
+
+        shop_item_id: types.Int
+
+    session_id: types.Int
+    item:       _SimpleNestedPacketType(_Item)
 
 @public
 class SetIceCubePacket(ClientboundPacket):
@@ -1231,7 +1288,7 @@ class SetTitlePacket(ClientboundPacket):
     title_id: types.UnsignedShort
 
 @public
-class CollectableActionPacket(ClientboundPacket):
+class CollectibleActionPacket(ClientboundPacket):
     id = (100, 101)
 
     class _Action(pak.Packet):

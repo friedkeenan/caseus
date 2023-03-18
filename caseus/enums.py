@@ -511,3 +511,10 @@ class PlayerAction(enum.Enum):
     Throw          = 2
     ResetAnimation = 3
     CastFishingRod = 4
+
+@public
+class ConsumableReward(enum.Enum):
+    Cheese = 0
+    Heart  = 1
+    Fraise = 2
+    Chest  = 3

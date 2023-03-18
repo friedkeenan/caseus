@@ -130,11 +130,25 @@ class ObjectDescription(pak.Type):
             return self.shaman_object_id == -1
 
     class ServerboundDescription(_Description):
-        pass
+        def clientbound(self, *, add_if_missing=False):
+            return ObjectDescription.ClientboundDescription(
+                object_id        = self.object_id,
+                shaman_object_id = self.shaman_object_id,
+                x                = self.x,
+                y                = self.y,
+                velocity_x       = self.velocity_x,
+                velocity_y       = self.velocity_y,
+                rotation         = self.rotation,
+                angular_velocity = self.angular_velocity,
+                mice_collidable  = self.mice_collidable,
+                inactive         = self.inactive,
+
+                add_if_missing = add_if_missing,
+            )
 
     @dataclasses.dataclass
     class ClientboundDescription(_Description):
-        add_if_missing: bool  = False
+        add_if_missing: bool = False
 
     @classmethod
     def __init_subclass__(cls, **kwargs):
