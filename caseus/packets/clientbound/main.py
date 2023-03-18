@@ -321,7 +321,7 @@ class AddCollectiblePacket(ClientboundPacket):
 
     adventure_id:   types.UnsignedByte
     individual_id:  types.UnsignedShort # TODO: Better name?
-    Collectible_id: types.UnsignedByte
+    collectible_id: types.UnsignedByte
     x:              types.Short
     y:              types.Short
 
