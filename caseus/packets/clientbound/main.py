@@ -1207,9 +1207,9 @@ class ShamanObjectPreviewPacket(ClientboundPacket):
     x:                types.Short
     y:                types.Short
 
-    # If a rock with children, then the first child's rotation.
-    # Else the object's rotation.
-    rotation: types.Short
+    # If a rock with children, then the first child's angle.
+    # Else the object's angle.
+    angle: types.Short
 
     # Only non-empty if it's a rock.
     # Has format like '2;3,4;5,6' where '2' is the number
@@ -1356,6 +1356,16 @@ class UnsetShamanPacket(ClientboundPacket):
     id = (144, 7)
 
     session_id: types.Int
+
+@public
+class PlayShamanInvocationSoundPacket(ClientboundPacket):
+    id = (144, 9)
+
+    shaman_object_id: types.Byte
+
+    @property
+    def use_nail_sound(self):
+        return self.shaman_object_id == -1
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):

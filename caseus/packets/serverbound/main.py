@@ -146,6 +146,14 @@ class AddShamanObjectPacket(ServerboundPacket):
     session_id:        types.LimitedLEB128
 
 @public
+class UseIceCubePacket(ServerboundPacket):
+    id = (5, 21)
+
+    session_id: types.Int
+    x:          types.Short
+    y:          types.Short
+
+@public
 class CollectBonusPointPacket(ServerboundPacket):
     id = (5, 25)
 
@@ -564,9 +572,9 @@ class ShamanObjectPreviewPacket(ServerboundPacket):
     x:                types.LimitedLEB128
     y:                types.LimitedLEB128
 
-    # If a rock with children, then the first child's rotation.
-    # Else the object's rotation.
-    rotation: types.LimitedLEB128
+    # If a rock with children, then the first child's angle.
+    # Else the object's angle.
+    angle: types.LimitedLEB128
 
     # Only non-empty if it's a rock.
     # Has format like '2;3,4;5,6' where '2' is the number
