@@ -1227,6 +1227,15 @@ class RemoveShamanObjectPreviewPacket(ClientboundPacket):
     session_id: types.Int
 
 @public
+class SetRockPaperScissorsChoicesPacket(ClientboundPacket):
+    id = (100, 5)
+
+    first_session_id:  types.Int
+    first_choice:      pak.Enum(types.Byte, enums.RockPaperScissorsChoice)
+    second_session_id: types.Int
+    second_choice:     pak.Enum(types.Byte, enums.RockPaperScissorsChoice)
+
+@public
 class VisualConsumableInfoPacket(ClientboundPacket):
     id = (100, 40)
 

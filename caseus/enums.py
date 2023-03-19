@@ -1,4 +1,5 @@
 import enum
+import random
 
 from public import public
 
@@ -243,6 +244,27 @@ class Emote(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.NONE
+
+    @property
+    def is_multi(self):
+        return self in (
+            self.Highfive,
+            self.Hug,
+            self.Kissing,
+            self.RockPaperScissors,
+        )
+
+    @property
+    def partner_emote(self):
+        if self not in (
+            self.Highfive_1,
+            self.Hug_1,
+            self.Kissing_1,
+            self.RockPaperScissors_1,
+        ):
+            raise ValueError(f"Emote '{self}' has no partner emote")
+
+        return type(self)(self.value + 1)
 
 @public
 class Emoticon(enum.Enum):
@@ -518,3 +540,23 @@ class ConsumableReward(enum.Enum):
     Heart  = 1
     Fraise = 2
     Chest  = 3
+
+@public
+class RockPaperScissorsChoice(enum.Enum):
+    NONE = -1
+
+    Paper    = 0
+    Scissors = 1
+    Rock     = 2
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.NONE
+
+    @classmethod
+    def random(cls):
+        return random.choice([
+            cls.Paper,
+            cls.Scissors,
+            cls.Rock,
+        ])
