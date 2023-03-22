@@ -563,8 +563,15 @@ class Proxy(pak.AsyncPacketHandler):
 
     @pak.packet_listener(serverbound.KeySourcesPacket)
     async def _load_packet_key_sources(self, source, packet):
-        # At this point there is no server connection or satellite connection.
         source.secrets = source.secrets.copy(packet_key_sources=packet.packet_key_sources)
+        if source.destination is not None:
+            source.destination.secrets = source.secrets
+
+    @pak.packet_listener(serverbound.AuthKeyPacket)
+    async def _load_auth_key(self, source, packet):
+        source.secrets = source.secrets.copy(auth_key=packet.auth_key)
+        if source.destination is not None:
+            source.destination.secrets = source.secrets
 
     async def _connect_to_main_server(self, source, packet):
         address = packet.address

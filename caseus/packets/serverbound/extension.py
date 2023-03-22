@@ -11,6 +11,12 @@ class KeySourcesPacket(ServerboundExtensionPacket):
     packet_key_sources: types.UnsignedByte[None]
 
 @public
+class AuthKeyPacket(ServerboundExtensionPacket):
+    id = "auth_key"
+
+    auth_key: types.Int
+
+@public
 class MainServerInfoPacket(ServerboundExtensionPacket):
     id = "main_server_info"
 
