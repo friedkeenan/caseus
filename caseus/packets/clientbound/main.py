@@ -1087,10 +1087,10 @@ class LoadInventoryPacket(ClientboundPacket):
         "ItemInfo",
 
         item_id             = types.Short,
-        quantity            = types.UnsignedByte, # NOTE: If item id already received, then this quantity is just added.
-        priority            = types.UnsignedByte, # Only used for sorting.
-        unk_boolean_4       = types.Boolean,      # Marked as 'is_event' by aiotfm, but I think that's wrong.
-        can_use             = types.Boolean,      # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
+        quantity            = types.UnsignedShort, # NOTE: If item id already received, then this quantity is just added.
+        priority            = types.UnsignedByte,  # Only used for sorting.
+        unk_boolean_4       = types.Boolean,       # Marked as 'is_event' by aiotfm, but I think that's wrong.
+        can_use             = types.Boolean,       # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
         can_equip           = types.Boolean,
         unk_boolean_7       = types.Boolean,
         category            = pak.Enum(types.Byte, enums.ItemCategory),
