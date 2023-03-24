@@ -241,6 +241,12 @@ class SetWorldGravityPacket(ClientboundPacket):
     y: pak.ScaledInteger(types.Int, 1000)
 
 @public
+class SetRollingPacket(ClientboundPacket):
+    id = (5, 30)
+
+    session_id: types.Int
+
+@public
 class SetPlayerSizePacket(ClientboundPacket):
     id = (5, 31)
 
@@ -249,7 +255,7 @@ class SetPlayerSizePacket(ClientboundPacket):
     exclude_shaman: types.Boolean
 
 @public
-class FreezePacket(ClientboundPacket):
+class FreezePlayerPacket(ClientboundPacket):
     id = (5, 34)
 
     session_id: types.Int
@@ -1278,6 +1284,12 @@ class VisualConsumableInfoPacket(ClientboundPacket):
         hours:      types.Byte
 
     info: _SimpleNestedPacketType(_InfoPacket)
+
+@public
+class ImmobilizePlayerPacket(ClientboundPacket):
+    id = (100, 66)
+
+    immobilize: types.Boolean
 
 @public
 class LaunchHotAirBalloonPacket(ClientboundPacket):
