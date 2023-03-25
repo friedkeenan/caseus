@@ -1143,7 +1143,7 @@ class TradeStartPacket(ClientboundPacket):
 class UpdateTradeContentsPacket(ClientboundPacket):
     id = (31, 8)
 
-    export:     types.Boolean
+    for_self:   types.Boolean
     item_id:    types.Short
     increase:   types.Boolean
     quantity:   types.Byte
