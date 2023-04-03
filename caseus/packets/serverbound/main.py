@@ -51,7 +51,7 @@ class PlayerMovementPacket(ServerboundPacket):
     jumping_frame_index: types.Byte
     entered_portal:      pak.Enum(types.Byte, enums.Portal)
 
-    # Only present if transformed.
+    # Only present if transformed or rolling.
     rotation_info: pak.Optional(
         pak.Compound(
             "RotationInfo",

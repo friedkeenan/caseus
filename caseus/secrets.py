@@ -171,6 +171,8 @@ class Secrets:
 
     @classmethod
     def load_from_leaker_swf(cls, leaker_swf_path, *, debug_standalone="flashplayerdebugger"):
+        # NOTE: This could be made asynchronous, but.. I don't really see any benefit.
+
         if sys.platform not in ("linux", "win32", "darwin"):
             raise ValueError(f"Unsupported platform: '{sys.platform}'")
 
