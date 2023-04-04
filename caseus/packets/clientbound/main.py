@@ -332,6 +332,13 @@ class AddCollectiblePacket(ClientboundPacket):
     y:              types.Short
 
 @public
+class RemoveCollectiblePacket(ClientboundPacket):
+    id = (5, 53)
+
+    adventure_id:  types.UnsignedByte
+    individual_id: types.UnsignedShort
+
+@public
 class AddAdventureAreaPacket(ClientboundPacket):
     # TODO: I am not happy with this name.
 
