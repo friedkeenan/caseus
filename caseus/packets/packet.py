@@ -73,10 +73,9 @@ class GenericPacket(Packet):
 
     data: pak.RawByte[None]
 
-# TODO: When Python 3.7 support is dropped, make 'id' a positional-only parameter.
 @public
 @pak.util.cache
-def GenericPacketWithID(id, base_cls=Packet):
+def GenericPacketWithID(id, /, base_cls=Packet):
     r"""Generates a subclass of :class:`GenericPacket` with the specified ID.
 
     .. note::
@@ -191,10 +190,9 @@ class GenericTribullePacket(TribullePacket):
 
     data: pak.RawByte[None]
 
-# TODO: When Python 3.7 support is dropped, make 'id' a positional-only parameter.
 @public
 @pak.util.cache
-def GenericTribullePacketWithID(id, base_cls=TribullePacket):
+def GenericTribullePacketWithID(id, /, base_cls=TribullePacket):
     return type(f"GenericTribullePacketWithID({id})", (GenericTribullePacket, base_cls), dict(
         id = id,
     ))
@@ -313,10 +311,9 @@ class GenericLegacyPacket(LegacyPacket):
 
     __repr__ = LegacyPacket.repr_for_attrs("body")
 
-# TODO: When Python 3.7 support is dropped, make 'id' a positional-only parameter.
 @public
 @pak.util.cache
-def GenericLegacyPacketWithID(id, base_cls=LegacyPacket):
+def GenericLegacyPacketWithID(id, /, base_cls=LegacyPacket):
     return type(f"GenericLegacyPacketWithID({id})", (GenericLegacyPacket, base_cls), dict(
         id = id,
     ))
@@ -334,10 +331,9 @@ class ExtensionPacket(pak.Packet):
 class GenericExtensionPacket(ExtensionPacket):
     data: pak.RawByte[None]
 
-# TODO: When Python 3.7 support is dropped, make 'id' a positional-only parameter.
 @public
 @pak.util.cache
-def GenericExtensionPacketWithID(id, base_cls=ExtensionPacket):
+def GenericExtensionPacketWithID(id, /, base_cls=ExtensionPacket):
     return type(f"GenericExtensionPacketWithID({repr(id)})", (GenericExtensionPacket, base_cls), dict(
         id = id,
     ))
