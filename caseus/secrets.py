@@ -70,9 +70,6 @@ class XXTEACipher(Cipher):
 
 @public
 class XORCipher(Cipher):
-    def name(self):
-        return self._name
-
     def _cipher_data(self, data, key, *, fingerprint):
         key_len = len(key)
 
