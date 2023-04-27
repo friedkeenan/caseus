@@ -1428,7 +1428,7 @@ class NPCPlayEmotePacket(ClientboundPacket):
 
     name:     types.String
     emote:    pak.Enum(types.Short, enums.Emote)
-    emoticon: pak.Enum(types.Short, enums.Emoticon)
+    emoji_id: types.Short
 
 @public
 class LoadShamanObjectSpritesPacket(ClientboundPacket):
