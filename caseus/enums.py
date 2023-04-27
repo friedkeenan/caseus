@@ -267,21 +267,6 @@ class Emote(enum.Enum):
         return type(self)(self.value + 1)
 
 @public
-class Emoticon(enum.Enum):
-    NONE = -1
-
-    Smiley    = 0
-    Sad       = 1
-    Tongue    = 2
-    Angry     = 3
-    BigSmiley = 4
-    Shades    = 5
-    Blush     = 6
-    Sweatdrop = 7
-    Derp      = 8
-    OMG       = 9
-
-@public
 class VictoryType(enum.Enum):
     Normal    = 0
     Defilante = 1

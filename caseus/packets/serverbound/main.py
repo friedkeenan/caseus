@@ -239,10 +239,10 @@ class PlayEmotePacket(ServerboundPacket):
         return self.partner_session_id != -1
 
 @public
-class ShowEmoticonPacket(ServerboundPacket):
+class ShowEmojiPacket(ServerboundPacket):
     id = (8, 5)
 
-    emoticon: pak.Enum(types.Byte, enums.Emoticon)
+    emoji_id: types.UnsignedShort
 
 @public
 class CollectEasterEggPacket(ServerboundPacket):

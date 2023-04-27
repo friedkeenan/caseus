@@ -479,11 +479,21 @@ class MovePlayerPacket(ClientboundPacket):
     velocity_relative: types.ByteBoolean
 
 @public
-class ShowEmoticonPacket(ClientboundPacket):
+class ShowEmojiPacket(ClientboundPacket):
     id = (8, 5)
 
+    IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_smiley/{emoji_id}.png"
+
     session_id: types.Int
-    emoticon:   pak.Enum(types.Byte, enums.Emoticon)
+    emoji_id:   types.UnsignedShort
+
+    @property
+    def should_remove(self):
+        return self.emoji_id == -1
+
+    @property
+    def image_url(self):
+        return self.IMAGE_URL_FMT.format(emoji_id=self.emoji_id)
 
 @public
 class PlayerVictoryPacket(ClientboundPacket):
@@ -1538,6 +1548,19 @@ class SetNewsPopupFlyerPacket(ClientboundPacket):
         """
 
         return self.IMAGE_URL_FMT.format(image_name=self.image_name)
+
+@public
+class AvailableEmojisPacket(ClientboundPacket):
+    id = (144, 44)
+
+    DEFAULT_EMOJI_IDS = range(1, 10 + 1)
+
+    # Emojis besides the default ones.
+    extra_emoji_ids: types.LimitedLEB128[types.LimitedLEB128]
+
+    @property
+    def available_emoji_ids(self):
+        return [*self.DEFAULT_EMOJI_IDS, *self.extra_emoji_ids]
 
 @public
 class SetLanguagePacket(ClientboundPacket):
