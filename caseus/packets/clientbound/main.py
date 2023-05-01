@@ -658,6 +658,61 @@ class OldNekodancerProfilePacket(BasePlayerInformationPacket):
     unk_byte_4: types.Byte
 
 @public
+class LoadShopPacket(ClientboundPacket):
+    id = (8, 20)
+
+    cheese:      types.Int
+    fraises:     types.Int
+    outfit_code: types.String # TODO: Parse outfit.
+    owned_items: types.OwnedShopItemDescription[types.Int]
+
+    items: pak.Compound(
+        "ItemInfo",
+
+        category_id = types.UnsignedShort,
+        item_id     = types.UnsignedShort,
+        num_colors  = types.Byte,
+        is_new      = types.Boolean,
+        info        = pak.Enum(types.Byte, enums.ShopItemInfo),
+        cheese_cost = types.Int,
+        fraise_cost = types.Int,
+        needed_item = pak.Optional(types.Int, types.Boolean)
+    )[types.Int]
+
+    outfits: pak.Compound(
+        "OutfitInfo",
+
+        outfit_id   = types.UnsignedShort,
+        outfit_code = types.String, # TODO: Parse outfit.
+        background  = pak.Enum(types.Byte, enums.FashionSquadOutfitBackground),
+    )[types.Byte]
+
+    owned_outfit_codes:   types.String[types.Short] # TODO: Parse outfit.
+    owned_shaman_objects: types.OwnedShamanObjectDescription[types.Short]
+
+    shaman_objects: pak.Compound(
+        "ShamanObjectInfo",
+
+        shaman_object_id = types.Int,
+        num_colors       = types.Byte,
+        is_new           = types.Boolean,
+        flags            = pak.Enum(types.Byte, enums.ShopItemInfo),
+        cheese_cost      = types.Int,
+        fraise_cost      = types.Short,
+    )[types.Short]
+
+    emotes: pak.Compound(
+        "EmoteInfo",
+
+        emote_id    = types.LimitedLEB128,
+        cheese_cost = types.LimitedLEB128,
+        fraise_cost = types.LimitedLEB128,
+        is_new      = types.Boolean,
+    )[types.LimitedLEB128]
+
+    owned_emote_ids: types.LimitedLEB128[types.LimitedLEB128]
+
+@public
 class AddNPCPacket(ClientboundPacket):
     id = (8, 30)
 
@@ -801,6 +856,24 @@ class Unknown_20_4_Packet(ClientboundPacket):
     )[types.Short]
 
 @public
+class ShopSpecialOfferPacket(ClientboundPacket):
+    id = (20, 3)
+
+    is_sale:             types.Boolean
+    is_shaman_item:      types.Boolean
+    item_id:             types.Int
+    enable:              types.Boolean
+    timestamp:           types.Int
+    discount_percentage: types.Byte
+
+@public
+class ShopCurrencyPacket(ClientboundPacket):
+    id = (20, 15)
+
+    cheese:  types.Int
+    fraises: types.Int
+
+@public
 class LoginSuccessPacket(ClientboundPacket):
     id = (26, 2)
 
@@ -904,6 +977,12 @@ class PlayerAttackPacket(ClientboundPacket):
     session_id: types.Int
 
 @public
+class SetFraisesVisibilityPacket(ClientboundPacket):
+    id = (26, 10)
+
+    visible: types.Boolean
+
+@public
 class PlayerDamagedPacket(ClientboundPacket):
     id = (26, 11)
 
@@ -967,6 +1046,12 @@ class LoadAndExecutePacket(ClientboundPacket):
     id = (28, 1)
 
     swf_data: pak.RawByte[None]
+
+@public
+class SetShopBaseTimestampPacket(ClientboundPacket):
+    id = (28, 2)
+
+    timestamp: types.Int
 
 @public
 class TranslatedGeneralMessagePacket(ClientboundPacket):

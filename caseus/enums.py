@@ -509,6 +509,10 @@ class PlayerActivity(enum.Enum):
     # This activity will cause the player
     # to not be added to the record of
     # players that can be acted on.
+    #
+    # NOTE: Named the same as the 'Hidden'
+    # info for shop items. Maybe this should
+    # be named 'Hidden' as well?
     Inert = 2
 
 @public
@@ -545,3 +549,19 @@ class RockPaperScissorsChoice(enum.Enum):
             cls.Scissors,
             cls.Rock,
         ])
+
+@public
+class ShopItemInfo(enum.Enum):
+    NONE = 0
+
+    Hidden = 1
+
+    Unknown10 = 10
+    Unknown11 = 11
+    Unknown12 = 12
+
+    Collector = 13
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.NONE

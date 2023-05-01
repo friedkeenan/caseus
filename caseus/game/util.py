@@ -7,9 +7,19 @@ def flag_url(flag_code, size):
 @public
 def shaman_object_id_parts(shaman_object_id):
     if shaman_object_id > 9999:
-        return (shaman_object_id - 10_000) // 10_000, (shaman_object_id - 10_000) % 10_000
+        return divmod(shaman_object_id - 10_000, 10_000)
 
     if shaman_object_id > 99:
-        return shaman_object_id // 100, shaman_object_id % 100
+        return divmod(shaman_object_id, 100)
 
     return shaman_object_id, 0
+
+@public
+def shop_item_id_parts(shop_item_id):
+    if shop_item_id > 9999:
+        return divmod(shop_item_id - 10_000, 10_000)
+
+    if shop_item_id > 99:
+        return divmod(shop_item_id, 100)
+
+    return 0, shop_item_id

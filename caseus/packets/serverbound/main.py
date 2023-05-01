@@ -249,6 +249,10 @@ class CollectEasterEggPacket(ServerboundPacket):
     id = (8, 6)
 
 @public
+class LoadShopPacket(ServerboundPacket):
+    id = (8, 20)
+
+@public
 class MeepPacket(ServerboundPacket):
     id = (8, 39)
 
@@ -307,6 +311,10 @@ class AdventureActionPacket(ServerboundPacket):
 
     def bool_argument(self, index):
         return self.arguments[index] == "true"
+
+@public
+class ShopCurrencyPacket(ServerboundPacket):
+    id = (20, 15)
 
 @public
 class LoginPacket(ServerboundPacket):
@@ -500,7 +508,7 @@ class PickColorPacket(ServerboundPacket):
     color:           types.Int
 
 @public
-class OpenInventoryPacket(ServerboundPacket):
+class LoadInventoryPacket(ServerboundPacket):
     id = (31, 1)
 
 @public

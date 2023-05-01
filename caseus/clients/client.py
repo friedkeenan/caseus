@@ -251,7 +251,7 @@ class Client(pak.AsyncPacketHandler):
         except asyncio.CancelledError:
             return
 
-    async def on_start(self):
+    async def handshake(self):
         language = self.language
         if language == "nb":
             # The game changes the language from 'Capabilities'
@@ -273,6 +273,9 @@ class Client(pak.AsyncPacketHandler):
             referee                     = self.REFEREE,
             milliseconds_since_start    = self.TIME_TILL_HANDSHAKE,
         )
+
+    async def on_start(self):
+        await self.handshake()
 
         keep_alive_task       = asyncio.create_task(self._keep_alive())
         satellite_listen_task = asyncio.create_task(self._satellite_listen())

@@ -1,4 +1,5 @@
 import dataclasses
+import typing
 import pak
 
 from public import *
@@ -238,4 +239,79 @@ class ObjectDescription(pak.Type):
             cls.__name__,
 
             Description = cls.ClientboundDescription,
+        )
+
+@public
+class OwnedShopItemDescription(pak.Type):
+    @dataclasses.dataclass
+    class Description:
+        unique_id: int
+        colors:    typing.Optional[list]
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        num_colors = Byte.unpack(buf, ctx=ctx)
+        unique_id  = Int.unpack(buf, ctx=ctx)
+
+        if num_colors == 0:
+            colors = None
+        else:
+            # NOTE: Our use of 'range' will handle non-positive lengths.
+            colors = [Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
+
+        return cls.Description(unique_id, colors)
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        if value.colors is None:
+            packed_colors_len = Byte.pack(0, ctx=ctx)
+            packed_colors     = b""
+        else:
+            packed_colors_len = Byte.pack(len(value.colors) + 1, ctx=ctx)
+            packed_colors     = b"".join(
+                Int.pack(color) for color in value.colors
+            )
+
+        return (
+            packed_colors_len                  +
+            Int.pack(value.unique_id, ctx=ctx) +
+            packed_colors
+        )
+
+@public
+class OwnedShamanObjectDescription(pak.Type):
+    @dataclasses.dataclass
+    class Description:
+        shaman_object_id: int
+        equipped:         bool
+        colors:           typing.Optional[list]
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        shaman_object_id = Short.unpack(buf, ctx=ctx)
+        equipped = Boolean.unpack(buf, ctx=ctx)
+        num_colors = Byte.unpack(buf, ctx=ctx)
+
+        if num_colors == 0:
+            colors = None
+        else:
+            # NOTE: Our use of 'range' will handle non-positive lengths.
+            colors = [Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
+
+        return cls.Description(shaman_object_id, equipped, colors)
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        if value.colors is None:
+            packed_colors = Byte.pack(0, ctx=ctx)
+        else:
+            packed_colors = Byte.pack(len(value.colors) + 1, ctx=ctx) + b"".join(
+                Int.pack(color) for color in value.colors
+            )
+
+        return (
+            Short.pack(value.shaman_object_id, ctx=ctx) +
+            Boolean.pack(value.equipped,       ctx=ctx) +
+
+            packed_colors
         )
