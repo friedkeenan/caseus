@@ -844,6 +844,17 @@ class AdventureActionPacket(ClientboundPacket):
         return self.arguments[index] == "true"
 
 @public
+class ShopSpecialOfferPacket(ClientboundPacket):
+    id = (20, 3)
+
+    is_sale:             types.Boolean
+    is_shaman_item:      types.Boolean
+    item_id:             types.Int
+    enable:              types.Boolean
+    timestamp:           types.Int
+    discount_percentage: types.Byte
+
+@public
 class Unknown_20_4_Packet(ClientboundPacket):
     id = (20, 4)
 
@@ -854,17 +865,6 @@ class Unknown_20_4_Packet(ClientboundPacket):
         unk_int_2   = types.Int,
         class_names = types.String[types.Byte],
     )[types.Short]
-
-@public
-class ShopSpecialOfferPacket(ClientboundPacket):
-    id = (20, 3)
-
-    is_sale:             types.Boolean
-    is_shaman_item:      types.Boolean
-    item_id:             types.Int
-    enable:              types.Boolean
-    timestamp:           types.Int
-    discount_percentage: types.Byte
 
 @public
 class ShopCurrencyPacket(ClientboundPacket):
@@ -994,9 +994,9 @@ class AccountErrorPacket(ClientboundPacket):
 
     # TODO: Enum? Might not be feasible if it
     # has different meanings in different contexts.
-    error_code: types.Byte
+    error_code:         types.Byte
+    suggested_username: types.String
 
-    unk_string_2: types.String
     unk_string_3: types.String
 
 @public

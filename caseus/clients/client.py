@@ -24,8 +24,6 @@ class AccountError(Exception):
 
 @public
 class Client(pak.AsyncPacketHandler):
-    MAIN_SERVER_PORTS = [11801, 12801, 13801, 14801]
-
     # NOTE: By default, we act like a Steam client.
     # These values are directly taken from such.
 
@@ -206,7 +204,7 @@ class Client(pak.AsyncPacketHandler):
         raise ValueError(f"Unable to connect to address '{address}' on ports {ports}")
 
     async def startup(self):
-        reader, writer = await self.open_streams(self.secrets.server_address, self.MAIN_SERVER_PORTS)
+        reader, writer = await self.open_streams(self.secrets.server_address, self.secrets.server_ports)
 
         self.main = self.Connection(self, reader=reader, writer=writer)
 

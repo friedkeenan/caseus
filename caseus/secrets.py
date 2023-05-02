@@ -88,6 +88,7 @@ public(XOR = XORCipher("msg"))
 class Secrets:
     _FIELDS = (
         "server_address",
+        "server_ports",
         "version",
         "connection_token",
         "auth_key",
@@ -99,16 +100,21 @@ class Secrets:
         self,
         *,
         server_address               = None,
+        server_ports                 = None,
         version                      = None,
         connection_token             = None,
         auth_key                     = None,
         packet_key_sources           = None,
         client_verification_template = None,
     ):
+        if server_ports is not None:
+            server_ports = tuple(server_ports)
+
         if packet_key_sources is not None:
             packet_key_sources = tuple(packet_key_sources)
 
         self.server_address               = server_address
+        self.server_ports                 = server_ports
         self.version                      = version
         self.connection_token             = connection_token
         self.auth_key                     = auth_key
@@ -148,6 +154,9 @@ class Secrets:
         # use a 'match' statement here.
         if name == "Server Address":
             return "server_address", value
+
+        if name == "Server Ports":
+            return "server_ports", [int(x) for x in value.split(",")]
 
         if name == "Game Version":
             return "version", int(value)

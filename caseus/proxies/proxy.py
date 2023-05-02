@@ -21,8 +21,6 @@ from .. import types
 
 @public
 class Proxy(pak.AsyncPacketHandler):
-    MAIN_SERVER_PORTS_FALLBACK = [11801, 12801, 13801, 14801]
-
     CORRECTED_LOADER_SIZE = 0x7EE88
 
     # NOTE: Be careful when sending packets to the server with this.
@@ -518,8 +516,8 @@ class Proxy(pak.AsyncPacketHandler):
 
         self._satellite_packets.remove((original_packet, main_client))
 
-        source.main       = source.Pair(client=main_client, server=main_client.destination)
-        source.secrets    = main_client.secrets
+        source.main    = source.Pair(client=main_client, server=main_client.destination)
+        source.secrets = main_client.secrets
 
         server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
@@ -578,12 +576,7 @@ class Proxy(pak.AsyncPacketHandler):
         if self.main_server_address is not None:
             address = self.main_server_address
 
-        ports = packet.ports
-        if self.main_server_ports is not None:
-            ports = self.main_server_ports
-
-        elif len(ports) == 0:
-            ports = self.MAIN_SERVER_PORTS_FALLBACK
+        ports = packet.ports if self.main_server_ports is None else self.main_server_ports
 
         server_reader, server_writer = await self.open_streams(address, ports)
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
