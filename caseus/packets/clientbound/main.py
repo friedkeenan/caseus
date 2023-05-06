@@ -633,8 +633,14 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
 
     # NOTE: If the player is not online, then
     # their adventure points will not be displayed.
-    is_online:        types.Boolean
-    adventure_points: types.Int
+    #
+    # This is because the server only loads a valid
+    # value for adventure points if the player is
+    # online. This means that you could also think
+    # of this field as 'is_online' but that doesn't
+    # seem to be the explicit intention.
+    display_adventure_points: types.Boolean
+    adventure_points:         types.Int
 
 @public
 class OldNekodancerProfilePacket(BasePlayerInformationPacket):
