@@ -628,10 +628,13 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
         unlocked_badge_id = types.Short,
     )[types.Byte]
 
-    cartouche_id:             types.UnsignedByte
-    cartouche_id_list:        types.UnsignedByte[types.UnsignedByte]
-    display_adventure_points: types.Boolean
-    adventure_points:         types.Int
+    cartouche_id:      types.UnsignedByte
+    cartouche_id_list: types.UnsignedByte[types.UnsignedByte]
+
+    # NOTE: If the player is not online, then
+    # their adventure points will not be displayed.
+    is_online:        types.Boolean
+    adventure_points: types.Int
 
 @public
 class OldNekodancerProfilePacket(BasePlayerInformationPacket):
