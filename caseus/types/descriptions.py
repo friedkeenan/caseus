@@ -111,6 +111,22 @@ public(
     )
 )
 
+public(
+    RoomPropertiesDescription = pak.Compound(
+        "RoomPropertiesDescription",
+
+        without_shaman_skills        = Boolean,
+        without_physical_consumables = Boolean,
+        without_adventure_maps       = Boolean,
+        with_mice_collisions         = Boolean,
+        without_fall_damage          = Boolean,
+        round_duration_percentage    = UnsignedByte,
+        mice_weight_percentage       = Int,
+        max_players                  = Short,
+        map_rotation                 = pak.Enum(Byte, enums.MapCategory)[UnsignedByte],
+    )
+)
+
 @public
 class ObjectDescription(pak.Type):
     @dataclasses.dataclass

@@ -404,7 +404,20 @@ class HoleType(enum.Enum):
 
 @public
 class Currency(enum.Enum):
-    Cheese = 0
+    Cheese  = 0
+    Fraises = 1
+
+    # Old event-specific currencies.
+    Hearts = 2
+    Eggs   = 3
+
+    # From Bouboum.
+    Hazelnuts = 4
+
+    # NOTE: The game seemingly expects
+    # to be able to load an image for a
+    # currency with value '5', however
+    # I cannot seem to find any such image.
 
     Unknown = -1
 

@@ -705,21 +705,21 @@ class LoadShopPacket(ClientboundPacket):
         shaman_object_id = types.Int,
         num_colors       = types.Byte,
         is_new           = types.Boolean,
-        flags            = pak.Enum(types.Byte, enums.ShopItemInfo),
+        info             = pak.Enum(types.Byte, enums.ShopItemInfo),
         cheese_cost      = types.Int,
         fraise_cost      = types.Short,
     )[types.Short]
 
-    emotes: pak.Compound(
-        "EmoteInfo",
+    emojis: pak.Compound(
+        "EmojiInfo",
 
-        emote_id    = types.LimitedLEB128,
+        emoji_id    = types.LimitedLEB128,
         cheese_cost = types.LimitedLEB128,
         fraise_cost = types.LimitedLEB128,
         is_new      = types.Boolean,
     )[types.LimitedLEB128]
 
-    owned_emote_ids: types.LimitedLEB128[types.LimitedLEB128]
+    owned_emoji_ids: types.LimitedLEB128[types.LimitedLEB128]
 
 @public
 class AddNPCPacket(ClientboundPacket):
@@ -1498,6 +1498,12 @@ class PlayShamanInvocationSoundPacket(ClientboundPacket):
     @property
     def use_nail_sound(self):
         return self.shaman_object_id == -1
+
+@public
+class RoomPropertiesPacket(ClientboundPacket):
+    id = (144, 18)
+
+    properties: types.RoomPropertiesDescription
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):

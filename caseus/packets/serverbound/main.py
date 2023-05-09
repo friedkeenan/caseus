@@ -182,8 +182,14 @@ class JoinRoomPacket(ServerboundPacket):
     # True if using the 'salonauto' command.
     auto: types.Boolean
 
-    # NOTE: The game has code for adding more data
-    # onto this packet, however it is never used.
+    customization: pak.Optional(
+        pak.Compound(
+            "CustomizationInfo",
+
+            password   = types.String,
+            properties = types.RoomPropertiesDescription,
+        )
+    )
 
 @public
 class RoomPasswordPacket(ServerboundPacket):
@@ -315,6 +321,14 @@ class AdventureActionPacket(ServerboundPacket):
 @public
 class ShopCurrencyPacket(ServerboundPacket):
     id = (20, 15)
+
+@public
+class BuyShopItemPacket(ServerboundPacket):
+    id = (20, 19)
+
+    unique_id: types.Int
+    currency:  pak.Enum(types.Byte, enums.Currency)
+    cost:      types.Short
 
 @public
 class LoginPacket(ServerboundPacket):
