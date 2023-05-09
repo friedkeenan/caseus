@@ -119,7 +119,7 @@ public(
         without_physical_consumables = Boolean,
         without_adventure_maps       = Boolean,
         with_mice_collisions         = Boolean,
-        without_fall_damage          = Boolean,
+        with_fall_damage             = Boolean,
         round_duration_percentage    = UnsignedByte,
         mice_weight_percentage       = Int,
         max_players                  = Short,
