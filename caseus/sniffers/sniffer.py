@@ -13,7 +13,6 @@ from scapy.sendrecv import AsyncSniffer
 
 from ..packets import (
     Packet,
-    GenericPacketWithID,
     ServerboundPacket,
     ClientboundPacket,
     serverbound,
@@ -99,7 +98,7 @@ class Sniffer(pak.AsyncPacketHandler):
 
             packet_cls = ClientboundPacket.subclass_with_id(header.id, ctx=self.ctx)
             if packet_cls is None:
-                packet_cls = GenericPacketWithID(header.id, ClientboundPacket)
+                packet_cls = ClientboundPacket.GenericWithID(header.id)
 
             return packet_cls.unpack(buf, ctx=self.ctx)
 
@@ -117,12 +116,12 @@ class Sniffer(pak.AsyncPacketHandler):
 
             packet_cls = ServerboundPacket.subclass_with_id(header.id, ctx=self.ctx)
             if packet_cls is None:
-                packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
+                packet_cls = ServerboundPacket.GenericWithID(header.id)
 
             if self.should_decipher:
                 buf = packet_cls.decipher_data(buf, secrets=self.secrets)
             elif packet_cls.CIPHER is not None:
-                packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
+                packet_cls = ServerboundPacket.GenericWithID(header.id)
 
             return packet_cls.unpack_with_fingerprint(header.fingerprint, buf, ctx=self.ctx)
 

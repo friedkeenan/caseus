@@ -6,11 +6,7 @@ from aioconsole import aprint
 
 from .proxy import Proxy
 
-from ..packets import (
-    Packet,
-    GenericPacket,
-    ServerboundPacket,
-)
+from ..packets import Packet, ServerboundPacket
 
 @public
 class LoggingProxy(Proxy):
@@ -38,7 +34,7 @@ class LoggingProxy(Proxy):
         await aprint(f"{connection}: {bound}: {packet}")
 
     async def _log_specific_packets(self, source, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(source, packet)

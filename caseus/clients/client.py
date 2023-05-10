@@ -7,7 +7,6 @@ from public import public
 
 from ..packets import (
     ClientboundPacket,
-    GenericPacketWithID,
     serverbound,
     clientbound,
 )
@@ -90,7 +89,7 @@ class Client(pak.AsyncPacketHandler):
 
             packet_cls = ClientboundPacket.subclass_with_id(header.id, ctx=self.ctx)
             if packet_cls is None:
-                packet_cls = GenericPacketWithID(header.id, ClientboundPacket)
+                packet_cls = ClientboundPacket.GenericWithID(header.id)
 
             return packet_cls.unpack(buf, ctx=self.ctx)
 

@@ -6,7 +6,7 @@ from public import public
 
 from .client import Client
 
-from ..packets import Packet, GenericPacket
+from ..packets import Packet
 
 @public
 class LoggingClient(Client):
@@ -44,7 +44,7 @@ class LoggingClient(Client):
         await self._log_packet(server, packet, bound="Clientbound")
 
     async def _log_specific_incoming_packets(self, server, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(server, packet, bound="Clientbound")
@@ -53,7 +53,7 @@ class LoggingClient(Client):
         await self._log_packet(server, packet, bound="Serverbound")
 
     async def _log_specific_outgoing_packets(self, server, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(server, packet, bound="Serverbound")

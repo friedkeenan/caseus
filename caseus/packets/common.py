@@ -2,12 +2,6 @@ import pak
 
 from public import public
 
-from .packet import (
-    GenericLegacyPacketWithID,
-    GenericTribullePacketWithID,
-    GenericExtensionPacketWithID,
-)
-
 from .. import types
 
 @public
@@ -23,7 +17,7 @@ class _NestedLegacyType(pak.Type):
 
         packet_cls = cls.parent_cls.subclass_with_id(id, ctx=ctx.packet_ctx)
         if packet_cls is None:
-            packet_cls = GenericLegacyPacketWithID(id, cls.parent_cls)
+            packet_cls = cls.parent_cls.GenericWithID(id)
 
         return packet_cls.from_body_components(components[1:], ctx=ctx.packet_ctx)
 
@@ -58,7 +52,7 @@ class _NestedTribulleType(pak.Type):
 
         packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
         if packet_cls is None:
-            packet_cls = GenericTribullePacketWithID(header.id, cls.parent_cls)
+            packet_cls = cls.parent_cls.GenericWithID(header.id)
 
         return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
 
@@ -82,7 +76,7 @@ class _NestedExtensionType(pak.Type):
 
         packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
         if packet_cls is None:
-            packet_cls = GenericExtensionPacketWithID(header.id, cls.parent_cls)
+            packet_cls = cls.parent_cls.GenericWithID(header.id)
 
         return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
 

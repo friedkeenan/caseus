@@ -8,7 +8,6 @@ from public import public
 
 from ..packets import (
     Packet,
-    GenericPacketWithID,
     ServerboundPacket,
     ClientboundPacket,
     serverbound,
@@ -210,7 +209,7 @@ class Proxy(pak.AsyncPacketHandler):
 
             packet_cls = ClientboundPacket.subclass_with_id(header.id, ctx=self.ctx)
             if packet_cls is None:
-                packet_cls = GenericPacketWithID(header.id, ClientboundPacket)
+                packet_cls = ClientboundPacket.GenericWithID(header.id)
 
             return packet_cls.unpack(buf, ctx=self.ctx)
 
@@ -259,12 +258,12 @@ class Proxy(pak.AsyncPacketHandler):
 
             packet_cls = ServerboundPacket.subclass_with_id(header.id, ctx=self.ctx)
             if packet_cls is None:
-                packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
+                packet_cls = ServerboundPacket.GenericWithID(header.id)
 
             if self.secrets.packet_key_sources is not None:
                 buf = packet_cls.decipher_data(buf, ctx=self.ctx, fingerprint=header.fingerprint)
             elif packet_cls.CIPHER is not None:
-                packet_cls = GenericPacketWithID(header.id, ServerboundPacket)
+                packet_cls = ServerboundPacket.GenericWithID(header.id)
 
             packet = packet_cls.unpack_with_fingerprint(header.fingerprint, buf, ctx=self.ctx)
 

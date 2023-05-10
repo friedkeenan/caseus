@@ -4,7 +4,7 @@ from public import public
 
 from .server import MinimalServer
 
-from ..packets import Packet, GenericPacket
+from ..packets import Packet
 
 @public
 class LoggingServer(MinimalServer):
@@ -38,7 +38,7 @@ class LoggingServer(MinimalServer):
         await self._log_packet(client, packet, bound="Serverbound")
 
     async def _log_specific_incoming_packets(self, client, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(client, packet, bound="Serverbound")
@@ -47,7 +47,7 @@ class LoggingServer(MinimalServer):
         await self._log_packet(client, packet, bound="Clientbound")
 
     async def _log_specific_outgoing_packets(self, client, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(client, packet, bound="Clientbound")

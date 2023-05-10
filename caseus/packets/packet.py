@@ -68,37 +68,6 @@ class Packet(pak.Packet):
         id: PacketCode
 
 @public
-class GenericPacket(Packet):
-    """A generic Transformice :class:`Packet`."""
-
-    data: pak.RawByte[None]
-
-@public
-@pak.util.cache
-def GenericPacketWithID(id, /, base_cls=Packet):
-    r"""Generates a subclass of :class:`GenericPacket` with the specified ID.
-
-    .. note::
-
-        This function is cached so that calling it with the same ID
-        will yield types with the same object identity.
-
-    Parameters
-    ----------
-    id : pair of :class:`int`\s
-        The ID of the generated :class:`GenericPacket`.
-
-    Returns
-    -------
-    subclass of :class:`GenericPacket`
-        The generated :class:`GenericPacket`.
-    """
-
-    return type(f"GenericPacketWithID({id})", (GenericPacket, base_cls), dict(
-        id = id,
-    ))
-
-@public
 class ServerboundPacket(Packet):
     r"""A serverbound :class:`Packet`.
 
@@ -185,19 +154,6 @@ class TribullePacket(pak.Packet):
         id: types.Short
 
 @public
-class GenericTribullePacket(TribullePacket):
-    """A generic :class:`TribullePacket`."""
-
-    data: pak.RawByte[None]
-
-@public
-@pak.util.cache
-def GenericTribullePacketWithID(id, /, base_cls=TribullePacket):
-    return type(f"GenericTribullePacketWithID({id})", (GenericTribullePacket, base_cls), dict(
-        id = id,
-    ))
-
-@public
 class ServerboundTribullePacket(TribullePacket):
     r"""A serverbound :class:`TribullePacket`.
 
@@ -235,6 +191,15 @@ class LegacyPacket(pak.Packet, abc.ABC):
     # machinery.
 
     Context = _GeneralPacketContext
+
+    @classmethod
+    @pak.util.cache
+    def GenericWithID(cls, id):
+        return type(f"{cls.__qualname__}.GenericWithID({repr(id)})", (_GenericLegacyPacket, cls), dict(
+            id = id,
+
+            __module__ = cls.__module__,
+        ))
 
     @classmethod
     @abc.abstractmethod
@@ -279,6 +244,19 @@ class LegacyPacket(pak.Packet, abc.ABC):
 
         return genned_repr
 
+class _GenericLegacyPacket(LegacyPacket):
+        def __init__(self, body):
+            self.body = body
+
+        @classmethod
+        def _from_body_components(cls, components, *, ctx):
+            return cls(components)
+
+        def _body_components(self, *, ctx):
+            return self.body
+
+        __repr__ = LegacyPacket.repr_for_attrs("body")
+
 @public
 class ServerboundLegacyPacket(LegacyPacket):
     r"""A serverbound :class:`LegacyPacket`.
@@ -298,27 +276,6 @@ class ClientboundLegacyPacket(LegacyPacket):
     """
 
 @public
-class GenericLegacyPacket(LegacyPacket):
-    def __init__(self, body):
-        self.body = body
-
-    @classmethod
-    def _from_body_components(cls, components, *, ctx):
-        return cls(components)
-
-    def _body_components(self, *, ctx):
-        return self.body
-
-    __repr__ = LegacyPacket.repr_for_attrs("body")
-
-@public
-@pak.util.cache
-def GenericLegacyPacketWithID(id, /, base_cls=LegacyPacket):
-    return type(f"GenericLegacyPacketWithID({id})", (GenericLegacyPacket, base_cls), dict(
-        id = id,
-    ))
-
-@public
 class ExtensionPacket(pak.Packet):
     """A packet not contained in the vanilla protocol."""
 
@@ -326,17 +283,6 @@ class ExtensionPacket(pak.Packet):
 
     class Header(pak.Packet.Header):
         id: types.String
-
-@public
-class GenericExtensionPacket(ExtensionPacket):
-    data: pak.RawByte[None]
-
-@public
-@pak.util.cache
-def GenericExtensionPacketWithID(id, /, base_cls=ExtensionPacket):
-    return type(f"GenericExtensionPacketWithID({repr(id)})", (GenericExtensionPacket, base_cls), dict(
-        id = id,
-    ))
 
 @public
 class ServerboundExtensionPacket(ExtensionPacket):

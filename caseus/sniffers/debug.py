@@ -1,14 +1,12 @@
+import pak
+
 from public import public
 
 from aioconsole import aprint
 
 from .sniffer import Sniffer
 
-from ..packets import (
-    Packet,
-    GenericPacket,
-    ServerboundPacket,
-)
+from ..packets import Packet, ServerboundPacket
 
 @public
 class LoggingSniffer(Sniffer):
@@ -31,7 +29,7 @@ class LoggingSniffer(Sniffer):
         await aprint(f"{server.name}: {bound}: {packet}")
 
     async def _log_specific_packets(self, server, packet):
-        if isinstance(packet, GenericPacket):
+        if isinstance(packet, pak.GenericPacket):
             return
 
         await self._log_packet(server, packet)
