@@ -1222,7 +1222,7 @@ class UpdateInventoryPacket(ClientboundPacket):
     id = (31, 2)
 
     item_id:  types.Short
-    quantity: types.UnsignedByte
+    quantity: types.UnsignedShort
 
 @public
 class UseItemPacket(ClientboundPacket):
