@@ -3,15 +3,16 @@ r"""Clientbound :class:`~.Packet`\s."""
 # TODO: Split this file up. Seriously.
 
 import dataclasses
+import typing
 import pak
 
 from public import public
 
 from ..common import (
     _NestedLegacyType,
-    _NestedTribulleType,
-    _NestedExtensionType,
-    _SimpleNestedPacketType,
+    PlayerInfo,
+    RoomProperties,
+    ClientboundObjectInfo,
 )
 
 from ..packet import (
@@ -35,11 +36,16 @@ class LegacyWrapperPacket(ClientboundPacket):
 class ObjectSyncPacket(ClientboundPacket):
     id = (4, 3)
 
-    objects: types.ObjectDescription(serverbound=False)[None]
+    objects: ClientboundObjectInfo[None]
 
 @public
 class PlayerMovementPacket(ClientboundPacket):
     id = (4, 4)
+
+    class RotationInfo(pak.SubPacket):
+        rotation:         pak.ScaledInteger(types.Short, 100)
+        angular_velocity: pak.ScaledInteger(types.Short, 100)
+        fixed_rotation:   types.Boolean
 
     session_id:          types.Int
     round_id:            types.Int
@@ -54,15 +60,7 @@ class PlayerMovementPacket(ClientboundPacket):
     entered_portal:      pak.Enum(types.Byte, enums.Portal)
 
     # Only present if transformed or rolling.
-    rotation_info: pak.Optional(
-        pak.Compound(
-            "RotationInfo",
-
-            rotation         = pak.ScaledInteger(types.Short, 100),
-            angular_velocity = pak.ScaledInteger(types.Short, 100),
-            fixed_rotation   = types.Boolean
-        )
-    )
+    rotation_info: pak.Optional(RotationInfo)
 
 @public
 class SetFacingPacket(ClientboundPacket):
@@ -185,15 +183,16 @@ class RemoveObjectPacket(ClientboundPacket):
 class AddShamanObjectPacket(ClientboundPacket):
     id = (5, 20)
 
-    object_id:        types.Int # If '-1' then automatically assigned.
-    shaman_object_id: types.LimitedLEB128
-    x:                types.LimitedLEB128
-    y:                types.LimitedLEB128
-    angle:            pak.ScaledInteger(types.LimitedLEB128, 100)
-    velocity_x:       pak.ScaledInteger(types.LimitedLEB128, 100)
-    velocity_y:       pak.ScaledInteger(types.LimitedLEB128, 100)
-    mice_collidable:  types.ByteBoolean
-    colors:           types.Int[types.Byte]
+    object_id:            types.Int # If '-1' then automatically assigned.
+    shaman_object_id:     types.LimitedLEB128
+    x:                    types.LimitedLEB128
+    y:                    types.LimitedLEB128
+    angle:                pak.ScaledInteger(types.LimitedLEB128, 100)
+    velocity_x:           pak.ScaledInteger(types.LimitedLEB128, 100)
+    velocity_y:           pak.ScaledInteger(types.LimitedLEB128, 100)
+    has_contact_listener: types.Boolean
+    mice_collidable:      types.ByteBoolean
+    colors:               types.Int[types.Byte]
 
 @public
 class JoinedRoomPacket(ClientboundPacket):
@@ -565,21 +564,22 @@ class BasePlayerInformationPacket(ClientboundPacket):
 class PlayerProfilePacket(BasePlayerInformationPacket):
     id = (8, 16)
 
+    class TitleInfo(pak.SubPacket):
+        title_id: types.Short
+        stars:    types.Byte
+
+    class BadgeInfo(pak.SubPacket):
+        badge_id: types.UnsignedShort
+        quantity: types.UnsignedShort
+
     class _Badges(pak.Type):
         _default = []
-
-        elem_type = pak.Compound(
-            "BadgeInfo",
-
-            badge_id = types.UnsignedShort,
-            quantity = types.UnsignedShort,
-        )
 
         @classmethod
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedShort.unpack(buf, ctx=ctx) // 2
 
-            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [PlayerProfilePacket.BadgeInfo.unpack(buf, ctx=ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -588,8 +588,14 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
             return (
                 types.UnsignedShort.pack(length, ctx=ctx) +
 
-                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+                b"".join(PlayerProfilePacket.BadgeInfo.pack(x, ctx=ctx) for x in value)
             )
+
+    class GamemodeStatInfo(pak.SubPacket):
+        stat_id:           types.UnsignedByte
+        quantity:          types.Int
+        needed_quantity:   types.Int
+        unlocked_badge_id: types.Short
 
     # NOTE: The game stores these as a vector
     # but manually reads each out. This is likely
@@ -606,27 +612,14 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
     hard_saves_without_skills:   types.Int
     divine_saves_without_skills: types.Int
 
-    title_id: types.Short
-
-    unlocked_titles: pak.Compound(
-        "TitleInfo",
-
-        title_id = types.Short,
-        stars    = types.Byte,
-    )[types.Short]
+    title_id:        types.Short
+    unlocked_titles: TitleInfo[types.Short]
 
     outfit_code: types.String # TODO: Parse outfit.
     level:       types.Short
     badges:      _Badges
 
-    gamemode_stats: pak.Compound(
-        "GamemodeStatInfo",
-
-        stat_id           = types.UnsignedByte,
-        quantity          = types.Int,
-        needed_quantity   = types.Int,
-        unlocked_badge_id = types.Short,
-    )[types.Byte]
+    gamemode_stats: GamemodeStatInfo[types.Byte]
 
     cartouche_id:      types.UnsignedByte
     cartouche_id_list: types.UnsignedByte[types.UnsignedByte]
@@ -646,12 +639,11 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
 class OldNekodancerProfilePacket(BasePlayerInformationPacket):
     id = (8, 17)
 
-    stats: pak.Compound(
-        "StatInfo",
+    class StatInfo(pak.SubPacket):
+        stat_id:  types.Byte
+        quantity: types.Int
 
-        stat_id  = types.Byte,
-        quantity = types.Int,
-    )[types.Byte]
+    stats: StatInfo[types.Byte]
 
     # NOTE: Not used in Transformice
     # or technically Nekodancer, but
@@ -670,55 +662,122 @@ class OldNekodancerProfilePacket(BasePlayerInformationPacket):
 class LoadShopPacket(ClientboundPacket):
     id = (8, 20)
 
+    @dataclasses.dataclass
+    class OwnedShopItemInfo:
+        unique_id: int
+        colors:    typing.Optional[list]
+
+    class _OwnedShopItemInfoType(pak.Type):
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            num_colors = types.Byte.unpack(buf, ctx=ctx)
+            unique_id  = types.Int.unpack(buf, ctx=ctx)
+
+            if num_colors == 0:
+                colors = None
+            else:
+                # NOTE: Our use of 'range' will handle non-positive lengths.
+                colors = [types.Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
+
+            return LoadShopPacket.OwnedShopItemInfo(unique_id, colors)
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            if value.colors is None:
+                packed_colors_len = types.Byte.pack(0, ctx=ctx)
+                packed_colors     = b""
+            else:
+                packed_colors_len = types.Byte.pack(len(value.colors) + 1, ctx=ctx)
+                packed_colors     = b"".join(
+                    types.Int.pack(color, ctx=ctx) for color in value.colors
+                )
+
+            return (
+                packed_colors_len                        +
+                types.Int.pack(value.unique_id, ctx=ctx) +
+                packed_colors
+            )
+
+    class ItemInfo(pak.SubPacket):
+        category_id: types.UnsignedShort
+        item_id:     types.UnsignedShort
+        num_colors:  types.Byte
+        is_new:      types.Boolean
+        info:        pak.Enum(types.Byte, enums.ShopItemInfo)
+        cheese_cost: types.Int
+        fraise_cost: types.Int
+        needed_item: pak.Optional(types.Int, types.Boolean)
+
+    class OutfitInfo(pak.SubPacket):
+        outfit_id:   types.UnsignedShort
+        outfit_code: types.String # TODO: Parse outfit.
+        background:  pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
+
+    @dataclasses.dataclass
+    class OwnedShamamanObjectInfo:
+        shaman_object_id: int
+        equipped:         bool
+        colors:           typing.Optional[list]
+
+    class _OwnedShamanObjectInfoType(pak.Type):
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            shaman_object_id = types.Short.unpack(buf, ctx=ctx)
+            equipped = types.Boolean.unpack(buf, ctx=ctx)
+            num_colors = types.Byte.unpack(buf, ctx=ctx)
+
+            if num_colors == 0:
+                colors = None
+            else:
+                # NOTE: Our use of 'range' will handle non-positive lengths.
+                colors = [types.Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
+
+            return LoadShopPacket.OwnedShamamanObjectInfo(shaman_object_id, equipped, colors)
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            if value.colors is None:
+                packed_colors = types.Byte.pack(0, ctx=ctx)
+            else:
+                packed_colors = types.Byte.pack(len(value.colors) + 1, ctx=ctx) + b"".join(
+                    types.Int.pack(color, ctx=ctx) for color in value.colors
+                )
+
+            return (
+                types.Short.pack(value.shaman_object_id, ctx=ctx) +
+                types.Boolean.pack(value.equipped,       ctx=ctx) +
+
+                packed_colors
+            )
+
+    class ShamanObjectInfo(pak.SubPacket):
+        shaman_object_id: types.Int
+        num_colors:       types.Byte
+        is_new:           types.Boolean
+        info:             pak.Enum(types.Byte, enums.ShopItemInfo)
+        cheese_cost:      types.Int
+        fraise_cost:      types.Short
+
+    class EmojiInfo(pak.SubPacket):
+        emoji_id:    types.LimitedLEB128
+        cheese_cost: types.LimitedLEB128
+        fraise_cost: types.LimitedLEB128
+        is_new:      types.Boolean
+
     cheese:      types.Int
     fraises:     types.Int
     outfit_code: types.String # TODO: Parse outfit.
-    owned_items: types.OwnedShopItemDescription[types.Int]
 
-    items: pak.Compound(
-        "ItemInfo",
+    owned_items: _OwnedShopItemInfoType[types.Int]
+    items:       ItemInfo[types.Int]
 
-        category_id = types.UnsignedShort,
-        item_id     = types.UnsignedShort,
-        num_colors  = types.Byte,
-        is_new      = types.Boolean,
-        info        = pak.Enum(types.Byte, enums.ShopItemInfo),
-        cheese_cost = types.Int,
-        fraise_cost = types.Int,
-        needed_item = pak.Optional(types.Int, types.Boolean)
-    )[types.Int]
+    outfits:            OutfitInfo[types.Byte]
+    owned_outfit_codes: types.String[types.Short] # TODO: Parse outfit.
 
-    outfits: pak.Compound(
-        "OutfitInfo",
+    owned_shaman_objects: _OwnedShamanObjectInfoType[types.Short]
+    shaman_objects:       ShamanObjectInfo[types.Short]
 
-        outfit_id   = types.UnsignedShort,
-        outfit_code = types.String, # TODO: Parse outfit.
-        background  = pak.Enum(types.Byte, enums.FashionSquadOutfitBackground),
-    )[types.Byte]
-
-    owned_outfit_codes:   types.String[types.Short] # TODO: Parse outfit.
-    owned_shaman_objects: types.OwnedShamanObjectDescription[types.Short]
-
-    shaman_objects: pak.Compound(
-        "ShamanObjectInfo",
-
-        shaman_object_id = types.Int,
-        num_colors       = types.Byte,
-        is_new           = types.Boolean,
-        info             = pak.Enum(types.Byte, enums.ShopItemInfo),
-        cheese_cost      = types.Int,
-        fraise_cost      = types.Short,
-    )[types.Short]
-
-    emojis: pak.Compound(
-        "EmojiInfo",
-
-        emoji_id    = types.LimitedLEB128,
-        cheese_cost = types.LimitedLEB128,
-        fraise_cost = types.LimitedLEB128,
-        is_new      = types.Boolean,
-    )[types.LimitedLEB128]
-
+    emojis:          EmojiInfo[types.LimitedLEB128]
     owned_emoji_ids: types.LimitedLEB128[types.LimitedLEB128]
 
 @public
@@ -756,8 +815,8 @@ class GiveMeepPacket(ClientboundPacket):
 class RaiseItemPacket(ClientboundPacket):
     id = (8, 44)
 
-    class _Item(pak.Packet):
-        class Header(pak.Packet.Header):
+    class _Item(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
             id: types.Byte
 
     class ShopItem(_Item):
@@ -807,7 +866,7 @@ class RaiseItemPacket(ClientboundPacket):
         shop_item_id: types.Int
 
     session_id: types.Int
-    item:       _SimpleNestedPacketType(_Item)
+    item:       _Item
 
 @public
 class SetIceCubePacket(ClientboundPacket):
@@ -867,13 +926,12 @@ class ShopSpecialOfferPacket(ClientboundPacket):
 class Unknown_20_4_Packet(ClientboundPacket):
     id = (20, 4)
 
-    unk_array_1: pak.Compound(
-        "UnknownCompound",
+    class UnknownSubPacket(pak.SubPacket):
+        unk_int_1:   types.Int
+        unk_int_2:   types.Int
+        class_names: types.String[types.Byte]
 
-        unk_int_1   = types.Int,
-        unk_int_2   = types.Int,
-        class_names = types.String[types.Byte],
-    )[types.Short]
+    unk_array_1: UnknownSubPacket[types.Short]
 
 @public
 class ShopCurrencyPacket(ClientboundPacket):
@@ -1016,26 +1074,24 @@ class IPSPongPacket(ClientboundPacket):
 class OpenNPCShopPacket(ClientboundPacket):
     id = (26, 38)
 
-    name: types.String
+    class ItemInfo(pak.SubPacket):
+        status: pak.Enum(types.UnsignedByte, enums.NPCItemStatus)
 
-    items: pak.Compound(
-        "ItemInfo",
-
-        status = pak.Enum(types.UnsignedByte, enums.NPCItemStatus),
-
-        type     = pak.Enum(types.UnsignedByte, enums.NPCItemType),
-        id       = types.Int,
-        quantity = types.Short,
+        type:     pak.Enum(types.UnsignedByte, enums.NPCItemType)
+        item_id:  types.Int
+        quantity: types.Short
 
         # Cost type is always 'NPCItemType.Normal' because you
         # always spend normal items to buy items from an NPC.
-        cost_type     = pak.Enum(types.UnsignedByte, enums.NPCItemType),
-        cost_id       = types.Int,
-        cost_quantity = types.Short,
+        cost_type:     pak.Enum(types.UnsignedByte, enums.NPCItemType)
+        cost_id:       types.Int
+        cost_quantity: types.Short
 
-        hover_translation_key = types.String,
-        hover_translation_arg = types.String,
-    )[types.UnsignedByte]
+        hover_translation_key: types.String
+        hover_translation_arg: types.String
+
+    name:  types.String
+    items: ItemInfo[types.UnsignedByte]
 
 @public
 class SetCanTransformPacket(ClientboundPacket):
@@ -1200,22 +1256,21 @@ class ShowColorPickerPacket(ClientboundPacket):
 class LoadInventoryPacket(ClientboundPacket):
     id = (31, 1)
 
-    items: pak.Compound(
-        "ItemInfo",
+    class ItemInfo(pak.SubPacket):
+        item_id:             types.Short
+        quantity:            types.UnsignedShort # NOTE: If item id already received, then this quantity is just added.
+        priority:            types.UnsignedByte  # Only used for sorting.
+        unk_boolean_4:       types.Boolean       # Marked as 'is_event' by aiotfm, but I think that's wrong.
+        can_use:             types.Boolean       # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
+        can_equip:           types.Boolean
+        unk_boolean_7:       types.Boolean
+        category:            pak.Enum(types.Byte, enums.ItemCategory)
+        can_use_immediately: types.Boolean
+        can_use_when_dead:   types.Boolean
+        image_name:          pak.Optional(types.String, types.Boolean)
+        slot:                types.Byte
 
-        item_id             = types.Short,
-        quantity            = types.UnsignedShort, # NOTE: If item id already received, then this quantity is just added.
-        priority            = types.UnsignedByte,  # Only used for sorting.
-        unk_boolean_4       = types.Boolean,       # Marked as 'is_event' by aiotfm, but I think that's wrong.
-        can_use             = types.Boolean,       # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
-        can_equip           = types.Boolean,
-        unk_boolean_7       = types.Boolean,
-        category            = pak.Enum(types.Byte, enums.ItemCategory),
-        can_use_immediately = types.Boolean,
-        can_use_when_dead   = types.Boolean,
-        image_name          = pak.Optional(types.String, types.Boolean),
-        slot                = types.Byte,
-    )[types.Short]
+    items: ItemInfo[types.Short]
 
 @public
 class UpdateInventoryPacket(ClientboundPacket):
@@ -1307,7 +1362,7 @@ class ChangeSatelliteServerPacket(ClientboundPacket):
 class TribulleWrapperPacket(ClientboundPacket):
     id = (60, 3)
 
-    nested: _NestedTribulleType(ClientboundTribullePacket)
+    nested: ClientboundTribullePacket
 
 @public
 class SetTribulleProtocolPacket(ClientboundPacket):
@@ -1356,8 +1411,8 @@ class SetRockPaperScissorsChoicesPacket(ClientboundPacket):
 class VisualConsumableInfoPacket(ClientboundPacket):
     id = (100, 40)
 
-    class _InfoPacket(pak.Packet):
-        class Header(pak.Packet.Header):
+    class _InfoPacket(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
             id: types.UnsignedByte
 
     class StartPainting(_InfoPacket):
@@ -1394,7 +1449,7 @@ class VisualConsumableInfoPacket(ClientboundPacket):
         days:       types.UnsignedShort
         hours:      types.Byte
 
-    info: _SimpleNestedPacketType(_InfoPacket)
+    info: _InfoPacket
 
 @public
 class ImmobilizePlayerPacket(ClientboundPacket):
@@ -1423,8 +1478,8 @@ class SetTitlePacket(ClientboundPacket):
 class CollectibleActionPacket(ClientboundPacket):
     id = (100, 101)
 
-    class _Action(pak.Packet):
-        class Header(pak.Packet.Header):
+    class _Action(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
             id: types.UnsignedByte
 
     class SetCanCollect(_Action):
@@ -1460,19 +1515,19 @@ class CollectibleActionPacket(ClientboundPacket):
         def all_players(self):
             return self.session_id == 0
 
-    action: _SimpleNestedPacketType(_Action)
+    action: _Action
 
 @public
 class SetPlayerListPacket(ClientboundPacket):
     id = (144, 1)
 
-    players: types.PlayerDescription[types.Short]
+    players: PlayerInfo[types.Short]
 
 @public
 class UpdatePlayerListPacket(ClientboundPacket):
     id = (144, 2)
 
-    player:                  types.PlayerDescription
+    player:                  PlayerInfo
     skip_prepare_animations: types.Boolean
     refresh_player_menu:     types.Boolean
 
@@ -1503,24 +1558,23 @@ class PlayShamanInvocationSoundPacket(ClientboundPacket):
 class RoomPropertiesPacket(ClientboundPacket):
     id = (144, 18)
 
-    properties: types.RoomPropertiesDescription
+    properties: RoomProperties
 
 @public
 class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
     id = (144, 22)
 
-    outfits: pak.Compound(
-        "OutfitInfo",
-
-        outfit_id    = types.Int,
-        outfit_name  = types.String,
-        background   = pak.Enum(types.Byte, enums.FashionSquadOutfitBackground),
-        removal_date = types.String,
-        outfit_code  = types.String, # TODO: Parse outfit.
+    class OutfitInfo(pak.SubPacket):
+        outfit_id:    types.Int
+        outfit_name:  types.String
+        background:   pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
+        removal_date: types.String
+        outfit_code:  types.String # TODO: Parse outfit.
 
         # Might have similar meaning as unk_leb128_6 of sales menu packet.
-        unk_byte_6 = types.Byte,
-    )[types.Int]
+        unk_byte_6: types.Byte
+
+    outfits: OutfitInfo[types.Int]
 
 @public
 class NPCPlayEmotePacket(ClientboundPacket):
@@ -1548,14 +1602,12 @@ class LoadShamanObjectSpritesPacket(ClientboundPacket):
 class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
     id = (144, 29)
 
-    sales: pak.Compound(
-        "SaleInfo",
-
-        sale_id    = types.LimitedLEB128,
-        item_id    = types.String,
-        sale_start = types.String,
-        sale_end   = types.String,
-        percentage = types.LimitedLEB128,
+    class SaleInfo(pak.SubPacket):
+        sale_id:    types.LimitedLEB128
+        item_id:    types.String
+        sale_start: types.String
+        sale_end:   types.String
+        percentage: types.LimitedLEB128
 
         # Some sort of enum, for colors of sale_start and sale_end.
         #
@@ -1564,8 +1616,9 @@ class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
         #
         # Other values are possible and cannot
         # cancel the sale and have color '0x60608F'.
-        unk_leb128_6 = types.LimitedLEB128,
-    )[types.LimitedLEB128]
+        unk_leb128_6: types.LimitedLEB128
+
+    sales: SaleInfo[types.LimitedLEB128]
 
 @public
 class SetCollisionDamagePacket(ClientboundPacket):
@@ -1678,13 +1731,12 @@ class LanguageSelectionInformationPacket(ClientboundPacket):
 
     FLAG_SIZE = 24
 
-    languages: pak.Compound(
-        "LanguageInfo",
+    class LanguageInfo(pak.SubPacket):
+        code:         types.String
+        display_name: types.String
+        flag_code:    types.String
 
-        code         = types.String,
-        display_name = types.String,
-        flag_code    = types.String,
-    )[types.UnsignedShort]
+    languages: LanguageInfo[types.UnsignedShort]
 
     def flag_url(self, flag_code):
         return game.flag_url(flag_code, self.FLAG_SIZE)
@@ -1700,4 +1752,4 @@ class ExtensionWrapperPacket(ClientboundPacket):
     # This ID doesn't seem to be used at all.
     id = (255, 255)
 
-    nested: _NestedExtensionType(ClientboundExtensionPacket)
+    nested: ClientboundExtensionPacket

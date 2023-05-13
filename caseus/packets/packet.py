@@ -32,21 +32,6 @@ class PacketCode(pak.Type):
 
         return types.UnsignedByte.pack(C, ctx=ctx) + types.UnsignedByte.pack(CC, ctx=ctx)
 
-class _GeneralPacketContext(pak.Packet.Context):
-    def __init__(self, secrets=Secrets()):
-        self.secrets = secrets
-
-        super().__init__()
-
-    def __hash__(self):
-        return hash(self.secrets)
-
-    def __eq__(self, other):
-        if not isinstance(other, Packet.Context):
-            return NotImplemented
-
-        return self.secrets == other.secrets
-
 @public
 class Packet(pak.Packet):
     r"""A Transformice packet.
@@ -62,7 +47,20 @@ class Packet(pak.Packet):
     ``(C, CC)`` or sometimes ``CCC`` altogether.
     """
 
-    Context = _GeneralPacketContext
+    class Context(pak.Packet.Context):
+        def __init__(self, secrets=Secrets()):
+            self.secrets = secrets
+
+            super().__init__()
+
+        def __hash__(self):
+            return hash(self.secrets)
+
+        def __eq__(self, other):
+            if not isinstance(other, Packet.Context):
+                return NotImplemented
+
+            return self.secrets == other.secrets
 
     class Header(pak.Packet.Header):
         id: PacketCode
@@ -134,7 +132,7 @@ class ClientboundPacket(Packet):
     """
 
 @public
-class TribullePacket(pak.Packet):
+class TribullePacket(pak.SubPacket):
     """A packet for the community platform.
 
     Such packets are used for inter-room and inter-game communication.
@@ -148,10 +146,12 @@ class TribullePacket(pak.Packet):
     game uses to name rooms.
     """
 
-    Context = _GeneralPacketContext
-
     class Header(pak.Packet.Header):
         id: types.Short
+
+    @classmethod
+    def _subclass_for_unknown_id(cls, id, *, ctx):
+        return cls.GenericWithID(id)
 
 @public
 class ServerboundTribullePacket(TribullePacket):
@@ -189,8 +189,11 @@ class LegacyPacket(pak.Packet, abc.ABC):
     # format, we will provide alternatives to
     # certain parts of the normal 'pak.Packet'
     # machinery.
+    #
+    # NOTE: Because of this weirdness, 'LegacyPacket'
+    # cannot use 'pak.SubPacket'.
 
-    Context = _GeneralPacketContext
+    Context = Packet.Context
 
     @classmethod
     @pak.util.cache
@@ -276,13 +279,15 @@ class ClientboundLegacyPacket(LegacyPacket):
     """
 
 @public
-class ExtensionPacket(pak.Packet):
+class ExtensionPacket(pak.SubPacket):
     """A packet not contained in the vanilla protocol."""
-
-    Context = _GeneralPacketContext
 
     class Header(pak.Packet.Header):
         id: types.String
+
+    @classmethod
+    def _subclass_for_unknown_id(cls, id, *, ctx):
+        return cls.GenericWithID(id)
 
 @public
 class ServerboundExtensionPacket(ExtensionPacket):

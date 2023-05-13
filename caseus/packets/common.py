@@ -2,6 +2,7 @@ import pak
 
 from public import public
 
+from .. import enums
 from .. import types
 
 @public
@@ -43,86 +44,67 @@ class _NestedLegacyType(pak.Type):
         )
 
 @public
-class _NestedTribulleType(pak.Type):
-    parent_cls = None
+class PlayerInfo(pak.SubPacket):
+    username:       types.String
+    session_id:     types.Int
+    is_shaman:      types.Boolean
+    activity:       pak.Enum(types.Byte, enums.PlayerActivity)
+    score:          types.Short
+    cheeses:        types.Byte
+    title_id:       types.Short
+    title_stars:    types.Byte
+    gender:         pak.Enum(types.Byte, enums.Gender)
+    unk_string_10:  types.String # A lot of times it's the string '0' but others it's a string of a different number. Same name as avatar ID seemingly?
+    outfit_code:    types.String # TODO: Parse outfit.
+    unk_boolean_12: types.Boolean
+    mouse_color:    types.Int
+    shaman_color:   types.Int
+    unk_int_15:     types.Int # Staff name color?
+    name_color:     types.Int
+    context_id:     types.UnsignedByte
 
-    @classmethod
-    def _unpack(cls, buf, *, ctx):
-        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.packet_ctx)
+@public
+class RoomProperties(pak.SubPacket):
+    without_shaman_skills:        types.Boolean
+    without_physical_consumables: types.Boolean
+    without_adventure_maps:       types.Boolean
+    with_mice_collisions:         types.Boolean
+    with_fall_damage:             types.Boolean
+    round_duration_percentage:    types.UnsignedByte
+    mice_weight_percentage:       types.Int
+    max_players:                  types.Short
+    map_rotation:                 pak.Enum(types.Byte, enums.MapCategory)[types.UnsignedByte]
 
-        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
-        if packet_cls is None:
-            packet_cls = cls.parent_cls.GenericWithID(header.id)
+class _ObjectInfo(pak.SubPacket):
+    class Attributes(pak.SubPacket):
+        x:                pak.ScaledInteger(types.Int,   100 / 30)
+        y:                pak.ScaledInteger(types.Int,   100 / 30)
+        velocity_x:       pak.ScaledInteger(types.Short, 10)
+        velocity_y:       pak.ScaledInteger(types.Short, 10)
+        rotation:         pak.ScaledInteger(types.Short, 100)
+        angular_velocity: pak.ScaledInteger(types.Short, 100)
+        mice_collidable:  types.Boolean
+        inactive:         types.Boolean
 
-        return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
+    object_id:        types.Int
+    shaman_object_id: types.Short
 
-    @classmethod
-    def _pack(cls, value, *, ctx):
-        return value.pack(ctx=ctx.packet_ctx)
+    attributes: pak.Optional(Attributes, lambda packet: not packet.should_remove)
 
-    @classmethod
-    def _call(cls, parent_cls):
-        return cls.make_type(
-            f"{cls.__qualname__}({parent_cls.__qualname__})",
+    @property
+    def should_remove(self):
+        return self.shaman_object_id == -1
 
-            parent_cls = parent_cls,
+@public
+class ServerboundObjectInfo(_ObjectInfo):
+    def clientbound(self, *, add_if_missing=False):
+        return ClientboundObjectInfo(
+            object_id        = self.object_id,
+            shaman_object_id = self.shaman_object_id,
+            attributes       = self.attributes,
+            add_if_missing   = add_if_missing,
         )
 
 @public
-class _NestedExtensionType(pak.Type):
-    @classmethod
-    def _unpack(cls, buf, *, ctx):
-        header = cls.parent_cls.Header.unpack(buf, ctx=ctx.packet_ctx)
-
-        packet_cls = cls.parent_cls.subclass_with_id(header.id, ctx=ctx.packet_ctx)
-        if packet_cls is None:
-            packet_cls = cls.parent_cls.GenericWithID(header.id)
-
-        return packet_cls.unpack(buf, ctx=ctx.packet_ctx)
-
-    @classmethod
-    def _pack(cls, value, *, ctx):
-        return value.pack(ctx=ctx.packet_ctx)
-
-    @classmethod
-    def _call(cls, parent_cls):
-        return cls.make_type(
-            f"{cls.__qualname__}({parent_cls.__qualname__})",
-
-            parent_cls = parent_cls,
-        )
-
-@public
-class _SimpleNestedPacketType(pak.Type):
-    parent_cls = None
-
-    @classmethod
-    def _default(cls, *, ctx):
-        return None
-
-    @classmethod
-    def _unpack(cls, buf, *, ctx):
-        # NOTE: We forgo contexts here.
-
-        header = cls.parent_cls.Header.unpack(buf)
-
-        packet_cls = cls.parent_cls.subclass_with_id(header.id)
-        if packet_cls is None:
-            return None
-
-        return packet_cls.unpack(buf)
-
-    @classmethod
-    def _pack(cls, value, *, ctx):
-        if value is None:
-            return b""
-
-        return value.pack()
-
-    @classmethod
-    def _call(cls, parent_cls):
-        return cls.make_type(
-            f"{cls.__qualname__}({parent_cls.__qualname__})",
-
-            parent_cls = parent_cls,
-        )
+class ClientboundObjectInfo(_ObjectInfo):
+    add_if_missing: pak.Optional(types.ByteBoolean, lambda packet: not packet.should_remove)

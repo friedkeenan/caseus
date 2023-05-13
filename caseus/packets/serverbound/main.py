@@ -6,9 +6,8 @@ from public import public
 
 from ..common import (
     _NestedLegacyType,
-    _NestedTribulleType,
-    _NestedExtensionType,
-    _SimpleNestedPacketType,
+    RoomProperties,
+    ServerboundObjectInfo,
 )
 
 from ..packet import (
@@ -34,11 +33,16 @@ class ObjectSyncPacket(ServerboundPacket):
     id = (4, 3)
 
     round_id: types.Int
-    objects:  types.ObjectDescription(serverbound=True)[None]
+    objects:  ServerboundObjectInfo[None]
 
 @public
 class PlayerMovementPacket(ServerboundPacket):
     id = (4, 4)
+
+    class RotationInfo(pak.SubPacket):
+        rotation:         pak.ScaledInteger(types.Short, 100)
+        angular_velocity: pak.ScaledInteger(types.Short, 100)
+        fixed_rotation:   types.Boolean
 
     round_id:            types.Int
     moving_right:        types.Boolean
@@ -52,15 +56,7 @@ class PlayerMovementPacket(ServerboundPacket):
     entered_portal:      pak.Enum(types.Byte, enums.Portal)
 
     # Only present if transformed or rolling.
-    rotation_info: pak.Optional(
-        pak.Compound(
-            "RotationInfo",
-
-            rotation         = pak.ScaledInteger(types.Short, 100),
-            angular_velocity = pak.ScaledInteger(types.Short, 100),
-            fixed_rotation   = types.Boolean,
-        )
-    )
+    rotation_info: pak.Optional(RotationInfo)
 
 @public
 class PlayerDiedPacket(ServerboundPacket):
@@ -170,6 +166,10 @@ class SetWorldGravityPacket(ServerboundPacket):
 class JoinRoomPacket(ServerboundPacket):
     id = (5, 38)
 
+    class CustomizationInfo(pak.SubPacket):
+        password:   types.String
+        properties: RoomProperties
+
     # Only non-empty when choosing a room from the room list menu.
     community: types.String
 
@@ -182,14 +182,7 @@ class JoinRoomPacket(ServerboundPacket):
     # True if using the 'salonauto' command.
     auto: types.Boolean
 
-    customization: pak.Optional(
-        pak.Compound(
-            "CustomizationInfo",
-
-            password   = types.String,
-            properties = types.RoomPropertiesDescription,
-        )
-    )
+    customization: pak.Optional(CustomizationInfo)
 
 @public
 class RoomPasswordPacket(ServerboundPacket):
@@ -369,13 +362,12 @@ class PlayerAttackPacket(ServerboundPacket):
 class MonsterSyncPacket(ServerboundPacket):
     id = (26, 10)
 
-    monsters: pak.Compound(
-        "MonsterInfo",
+    class MonsterInfo(pak.SubPacket):
+        monster_id: types.Int
+        x:          types.Int
+        y:          types.Int
 
-        monster_id = types.Int,
-        x          = types.Int,
-        y          = types.Int,
-    )[types.UnsignedShort]
+    monsters: MonsterInfo[types.UnsignedShort]
 
 @public
 class PlayerDamagedPacket(ServerboundPacket):
@@ -584,7 +576,7 @@ class TribulleWrapperPacket(ServerboundPacket):
 
     CIPHER = XOR
 
-    nested: _NestedTribulleType(ServerboundTribullePacket)
+    nested: ServerboundTribullePacket
 
 @public
 class ShamanObjectPreviewPacket(ServerboundPacket):
@@ -615,8 +607,8 @@ class RemoveShamanObjectPreviewPacket(ServerboundPacket):
 class VisualConsumableInfoPacket(ServerboundPacket):
     id = (100, 40)
 
-    class _InfoPacket(pak.Packet):
-        class Header(pak.Packet.Header):
+    class _InfoPacket(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
             id: types.UnsignedByte
 
     class PaintLine(_InfoPacket):
@@ -637,7 +629,7 @@ class VisualConsumableInfoPacket(ServerboundPacket):
 
         artist_name: types.String
 
-    info: _SimpleNestedPacketType(_InfoPacket)
+    info: _InfoPacket
 
 @public
 class InteractWithOfficialNPCPacket(ServerboundPacket):
@@ -675,21 +667,23 @@ class InteractWithOfficialNPCPacket(ServerboundPacket):
 class CheesesAndHolesSyncPacket(ServerboundPacket):
     id = (100, 80)
 
+    class CheeseInfo(pak.SubPacket):
+        x: types.Short
+        y: types.Short
+
+    class HoleInfo(pak.SubPacket):
+        type: pak.Enum(types.Short, enums.HoleType)
+        x:    types.Short
+        y:    types.Short
+
     class _Cheeses(pak.Type):
         _default = []
-
-        elem_type = pak.Compound(
-            "CheeseInfo",
-
-            x = types.Short,
-            y = types.Short,
-        )
 
         @classmethod
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedByte.unpack(buf, ctx=ctx) // 2
 
-            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [CheesesAndHolesSyncPacket.CheeseInfo.unpack(buf, ctx=ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -698,26 +692,17 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
             return (
                 types.UnsignedByte.pack(length, ctx=ctx) +
 
-                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+                b"".join(CheesesAndHolesSyncPacket.CheeseInfo.pack(x, ctx=ctx) for x in value)
             )
 
     class _Holes(pak.Type):
         _default = []
 
-        elem_type = pak.Compound(
-            "HoleInfo",
-
-            type = pak.Enum(types.Short, enums.HoleType),
-
-            x = types.Short,
-            y = types.Short,
-        )
-
         @classmethod
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedByte.unpack(buf, ctx=ctx) // 3
 
-            return [cls.elem_type.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [CheesesAndHolesSyncPacket.HoleInfo.unpack(buf, ctx=ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -726,7 +711,7 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
             return (
                 types.UnsignedByte.pack(length, ctx=ctx) +
 
-                b"".join(cls.elem_type.pack(x, ctx=ctx) for x in value)
+                b"".join(CheesesAndHolesSyncPacket.HoleInfo.pack(x, ctx=ctx) for x in value)
             )
 
     cheeses: _Cheeses
@@ -802,4 +787,4 @@ class ExtensionWrapperPacket(ServerboundPacket):
     # This ID doesn't seem to be used at all.
     id = (255, 255)
 
-    nested: _NestedExtensionType(ServerboundExtensionPacket)
+    nested: ServerboundExtensionPacket
