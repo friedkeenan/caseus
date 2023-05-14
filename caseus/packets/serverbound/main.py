@@ -728,7 +728,7 @@ class AddFashionSquadOutfitPacket(ServerboundPacket):
     outfit_name: types.String
     background:  pak.EnumOr(types.Short, enums.FashionSquadOutfitBackground)
     date:        types.String
-    outfit_code: types.String # TODO: Parse outfit.
+    look:        types.String # TODO: Parse outfit.
 
 @public
 class RemoveFashionSquadOutfitPacket(ServerboundPacket):

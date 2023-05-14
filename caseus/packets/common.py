@@ -55,7 +55,7 @@ class PlayerInfo(pak.SubPacket):
     title_stars:    types.Byte
     gender:         pak.Enum(types.Byte, enums.Gender)
     unk_string_10:  types.String # A lot of times it's the string '0' but others it's a string of a different number. Same name as avatar ID seemingly?
-    outfit_code:    types.String # TODO: Parse outfit.
+    look:           types.String # TODO: Parse outfit.
     unk_boolean_12: types.Boolean
     mouse_color:    types.Int
     shaman_color:   types.Int

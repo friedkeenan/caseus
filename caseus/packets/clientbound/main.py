@@ -615,9 +615,9 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
     title_id:        types.Short
     unlocked_titles: TitleInfo[types.Short]
 
-    outfit_code: types.String # TODO: Parse outfit.
-    level:       types.Short
-    badges:      _Badges
+    look:   types.String # TODO: Parse outfit.
+    level:  types.Short
+    badges: _Badges
 
     gamemode_stats: GamemodeStatInfo[types.Byte]
 
@@ -709,9 +709,9 @@ class LoadShopPacket(ClientboundPacket):
         needed_item: pak.Optional(types.Int, types.Boolean)
 
     class OutfitInfo(pak.SubPacket):
-        outfit_id:   types.UnsignedShort
-        outfit_code: types.String # TODO: Parse outfit.
-        background:  pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
+        outfit_id:  types.UnsignedShort
+        look:       types.String # TODO: Parse outfit.
+        background: pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
 
     @dataclasses.dataclass
     class OwnedShamamanObjectInfo:
@@ -764,15 +764,15 @@ class LoadShopPacket(ClientboundPacket):
         fraise_cost: types.LimitedLEB128
         is_new:      types.Boolean
 
-    cheese:      types.Int
-    fraises:     types.Int
-    outfit_code: types.String # TODO: Parse outfit.
+    cheese:  types.Int
+    fraises: types.Int
+    look:    types.String # TODO: Parse outfit.
 
     owned_items: _OwnedShopItemInfoType[types.Int]
     items:       ItemInfo[types.Int]
 
     outfits:            OutfitInfo[types.Byte]
-    owned_outfit_codes: types.String[types.Short] # TODO: Parse outfit.
+    owned_outfit_looks: types.String[types.Short] # TODO: Parse outfit.
 
     owned_shaman_objects: _OwnedShamanObjectInfoType[types.Short]
     shaman_objects:       ShamanObjectInfo[types.Short]
@@ -788,7 +788,7 @@ class AddNPCPacket(ClientboundPacket):
     name:             types.String
     title_id:         types.Short
     feminine:         types.Boolean
-    outfit_code:      types.String # TODO: Parse outfit.
+    look:             types.String # TODO: Parse outfit.
     x:                types.LimitedLEB128
     y:                types.LimitedLEB128
     facing_right:     types.Boolean
@@ -916,10 +916,10 @@ class ShopSpecialOfferPacket(ClientboundPacket):
     id = (20, 3)
 
     is_sale:             types.Boolean
-    is_shaman_item:      types.Boolean
+    is_regular_item:     types.Boolean
     item_id:             types.Int
     enable:              types.Boolean
-    timestamp:           types.Int
+    ends_timestamp:      types.Int
     discount_percentage: types.Byte
 
 @public
@@ -1113,7 +1113,7 @@ class LoadAndExecutePacket(ClientboundPacket):
     swf_data: pak.RawByte[None]
 
 @public
-class SetShopBaseTimestampPacket(ClientboundPacket):
+class ShopBaseTimestampPacket(ClientboundPacket):
     id = (28, 2)
 
     timestamp: types.Int
@@ -1569,7 +1569,7 @@ class OpenFashionSquadOutfitsMenuPacket(ClientboundPacket):
         outfit_name:  types.String
         background:   pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
         removal_date: types.String
-        outfit_code:  types.String # TODO: Parse outfit.
+        look:         types.String # TODO: Parse outfit.
 
         # Might have similar meaning as unk_leb128_6 of sales menu packet.
         unk_byte_6: types.Byte

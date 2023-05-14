@@ -372,6 +372,9 @@ class Client(pak.AsyncPacketHandler):
 
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _on_change_satellite_server(self, server, packet):
+        # TODO: Do we want a way to disable
+        # connecting to the satellite server?
+
         if packet.should_ignore:
             return
 
