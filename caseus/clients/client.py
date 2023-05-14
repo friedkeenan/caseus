@@ -127,6 +127,8 @@ class Client(pak.AsyncPacketHandler):
         language = "en",
         steam_id = None,
 
+        connect_to_satellite = True,
+
         listen_sequentially = False,
     ):
         super().__init__()
@@ -146,6 +148,9 @@ class Client(pak.AsyncPacketHandler):
             steam_id = str(steam_id)
 
         self.steam_id = steam_id
+
+        if connect_to_satellite:
+            self.register_packet_listener(self._on_change_satellite_server, clientbound.ChangeSatelliteServer)
 
         self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True
@@ -370,11 +375,7 @@ class Client(pak.AsyncPacketHandler):
         if not self.listen_sequentially:
             self._listen_sequentially = False
 
-    @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
     async def _on_change_satellite_server(self, server, packet):
-        # TODO: Do we want a way to disable
-        # connecting to the satellite server?
-
         if packet.should_ignore:
             return
 
