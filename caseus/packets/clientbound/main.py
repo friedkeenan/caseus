@@ -1726,7 +1726,7 @@ class SetLanguagePacket(ClientboundPacket):
     font:                   types.String
 
 @public
-class LanguageSelectionInformationPacket(ClientboundPacket):
+class AvailableLanguagesPacket(ClientboundPacket):
     id = (176, 6)
 
     FLAG_SIZE = 24

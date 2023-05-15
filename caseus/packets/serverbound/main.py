@@ -768,6 +768,10 @@ class SetLanguagePacket(ServerboundPacket):
     language: types.String
 
 @public
+class AvailableLanguagesPacket(ServerboundPacket):
+    id = (176, 2)
+
+@public
 class ClientVerificationPacket(ServerboundPacket):
     id = (176, 47)
 
