@@ -179,17 +179,15 @@ class JoinRoomPacket(ServerboundPacket):
     # as you will instead be put in "*TribeName".
     name: types.String
 
+    # Only non-empty when entering a room from
+    # the password menu shown by the clientbound
+    # 'RoomPasswordPacket'.
+    password: types.String
+
     # True if using the 'salonauto' command.
     auto: types.Boolean
 
     customization: pak.Optional(CustomizationInfo)
-
-@public
-class RoomPasswordPacket(ServerboundPacket):
-    id = (5, 39)
-
-    password:  types.String
-    room_name: types.String
 
 @public
 class RoomMessagePacket(ServerboundPacket):
