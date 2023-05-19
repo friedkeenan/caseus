@@ -865,6 +865,11 @@ class RaiseItemPacket(ClientboundPacket):
 
         shop_item_id: types.Int
 
+    class Emoji(_Item):
+        id = 9
+
+        emoji_id: types.Int
+
     session_id: types.Int
     item:       _Item
 
@@ -1069,6 +1074,43 @@ class AccountErrorPacket(ClientboundPacket):
 @public
 class IPSPongPacket(ClientboundPacket):
     id = (26, 25)
+
+@public
+class AddOfficialImagesPacket(ClientboundPacket):
+    id = (26, 31)
+
+    class ImageInfo(pak.SubPacket):
+        class TileInfo(pak.SubPacket):
+            # Unused. Maybe some sort of ID?
+            unk_short_1: types.Short
+
+            x_step: pak.ScaledInteger(types.Int, 100)
+            y_step: pak.ScaledInteger(types.Int, 100)
+
+        image_path: types.String
+
+        # If true calls an empty function which is named the same
+        # as other functions which look like "center" or "align".
+        unk_boolean_2: types.Boolean
+
+        x: types.Short
+        y: types.Short
+
+        # Only used when tiled.
+        width:  types.Short
+        height: types.Short
+
+        target: pak.Enum(types.Byte, enums.OfficialImageTarget)
+
+        tile_info: pak.Optional(TileInfo, types.Boolean)
+
+        disappear_on_click: types.Boolean
+        hidden:             types.Boolean
+
+        # Only used for use with 'RemoveOfficialImagePacket'.
+        name: types.String
+
+    images: ImageInfo[types.UnsignedByte]
 
 @public
 class OpenNPCShopPacket(ClientboundPacket):
@@ -1406,6 +1448,12 @@ class SetRockPaperScissorsChoicesPacket(ClientboundPacket):
     first_choice:      pak.Enum(types.Byte, enums.RockPaperScissorsChoice)
     second_session_id: types.Int
     second_choice:     pak.Enum(types.Byte, enums.RockPaperScissorsChoice)
+
+@public
+class RemoveOfficialImagePacket(ClientboundPacket):
+    id = (100, 10)
+
+    name: types.String
 
 @public
 class VisualConsumableInfoPacket(ClientboundPacket):

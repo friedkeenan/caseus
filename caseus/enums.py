@@ -310,11 +310,16 @@ class NPCItemStatus(enum.Enum):
 
 @public
 class NPCItemType(enum.Enum):
+    # NOTE: The game defines constants for
+    # values '0' and '6' but they are never used.
+
     Badge     = 1
     Cartouche = 2
     Title     = 3
     Normal    = 4
     Costume   = 5
+
+    Emoji = 7
 
 @public
 class MapCategory(enum.Enum):
@@ -578,3 +583,10 @@ class ShopItemInfo(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.NONE
+
+@public
+class OfficialImageTarget(enum.Enum):
+    BackgroundLayer = 0
+    ForegroundLayer = 1
+    AboveMap        = 2
+    AboveAll        = 3

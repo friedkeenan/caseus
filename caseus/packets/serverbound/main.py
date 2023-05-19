@@ -185,7 +185,7 @@ class JoinRoomPacket(ServerboundPacket):
     password: types.String
 
     # True if using the 'salonauto' command.
-    auto: types.Boolean
+    auto: types.ByteBoolean
 
     customization: pak.Optional(CustomizationInfo)
 
