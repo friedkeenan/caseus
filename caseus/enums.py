@@ -316,8 +316,8 @@ class NPCItemType(enum.Enum):
     Badge     = 1
     Cartouche = 2
     Title     = 3
-    Normal    = 4
-    Costume   = 5
+    Inventory = 4
+    ShopItem  = 5
 
     Emoji = 7
 

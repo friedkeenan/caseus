@@ -77,7 +77,7 @@ class SetFacingPacket(ServerboundPacket):
 class PlayerActionPacket(ServerboundPacket):
     id = (4, 9)
 
-    animation: pak.Enum(types.Byte, enums.PlayerAction)
+    action: pak.Enum(types.Byte, enums.PlayerAction)
 
 @public
 class CreateShamanLabelPacket(ServerboundPacket):

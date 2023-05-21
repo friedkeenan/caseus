@@ -150,7 +150,7 @@ class Client(pak.AsyncPacketHandler):
         self.steam_id = steam_id
 
         if connect_to_satellite:
-            self.register_packet_listener(self._on_change_satellite_server, clientbound.ChangeSatelliteServer)
+            self.register_packet_listener(self._on_change_satellite_server, clientbound.ChangeSatelliteServerPacket)
 
         self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True

@@ -74,7 +74,7 @@ class PlayerActionPacket(ClientboundPacket):
     id = (4, 9)
 
     session_id: types.Int
-    animation:  pak.Enum(types.Byte, enums.PlayerAction)
+    action:     pak.Enum(types.Byte, enums.PlayerAction)
     allow_self: types.ByteBoolean
 
 @public
@@ -1123,8 +1123,8 @@ class OpenNPCShopPacket(ClientboundPacket):
         item_id:  types.Int
         quantity: types.Short
 
-        # Cost type is always 'NPCItemType.Normal' because you
-        # always spend normal items to buy items from an NPC.
+        # Cost type is always 'NPCItemType.Inventory' because you
+        # always spend inventory items to buy items from an NPC.
         cost_type:     pak.Enum(types.UnsignedByte, enums.NPCItemType)
         cost_id:       types.Int
         cost_quantity: types.Short
