@@ -579,7 +579,7 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedShort.unpack(buf, ctx=ctx) // 2
 
-            return [PlayerProfilePacket.BadgeInfo.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [PlayerProfilePacket.BadgeInfo.unpack(buf, ctx=ctx.packet_ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -588,7 +588,7 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
             return (
                 types.UnsignedShort.pack(length, ctx=ctx) +
 
-                b"".join(PlayerProfilePacket.BadgeInfo.pack(x, ctx=ctx) for x in value)
+                b"".join(PlayerProfilePacket.BadgeInfo.pack(x, ctx=ctx.packet_ctx) for x in value)
             )
 
     class GamemodeStatInfo(pak.SubPacket):

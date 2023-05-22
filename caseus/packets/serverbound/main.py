@@ -681,7 +681,7 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedByte.unpack(buf, ctx=ctx) // 2
 
-            return [CheesesAndHolesSyncPacket.CheeseInfo.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [CheesesAndHolesSyncPacket.CheeseInfo.unpack(buf, ctx=ctx.packet_ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -690,7 +690,7 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
             return (
                 types.UnsignedByte.pack(length, ctx=ctx) +
 
-                b"".join(CheesesAndHolesSyncPacket.CheeseInfo.pack(x, ctx=ctx) for x in value)
+                b"".join(CheesesAndHolesSyncPacket.CheeseInfo.pack(x, ctx=ctx.packet_ctx) for x in value)
             )
 
     class _Holes(pak.Type):
@@ -700,7 +700,7 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
         def _unpack(cls, buf, *, ctx):
             length = types.UnsignedByte.unpack(buf, ctx=ctx) // 3
 
-            return [CheesesAndHolesSyncPacket.HoleInfo.unpack(buf, ctx=ctx) for _ in range(length)]
+            return [CheesesAndHolesSyncPacket.HoleInfo.unpack(buf, ctx=ctx.packet_ctx) for _ in range(length)]
 
         @classmethod
         def _pack(cls, value, *, ctx):
@@ -709,7 +709,7 @@ class CheesesAndHolesSyncPacket(ServerboundPacket):
             return (
                 types.UnsignedByte.pack(length, ctx=ctx) +
 
-                b"".join(CheesesAndHolesSyncPacket.HoleInfo.pack(x, ctx=ctx) for x in value)
+                b"".join(CheesesAndHolesSyncPacket.HoleInfo.pack(x, ctx=ctx.packet_ctx) for x in value)
             )
 
     cheeses: _Cheeses
