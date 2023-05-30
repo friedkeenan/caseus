@@ -379,6 +379,10 @@ class SteamInfoPacket(ServerboundPacket):
     empty_string: types.String
 
 @public
+class CaptchaRequestPacket(ServerboundPacket):
+    id = (26, 20)
+
+@public
 class IPSPingPacket(ServerboundPacket):
     """A packet to test the ping of the satellite server.
 

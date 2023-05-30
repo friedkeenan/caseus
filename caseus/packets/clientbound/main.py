@@ -10,6 +10,7 @@ from public import public
 
 from ..common import (
     _NestedLegacyType,
+    CompressedSubPacket,
     PlayerInfo,
     RoomProperties,
     ClientboundObjectInfo,
@@ -1070,6 +1071,60 @@ class AccountErrorPacket(ClientboundPacket):
     suggested_username: types.String
 
     unk_string_3: types.String
+
+@public
+class CaptchaPacket(ClientboundPacket):
+    id = (26, 20)
+
+    class Info(CompressedSubPacket):
+        # NOTE: We could make these two fields into a single
+        # 'Type' wrapped up together, but there are packets
+        # which say they has a custom scale and yet still
+        # specify a scale of '1' (this is a real thing that
+        # I have observed), and there would be no way to
+        # disambiguate such a situation with a 'Type' that
+        # only yields the proper scale.
+        #
+        # Such a situation would have no effect on the client,
+        # but I would like to avoid such a situation nonetheless.
+        type:  pak.Enum(types.LimitedLEB128, enums.CaptchaType)
+        scale: pak.Optional(types.LimitedLEB128, lambda packet: packet.type is enums.CaptchaType.ScaledColors)
+
+        width:  types.UnsignedShort
+        height: types.UnsignedShort
+
+        colors: types.Int[types.UnsignedShort]
+
+    info: Info
+
+    @staticmethod
+    def _lerp_white(component, alpha):
+        return 0xFF - alpha + ((component * alpha) // 0xFF)
+
+    def draw_image(self):
+        from PIL import Image
+
+        im = Image.new("RGB", (self.info.width, self.info.height))
+        im.paste(0xFFFFFF, (0, 0, self.info.width, self.info.height))
+
+        for i, color in enumerate(self.info.colors):
+            y, x = divmod(i, self.info.width)
+
+            if self.info.scale is not None:
+                color *= self.info.scale
+
+            color &= 0xFFFFFFFF
+
+            alpha = (color >> 24) & 0xFF
+            red   = (color >> 16) & 0xFF
+            green = (color >>  8) & 0xFF
+            blue  = (color >>  0) & 0xFF
+
+            rgb = tuple(self._lerp_white(component, alpha) for component in (red, green, blue))
+
+            im.putpixel((x, y), rgb)
+
+        return im
 
 @public
 class IPSPongPacket(ClientboundPacket):

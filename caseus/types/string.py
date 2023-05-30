@@ -40,27 +40,38 @@ class _UInt24(pak.Type):
 public(LargeString = pak.PrefixedString(_UInt24))
 
 @public
-class CompressedString(pak.Type):
-    _default = ""
+class CompressedByteArray(pak.Type):
+    _default = bytearray()
+
+    def __set__(self, instance, value):
+        return super().__set__(instance, bytearray(value))
 
     @classmethod
     def _unpack(cls, buf, *, ctx):
         compressed_length = Int.unpack(buf, ctx=ctx)
         if compressed_length == 0:
-            return ""
+            return bytearray()
 
         compressed_data = buf.read(compressed_length)
         if len(compressed_data) < compressed_length:
             raise pak.util.BufferOutOfData("Reading compressed data failed")
 
-        data = zlib.decompress(compressed_data)
-
-        return data.decode("utf-8")
+        return zlib.decompress(compressed_data)
 
     @classmethod
     def _pack(cls, value, *, ctx):
-        data = value.encode("utf-8")
-
-        compressed_data = zlib.compress(data)
+        compressed_data = zlib.compress(value)
 
         return Int.pack(len(compressed_data), ctx=ctx) + compressed_data
+
+@public
+class CompressedString(pak.Type):
+    _default = ""
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        return CompressedByteArray.unpack(buf, ctx=ctx).decode("utf-8")
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        return CompressedByteArray.pack(value.encode("utf-8"), ctx=ctx)

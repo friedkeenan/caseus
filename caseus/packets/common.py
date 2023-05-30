@@ -43,6 +43,43 @@ class _NestedLegacyType(pak.Type):
             parent_cls = parent_cls,
         )
 
+# Only used for the 'typelike' machinery.
+class _CompressedSubPacketMeta(type):
+    pass
+
+@public
+class CompressedSubPacket(pak.Packet, metaclass=_CompressedSubPacketMeta):
+    @classmethod
+    def __class_getitem__(cls, index):
+        return _CompressedSubPacketType(cls)[index]
+
+class _CompressedSubPacketType(pak.Type):
+    subpacket_cls = None
+
+    @classmethod
+    def _default(cls, *, ctx):
+        return cls.subpacket_cls(ctx=ctx.packet_ctx)
+
+    @classmethod
+    def _unpack(cls, buf, *, ctx):
+        packet_buf = types.CompressedByteArray.unpack(buf, ctx=ctx)
+
+        return cls.subpacket_cls.unpack(packet_buf, ctx=ctx.packet_ctx)
+
+    @classmethod
+    def _pack(cls, value, *, ctx):
+        return types.CompressedByteArray.pack(value.pack(ctx=ctx.packet_ctx), ctx=ctx)
+
+    @classmethod
+    def _call(cls, subpacket_cls):
+        return cls.make_type(
+            f"{cls.__qualname__}({subpacket_cls.__qualname__})",
+
+            subpacket_cls = subpacket_cls
+        )
+
+pak.Type.register_typelike(_CompressedSubPacketMeta, _CompressedSubPacketType)
+
 @public
 class PlayerInfo(pak.SubPacket):
     username:       types.String

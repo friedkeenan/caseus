@@ -590,3 +590,12 @@ class OfficialImageTarget(enum.Enum):
     ForegroundLayer = 1
     AboveMap        = 2
     AboveAll        = 3
+
+@public
+class CaptchaType(enum.Enum):
+    UnscaledColors = 0
+    ScaledColors   = 1
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.UnscaledColors
