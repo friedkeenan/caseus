@@ -1354,18 +1354,28 @@ class LoadInventoryPacket(ClientboundPacket):
     id = (31, 1)
 
     class ItemInfo(pak.SubPacket):
-        item_id:             types.Short
-        quantity:            types.UnsignedShort # NOTE: If item id already received, then this quantity is just added.
-        priority:            types.UnsignedByte  # Only used for sorting.
-        unk_boolean_4:       types.Boolean       # Marked as 'is_event' by aiotfm, but I think that's wrong.
-        can_use:             types.Boolean       # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
-        can_equip:           types.Boolean
-        unk_boolean_7:       types.Boolean
-        category:            pak.Enum(types.Byte, enums.ItemCategory)
-        can_use_immediately: types.Boolean
-        can_use_when_dead:   types.Boolean
-        image_name:          pak.Optional(types.String, types.Boolean)
-        slot:                types.Byte
+        item_id: types.Short
+
+        # NOTE: If item id already received, then this quantity is just added.
+        quantity: types.UnsignedShort
+
+        # Only used for sorting.
+        priority: types.UnsignedByte
+        is_event: types.Boolean
+
+        # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
+        can_use: types.Boolean
+
+        can_equip:     types.Boolean
+        unk_boolean_7: types.Boolean
+        category:      pak.Enum(types.Byte, enums.ItemCategory)
+
+        # On map category 'NoShaman' and map category values for which '% 7 == 0', this is hardcoded to '30'.
+        can_use_after_time: types.UnsignedByte
+
+        can_use_when_dead: types.Boolean
+        image_name:        pak.Optional(types.String, types.Boolean)
+        slot:              types.Byte
 
     items: ItemInfo[types.Short]
 
