@@ -56,9 +56,6 @@ class Proxy(pak.AsyncPacketHandler):
 
             super().__init__(ctx=Packet.Context(), **kwargs)
 
-        def _listen(self):
-            self._tasks.append(asyncio.create_task(self.proxy._listen_impl(self)))
-
         def is_closing(self):
             if self.destination is None:
                 return pak.io.Connection.is_closing(self)

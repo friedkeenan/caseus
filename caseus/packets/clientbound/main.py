@@ -1162,7 +1162,7 @@ class AddOfficialImagesPacket(ClientboundPacket):
         disappear_on_click: types.Boolean
         hidden:             types.Boolean
 
-        # Only used for use with 'RemoveOfficialImagePacket'.
+        # Only for use with 'RemoveOfficialImagePacket'.
         name: types.String
 
     images: ImageInfo[types.UnsignedByte]
@@ -1371,7 +1371,7 @@ class LoadInventoryPacket(ClientboundPacket):
         category:      pak.Enum(types.Byte, enums.ItemCategory)
 
         # On map category 'NoShaman' and map category values for which '% 7 == 0', this is hardcoded to '30'.
-        can_use_after_time: types.UnsignedByte
+        can_use_after_seconds: types.UnsignedByte
 
         can_use_when_dead: types.Boolean
         image_name:        pak.Optional(types.String, types.Boolean)
