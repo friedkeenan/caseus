@@ -407,6 +407,12 @@ class KeepAlivePacket(ServerboundPacket):
     id = (26, 26)
 
 @public
+class RoomListPacket(ServerboundPacket):
+    id = (26, 35)
+
+    game_mode: pak.Enum(types.Byte, enums.GameMode)
+
+@public
 class SetTransformationPacket(ServerboundPacket):
     id = (27, 11)
 

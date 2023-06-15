@@ -599,3 +599,32 @@ class CaptchaType(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.UnscaledColors
+
+@public
+class GameMode(enum.Enum):
+    NONE = 0
+
+    Transformice = 1
+    Bootcamp     = 2
+    Vanilla      = 3
+    Survivor     = 8
+    Racing       = 9
+    Defilante    = 10
+    Music        = 11
+    Village      = 16
+    Module       = 18
+    Bouboum      = 30
+    Ranked       = 31
+    Duel         = 22
+    Arena        = 34
+    Fortoresse   = 40
+    Dommination  = 42
+    Nekodancer   = 50
+
+    @property
+    def image_url(self):
+        return f"https://www.transformice.com/images/x_commun/x_mode/x_{self.value}.jpg"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.NONE

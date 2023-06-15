@@ -1168,6 +1168,69 @@ class AddOfficialImagesPacket(ClientboundPacket):
     images: ImageInfo[types.UnsignedByte]
 
 @public
+class RoomListPacket(ClientboundPacket):
+    id = (26, 35)
+
+    class RoomInfo(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
+            id: types.Byte
+
+        community: types.String
+        flag_code: types.String
+        name:      types.String
+
+    class NormalRoomInfo(RoomInfo):
+        id = 0
+
+        num_players: types.UnsignedShort
+        max_players: types.UnsignedByte
+        is_funcorp:  types.Boolean
+        properties:  pak.Optional(RoomProperties, types.Boolean)
+
+    # NOTE: Called 'pinned' rooms by other libraries.
+    # These rooms are indeed sorted above all other
+    # room entries, but I don't think that's the only
+    # purpose of these entries.
+    class SpecialRoomInfo(RoomInfo):
+        id = 1
+
+        num_players_description: types.String
+        type:                    types.String
+        argument:                types.String
+
+        @property
+        def num_players(self):
+            separator_index = self.num_players_description.find("/")
+
+            if separator_index > 0:
+                num_players = self.num_players_description[:separator_index]
+            else:
+                num_players = self.num_players_description
+
+            if len(num_players) <= 0:
+                return 0
+
+            return int(num_players)
+
+        @property
+        def children_info(self):
+            # "lm" is likely short for "Lua Module".
+            if self.type != "lm":
+                return None
+
+            children = []
+            for description in self.argument.split("&~"):
+                name, num_players = description.split(",")
+
+                children.append(dict(name=name, num_players=int(num_players)))
+
+            return children
+
+    game_modes:         pak.Enum(types.Byte, enums.GameMode)[types.Byte]
+    selected_game_mode: pak.Enum(types.Byte, enums.GameMode)
+    rooms:              RoomInfo[None]
+
+@public
 class OpenNPCShopPacket(ClientboundPacket):
     id = (26, 38)
 
