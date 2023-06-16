@@ -543,7 +543,7 @@ class Proxy(pak.AsyncPacketHandler):
         # Never forward on an extension packet.
         return self.DO_NOTHING
 
-    @pak.packet_listener(serverbound.TribulleWrapperPacket, clientbound.TribulleWrapperPacket)
+    @pak.packet_listener(serverbound.TribulleWrapperPacket, clientbound.TribulleWrapperPacket, after=True)
     async def _on_tribulle_after(self, source, packet):
         await self._listen_to_nested_packet(source, packet.nested, after=True)
 
