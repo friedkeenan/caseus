@@ -70,8 +70,6 @@ class Sniffer(pak.AsyncPacketHandler):
                 except Exception:
                     continue
 
-                break
-
         @abc.abstractmethod
         def _packet_from_data(self, buf):
             raise NotImplementedError

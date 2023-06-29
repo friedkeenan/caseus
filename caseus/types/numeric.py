@@ -164,7 +164,7 @@ class VarNum(pak.Type):
         num = 0
 
         for i in range(cls._max_bytes):
-            read  = UnsignedByte.unpack(buf, ctx=ctx)
+            read = UnsignedByte.unpack(buf, ctx=ctx)
 
             # Get the bottom 7 bits
             value = read & 0b01111111

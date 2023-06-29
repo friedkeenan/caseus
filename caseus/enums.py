@@ -155,6 +155,7 @@ class FashionSquadOutfitBackground(enum.Enum):
     Ocean      = 2
     Valentines = 3
     Halloween  = 4
+    Fishing    = 5
 
     @property
     def url(self):

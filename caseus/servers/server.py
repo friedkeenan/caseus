@@ -146,8 +146,6 @@ class MinimalServer(pak.AsyncPacketHandler):
                 except Exception:
                     continue
 
-                break
-
         async def _read_next_packet(self):
             length = await self._read_length()
             if length is None:

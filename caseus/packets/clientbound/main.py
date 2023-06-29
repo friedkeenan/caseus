@@ -1651,6 +1651,67 @@ class SetTitlePacket(ClientboundPacket):
     title_id: types.UnsignedShort
 
 @public
+class ChangeLoginBackgroundPacket(ClientboundPacket):
+    id = (100, 99)
+
+    @dataclasses.dataclass
+    class BackgroundInfo:
+        IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_connexion/{image}"
+
+        background_image: str
+        foreground_image: str
+
+        background_x: int
+        background_y: int
+
+        @property
+        def background_image_url(self):
+            return self.IMAGE_URL_FMT.format(image=self.background_image)
+
+        @property
+        def foreground_image_url(self):
+            if len(self.foreground_image) <= 0:
+                return None
+
+            return self.IMAGE_URL_FMT.format(image=self.foreground_image)
+
+    class _BackgroundInfo(pak.Type):
+        @classmethod
+        def _unpack(cls, buf, *, ctx):
+            description = types.String.unpack(buf, ctx=ctx)
+
+            background_image, *rest = description.split("#")
+
+            return ChangeLoginBackgroundPacket.BackgroundInfo(
+                background_image = background_image,
+                foreground_image = rest[0] if len(rest) > 0 else "",
+
+                background_x = int(rest[1]) if len(rest) > 1 else 0,
+                background_y = int(rest[2]) if len(rest) > 2 else 0,
+            )
+
+        @classmethod
+        def _pack(cls, value, *, ctx):
+            description = value.background_image
+
+            if len(value.foreground_image) > 0:
+                description += f"#{value.foreground_image}"
+            elif value.background_x != 0 or value.background_y != 0:
+                description += "#"
+
+            if value.background_x != 0:
+                description += f"#{value.background_x}"
+            else:
+                description += "#"
+
+            if value.background_y != 0:
+                description += f"#{value.background_y}"
+
+            return types.String.pack(description, ctx=ctx)
+
+    background: _BackgroundInfo
+
+@public
 class CollectibleActionPacket(ClientboundPacket):
     id = (100, 101)
 
