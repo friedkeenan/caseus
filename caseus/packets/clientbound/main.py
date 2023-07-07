@@ -1433,8 +1433,22 @@ class LoadInventoryPacket(ClientboundPacket):
         unk_boolean_7: types.Boolean
         category:      pak.Enum(types.Byte, enums.ItemCategory)
 
-        # On map category 'NoShaman' and map category values for which '% 7 == 0', this is hardcoded to '30'.
-        can_use_after_seconds: types.UnsignedByte
+        # If the current map category is 'Racing', 'RacingTest',
+        # or 'NoShamanTest', then this value is hardcoded to '30'.
+        # Additionally if playing those categories, then items
+        # cannot be used before a player has won the round.
+        #
+        # Else, if the map has no shaman, then if no player has
+        # won the round or if the round has been active for more
+        # than 90 seconds, then items cannot be used.
+        #
+        # Else, if the map has a shaman but the shaman is dead,
+        # then there is no time constraint on when items can be
+        # used, overriding this field.
+        #
+        # Else this field names the seconds after a round has
+        # begun after which the item can be used.
+        can_use_after_seconds: types.Byte
 
         can_use_when_dead: types.Boolean
         image_name:        pak.Optional(types.String, types.Boolean)

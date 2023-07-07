@@ -31,16 +31,20 @@ class Translator(collections.abc.MutableMapping):
     async def download(cls, language):
         async with aiohttp.ClientSession() as session:
             async with session.get(cls.TRANSLATIONS_URL_FMT.format(language=language)) as response:
-                data = zlib.decompress(await response.read()).decode("utf-8")
+                return cls.from_compressed_data(await response.read())
 
-                data = data.split("\n-\n")
-                data = [entry.split("=", 1) for entry in data if len(entry) != 0]
+    @classmethod
+    def from_compressed_data(cls, data):
+        data = zlib.decompress(data).decode("utf-8")
 
-                return cls({
-                    pair[0]: pair[1]
+        data = data.split("\n-\n")
+        data = [entry.split("=", 1) for entry in data if len(entry) != 0]
 
-                    for pair in data if len(pair) > 1
-                })
+        return cls({
+            pair[0]: pair[1]
+
+            for pair in data if len(pair) > 1
+        })
 
     def _nested_translate(self, translated_tracker, capture, args):
         if translated_tracker is not None:
