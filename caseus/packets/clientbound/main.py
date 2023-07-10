@@ -1836,6 +1836,27 @@ class NPCPlayEmotePacket(ClientboundPacket):
     emoji_id: types.Short
 
 @public
+class DecoratePlayerListPacket(ClientboundPacket):
+    id = (144, 26)
+
+    class Decoration(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
+            id: types.LimitedLEB128
+
+    class VersusEventCounter(Decoration):
+        id = 1
+
+        class TeamInfo(pak.SubPacket):
+            image_name:      types.String
+            gathered_cheese: types.String
+            text_color:      types.LimitedLEB128
+
+        left:  TeamInfo
+        right: TeamInfo
+
+    decoration: Decoration
+
+@public
 class LoadShamanObjectSpritesPacket(ClientboundPacket):
     id = (144, 27)
 
