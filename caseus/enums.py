@@ -329,7 +329,7 @@ class MapCategory(enum.Enum):
     # when an actual vanilla map appears with
     # a 'NewRoundPacket', where the map category
     # seems to make no sense, perhaps being random
-    # or just garbage data from ot being filled in.
+    # or just garbage data from not being filled in.
     Vanilla = -1
 
     Standard               = 0
