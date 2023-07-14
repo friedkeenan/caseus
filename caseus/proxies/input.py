@@ -114,7 +114,7 @@ class InputListeningProxy(Proxy):
             except KeyError:
                 pass
 
-    # NOTE: The game server does not seem to care about unexpected
+    # NOTE: The official server does not seem to care about unexpected
     # mouse down packets or keyboard packets, however we take care
     # here to nonetheless not forward on any packets the server would
     # not expect.

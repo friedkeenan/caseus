@@ -19,7 +19,9 @@ class AddAnchorsPacket(ClientboundLegacyPacket):
     def _body_components(self, *, ctx):
         return [anchor.description for anchor in self.anchors]
 
-    __repr__ = ClientboundLegacyPacket.repr_for_attrs("anchors")
+    __repr__ = ClientboundLegacyPacket.repr_for_attrs(
+        "anchors",
+    )
 
 @public
 class PlayerDiedPacket(ClientboundLegacyPacket):
@@ -27,7 +29,7 @@ class PlayerDiedPacket(ClientboundLegacyPacket):
 
     def __init__(self, session_id, unk_attr_2, score, type):
         self.session_id = session_id
-        self.unk_attr_2 = unk_attr_2
+        self.unk_attr_2 = unk_attr_2 # Per-round death counter?
         self.score      = score
         self.type       = type
 
@@ -73,4 +75,7 @@ class SetSynchronizerPacket(ClientboundLegacyPacket):
 
         return [str(self.session_id)]
 
-    __repr__ = ClientboundLegacyPacket.repr_for_attrs("session_id", "spawn_initial_objects")
+    __repr__ = ClientboundLegacyPacket.repr_for_attrs(
+        "session_id",
+        "spawn_initial_objects",
+    )

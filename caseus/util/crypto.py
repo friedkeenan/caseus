@@ -23,7 +23,7 @@ def shakikoo(data):
         The data to hash.
 
         If :class:`str`, then the string is encoded
-        in UTF-8 and the result is sued as the data.
+        in UTF-8 and the result is used as the data.
     """
 
     if isinstance(data, str):
@@ -39,7 +39,7 @@ def shakikoo(data):
     extra_hash = hashlib.sha256(new_data)
 
     # Convert the binary digest to base64.
-    return base64.b64encode(extra_hash.digest())
+    return base64.b64encode(extra_hash.digest()).decode("ascii")
 
 _XXTEA_DELTA = 0x9E3779B9
 _MAX_UINT32  = 0xFFFFFFFF

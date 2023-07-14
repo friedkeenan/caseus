@@ -324,11 +324,13 @@ class NPCItemType(enum.Enum):
 
 @public
 class MapCategory(enum.Enum):
-    # NOTE: There are certain categories
-    # which are listed on the wiki but we
-    # do not list here. This is because the
-    # game does not know about them or treat
-    # them specially at all.
+    # NOTE: This value seems only used for the
+    # map rotation in a room's properties, not
+    # when an actual vanilla map appears with
+    # a 'NewRoundPacket', where the map category
+    # seems to make no sense, perhaps being random
+    # or just garbage data from ot being filled in.
+    Vanilla = -1
 
     Standard               = 0
     Protected              = 1
@@ -357,7 +359,18 @@ class MapCategory(enum.Enum):
     NoShamanTest           = 42
     Deleted                = 44
     Thematic               = 66
-    Vanilla                = 88
+
+    # There is a sprite for this map category,
+    # which is just *ever* so slightly different
+    # from the sprite for the 'Vanilla' category,
+    # however the server does not recognize it and
+    # its value is not included with all the other
+    # map categories, including unused ones.
+    #
+    # My theory is that it's for some sort of "test"
+    # maps, akin to 'SurvivorTest', 'DualShamanTest',
+    # etc., maybe for testing vanilla maps?
+    Unknown88 = 88
 
     # NOTE: The client translates this to just 'Racing'.
     RacingTest = 38
@@ -536,11 +549,11 @@ class PlayerActivity(enum.Enum):
 
 @public
 class PlayerAction(enum.Enum):
-    Uncrouch       = 0
-    Crouch         = 1
-    Throw          = 2
-    ResetAnimation = 3
-    CastFishingRod = 4
+    Uncrouch        = 0
+    Crouch          = 1
+    Throw           = 2
+    RevertAnimation = 3
+    CastFishingRod  = 4
 
 @public
 class ConsumableReward(enum.Enum):
