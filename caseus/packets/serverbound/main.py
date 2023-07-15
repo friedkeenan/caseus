@@ -770,6 +770,13 @@ class InteractWithLuaNPCPacket(ServerboundPacket):
     name: types.String
 
 @public
+class BuyEmojiPacket(ServerboundPacket):
+    id = (149, 25)
+
+    emoji_id: types.LimitedLEB128
+    currency: pak.Enum(types.LimitedLEB128, enums.Currency)
+
+@public
 class SetLanguagePacket(ServerboundPacket):
     id = (176, 1)
 
