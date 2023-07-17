@@ -1433,6 +1433,10 @@ class LoadInventoryPacket(ClientboundPacket):
         unk_boolean_7: types.Boolean
         category:      pak.Enum(types.Byte, enums.ItemCategory)
 
+        # If the 'initial_cooldown' field is non-zero, and if
+        # the client has not received a 'DisableInitialItemCooldownPacket'
+        # since the round started, then the following logic is applied:
+        #
         # If the current map category is 'Racing', 'RacingTest',
         # or 'NoShamanTest', then this value is hardcoded to '30'.
         # Additionally if playing those categories, then items
@@ -1448,7 +1452,7 @@ class LoadInventoryPacket(ClientboundPacket):
         #
         # Else this field names the seconds after a round has
         # begun after which the item can be used.
-        can_use_after_seconds: types.Byte
+        initial_cooldown: types.Byte
 
         can_use_when_dead: types.Boolean
         image_name:        pak.Optional(types.String, types.Boolean)
@@ -1986,6 +1990,28 @@ class AvailableEmojisPacket(ClientboundPacket):
     @property
     def available_emoji_ids(self):
         return [*self.DEFAULT_EMOJI_IDS, *self.extra_emoji_ids]
+
+@public
+class DisableSynchronizationPacket(ClientboundPacket):
+    id = (144, 45)
+
+@public
+class DisableInitialItemCooldownPacket(ClientboundPacket):
+    id = (144, 46)
+
+@public
+class SaveWallpaperPacket(ClientboundPacket):
+    id = (144, 47)
+
+    # NOTE: The game downloads the image as a JPEG but
+    # then before saving it, converts the image to a PNG.
+    IMAGE_URL_FMT = "https://www.transformice.com/images/wallpaper/{name}.jpg"
+
+    wallpaper_name: types.String
+
+    @property
+    def image_url(self):
+        return self.IMAGE_URL_FMT.format(name=self.wallpaper_name)
 
 @public
 class SetLanguagePacket(ClientboundPacket):
