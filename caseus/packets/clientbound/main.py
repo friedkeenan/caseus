@@ -1429,9 +1429,10 @@ class LoadInventoryPacket(ClientboundPacket):
         # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
         can_use: types.Boolean
 
-        can_equip:     types.Boolean
-        unk_boolean_7: types.Boolean
-        category:      pak.Enum(types.Byte, enums.ItemCategory)
+        can_equip: types.Boolean
+        can_trade: types.Boolean
+
+        category: pak.Enum(types.Byte, enums.ItemCategory)
 
         # If the 'initial_cooldown' field is non-zero, and if
         # the client has not received a 'DisableInitialItemCooldownPacket'
