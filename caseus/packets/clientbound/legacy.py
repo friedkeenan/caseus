@@ -79,3 +79,40 @@ class SetSynchronizerPacket(ClientboundLegacyPacket):
         "session_id",
         "spawn_initial_objects",
     )
+
+@public
+class BanMessagePacket(ClientboundLegacyPacket):
+    id = (26, 18)
+
+    # NOTE: 'duration' is in milliseconds,
+    # and 'reason' is a translation key.
+    #
+    # TODO: Should we use datetime stuff
+    # to represent time things instead
+    # of just numbers?
+
+    def __init__(self, reason, duration):
+        self.reason   = reason
+        self.duration = duration
+
+    @property
+    def is_permanent(self):
+        return self.duration is None
+
+    @classmethod
+    def _from_body_components(cls, components, *, ctx):
+        if len(components) < 2:
+            return cls(components[0], None)
+
+        return cls(components[1], int(components[0]))
+
+    def _body_components(self, *, ctx):
+        if self.is_permanent:
+            return [self.reason]
+
+        return [str(self.duration), self.reason]
+
+    __repr__ = ClientboundLegacyPacket.repr_for_attrs(
+        "reason",
+        "duration",
+    )

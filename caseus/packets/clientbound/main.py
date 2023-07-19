@@ -1653,6 +1653,28 @@ class ImmobilizePlayerPacket(ClientboundPacket):
     immobilize: types.Boolean
 
 @public
+class NotificationPacket(ClientboundPacket):
+    # NOTE: I am not happy with the name of
+    # this packet, but I don't know what other
+    # purpose it could have considering they
+    # planned ahead to have different IDs do
+    # different things.
+
+    id = (100, 67)
+
+    class Notification(pak.SubPacket):
+        class Header(pak.SubPacket.Header):
+            id: types.Byte
+
+    class GainItemNotification(Notification):
+        id = 0
+
+        item_id:  types.UnsignedShort
+        quantity: types.UnsignedShort
+
+    notification: Notification
+
+@public
 class LaunchHotAirBalloonPacket(ClientboundPacket):
     id = (100, 71)
 
