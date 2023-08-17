@@ -1443,13 +1443,20 @@ class LoadInventoryPacket(ClientboundPacket):
         # Additionally if playing those categories, then items
         # cannot be used before a player has won the round.
         #
-        # Else, if the map has no shaman, then if no player has
-        # won the round or if the round has been active for more
-        # than 90 seconds, then items cannot be used.
-        #
         # Else, if the map has a shaman but the shaman is dead,
         # then there is no time constraint on when items can be
         # used, overriding this field.
+        #
+        # After the above logic, then if the item has ID '2578',
+        # corresponding to the trampoline item, then if the map
+        # has no shaman, or strangely if the map has a shaman but
+        # the shaman is dead, then the item cannot be used. The
+        # latter case seems maybe unintentional since the game
+        # still sets the cooldown to '0' before returning from
+        # the function, and does not send any message that the
+        # item can't be used. However if it is unintentional,
+        # then there would be no reason for that condition to
+        # exist because it was already covered by earlier behavior.
         #
         # Else this field names the seconds after a round has
         # begun after which the item can be used.
@@ -2000,6 +2007,32 @@ class SetNewsPopupFlyerPacket(ClientboundPacket):
         """
 
         return self.IMAGE_URL_FMT.format(image_name=self.image_name)
+
+@public
+class SetPlayerCollisionPacket(ClientboundPacket):
+    id = (144, 43)
+
+    class CollisionFlags(pak.BitField):
+        standard_player:              1
+        colliding_player:             1
+        standard_object:              1
+        non_player_colliding_object:  1
+        only_player_colliding_object: 1
+        non_colliding:                1
+
+        # Theoretically these extraneous
+        # bits could be set to impact
+        # collisions between players,
+        # but that would be weird.
+        _custom_bits: 26
+
+    session_id: types.LimitedLEB128
+
+    collision_preset: pak.Enum(types.LimitedLEB128, enums.CollisionPreset)
+
+    # Only used if 'Manual' is used as 'collision_preset'.
+    personal_categories:      CollisionFlags.Type(types.LimitedLEB128)
+    collides_with_categories: CollisionFlags.Type(types.LimitedLEB128)
 
 @public
 class AvailableEmojisPacket(ClientboundPacket):

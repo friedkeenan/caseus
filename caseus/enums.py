@@ -642,3 +642,14 @@ class GameMode(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.NONE
+
+@public
+class CollisionPreset(enum.Enum):
+    Manual = -1
+
+    NonColliding              = 0
+    StandardPlayer            = 1
+    CollidingPlayer           = 2
+    StandardObject            = 3
+    NonPlayerCollidingObject  = 4
+    OnlyPlayerCollidingObject = 5
