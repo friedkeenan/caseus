@@ -40,30 +40,6 @@ class ObjectSyncPacket(ClientboundPacket):
     objects: ClientboundObjectInfo[None]
 
 @public
-class PlayerMovementPacket(ClientboundPacket):
-    id = (4, 4)
-
-    class RotationInfo(pak.SubPacket):
-        rotation:         pak.ScaledInteger(types.Short, 100)
-        angular_velocity: pak.ScaledInteger(types.Short, 100)
-        fixed_rotation:   types.Boolean
-
-    session_id:          types.Int
-    round_id:            types.Int
-    moving_right:        types.Boolean
-    moving_left:         types.Boolean
-    x:                   pak.ScaledInteger(types.Int,   100 / 30)
-    y:                   pak.ScaledInteger(types.Int,   100 / 30)
-    velocity_x:          pak.ScaledInteger(types.Short, 10)
-    velocity_y:          pak.ScaledInteger(types.Short, 10)
-    jumping:             types.Boolean
-    jumping_frame_index: types.Byte
-    entered_portal:      pak.Enum(types.Byte, enums.Portal)
-
-    # Only present if transformed or rolling.
-    rotation_info: pak.Optional(RotationInfo)
-
-@public
 class SetFacingPacket(ClientboundPacket):
     id = (4, 6)
 
@@ -2068,6 +2044,30 @@ class SaveWallpaperPacket(ClientboundPacket):
     @property
     def image_url(self):
         return self.IMAGE_URL_FMT.format(name=self.wallpaper_name)
+
+@public
+class PlayerMovementPacket(ClientboundPacket):
+    id = (144, 48)
+
+    class RotationInfo(pak.SubPacket):
+        rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
+        angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
+        fixed_rotation:   types.ByteBoolean
+
+    session_id:          types.LimitedLEB128
+    moving_right:        types.ByteBoolean
+    moving_left:         types.ByteBoolean
+    x:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
+    y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
+    velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    honeyed_seconds:     pak.ScaledInteger(types.LimitedLEB128, 4 * 100)
+    jumping:             types.ByteBoolean
+    jumping_frame_index: types.LimitedLEB128
+    entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
+
+    # Only present if transformed or rolling.
+    rotation_info: pak.Optional(RotationInfo)
 
 @public
 class SetLanguagePacket(ClientboundPacket):

@@ -36,29 +36,6 @@ class ObjectSyncPacket(ServerboundPacket):
     objects:  ServerboundObjectInfo[None]
 
 @public
-class PlayerMovementPacket(ServerboundPacket):
-    id = (4, 4)
-
-    class RotationInfo(pak.SubPacket):
-        rotation:         pak.ScaledInteger(types.Short, 100)
-        angular_velocity: pak.ScaledInteger(types.Short, 100)
-        fixed_rotation:   types.Boolean
-
-    round_id:            types.Int
-    moving_right:        types.Boolean
-    moving_left:         types.Boolean
-    x:                   pak.ScaledInteger(types.Int,   100 / 30)
-    y:                   pak.ScaledInteger(types.Int,   100 / 30)
-    velocity_x:          pak.ScaledInteger(types.Short, 10)
-    velocity_y:          pak.ScaledInteger(types.Short, 10)
-    jumping:             types.Boolean
-    jumping_frame_index: types.Byte
-    entered_portal:      pak.Enum(types.Byte, enums.Portal)
-
-    # Only present if transformed or rolling.
-    rotation_info: pak.Optional(RotationInfo)
-
-@public
 class PlayerDiedPacket(ServerboundPacket):
     id = (4, 5)
 
@@ -775,6 +752,30 @@ class BuyEmojiPacket(ServerboundPacket):
 
     emoji_id: types.LimitedLEB128
     currency: pak.Enum(types.LimitedLEB128, enums.Currency)
+
+@public
+class PlayerMovementPacket(ServerboundPacket):
+    id = (149, 26)
+
+    class RotationInfo(pak.SubPacket):
+        rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
+        angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
+        fixed_rotation:   types.Boolean
+
+    round_id:            types.LimitedLEB128
+    moving_right:        types.Boolean
+    moving_left:         types.Boolean
+    x:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
+    y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
+    velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    honeyed_seconds:     pak.ScaledInteger(types.LimitedLEB128, 4 * 100)
+    jumping:             types.Boolean
+    jumping_frame_index: types.LimitedLEB128
+    entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
+
+    # Only present if transformed or rolling.
+    rotation_info: pak.Optional(RotationInfo)
 
 @public
 class SetLanguagePacket(ServerboundPacket):
