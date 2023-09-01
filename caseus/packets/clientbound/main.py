@@ -2052,7 +2052,7 @@ class PlayerMovementPacket(ClientboundPacket):
     class RotationInfo(pak.SubPacket):
         rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
         angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
-        fixed_rotation:   types.ByteBoolean
+        fixed_rotation:   types.Boolean
 
     session_id:          types.LimitedLEB128
     moving_right:        types.Boolean
