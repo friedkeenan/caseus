@@ -2055,14 +2055,14 @@ class PlayerMovementPacket(ClientboundPacket):
         fixed_rotation:   types.ByteBoolean
 
     session_id:          types.LimitedLEB128
-    moving_right:        types.ByteBoolean
-    moving_left:         types.ByteBoolean
+    moving_right:        types.Boolean
+    moving_left:         types.Boolean
     x:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
     y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
     velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
     velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
     honeyed_seconds:     pak.ScaledInteger(types.LimitedLEB128, 4 * 100)
-    jumping:             types.ByteBoolean
+    jumping:             types.Boolean
     jumping_frame_index: types.LimitedLEB128
     entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
 
