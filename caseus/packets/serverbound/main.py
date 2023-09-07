@@ -8,6 +8,8 @@ from ..common import (
     _NestedLegacyType,
     RoomProperties,
     ServerboundObjectInfo,
+    PlayerFrictionInfo,
+    PlayerRotationInfo,
 )
 
 from ..packet import (
@@ -757,10 +759,7 @@ class BuyEmojiPacket(ServerboundPacket):
 class PlayerMovementPacket(ServerboundPacket):
     id = (149, 26)
 
-    class RotationInfo(pak.SubPacket):
-        rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
-        angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
-        fixed_rotation:   types.Boolean
+    CIPHER = XOR
 
     round_id:            types.LimitedLEB128
     moving_right:        types.Boolean
@@ -769,13 +768,13 @@ class PlayerMovementPacket(ServerboundPacket):
     y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
     velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
     velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
-    honeyed_seconds:     pak.ScaledInteger(types.LimitedLEB128, 4 * 100)
+    friction_info:       PlayerFrictionInfo
     jumping:             types.Boolean
     jumping_frame_index: types.LimitedLEB128
     entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
 
     # Only present if transformed or rolling.
-    rotation_info: pak.Optional(RotationInfo)
+    rotation_info: pak.Optional(PlayerRotationInfo)
 
 @public
 class SetLanguagePacket(ServerboundPacket):

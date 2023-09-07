@@ -145,3 +145,29 @@ class ServerboundObjectInfo(_ObjectInfo):
 @public
 class ClientboundObjectInfo(_ObjectInfo):
     add_if_missing: pak.Optional(types.ByteBoolean, lambda packet: not packet.should_remove)
+
+@public
+class PlayerFrictionInfo(pak.SubPacket):
+    charge: pak.ScaledInteger(types.LimitedLEB128, 100)
+
+    # How much is substracted from 'charge' per second.
+    #
+    # NOTE: The game uses this rate to interpolate between
+    # arbitrary times. Also if the sign of this field is
+    # different from the sign of 'charge', then the duration
+    # of the effect will never end on its own.
+    loss_rate: pak.ScaledInteger(types.LimitedLEB128, 10)
+
+    @property
+    def sticky(self):
+        return self.charge > 0
+
+    @property
+    def slippery(self):
+        return self.charge < 0
+
+@public
+class PlayerRotationInfo(pak.SubPacket):
+    rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
+    angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
+    fixed_rotation:   types.Boolean

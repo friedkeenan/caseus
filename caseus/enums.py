@@ -653,3 +653,9 @@ class CollisionPreset(enum.Enum):
     StandardObject            = 3
     NonPlayerCollidingObject  = 4
     OnlyPlayerCollidingObject = 5
+
+    Ignore = 6
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Ignore

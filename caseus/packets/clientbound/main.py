@@ -14,6 +14,8 @@ from ..common import (
     PlayerInfo,
     RoomProperties,
     ClientboundObjectInfo,
+    PlayerFrictionInfo,
+    PlayerRotationInfo,
 )
 
 from ..packet import (
@@ -2049,11 +2051,6 @@ class SaveWallpaperPacket(ClientboundPacket):
 class PlayerMovementPacket(ClientboundPacket):
     id = (144, 48)
 
-    class RotationInfo(pak.SubPacket):
-        rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
-        angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
-        fixed_rotation:   types.Boolean
-
     session_id:          types.LimitedLEB128
     moving_right:        types.Boolean
     moving_left:         types.Boolean
@@ -2061,13 +2058,13 @@ class PlayerMovementPacket(ClientboundPacket):
     y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
     velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
     velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
-    honeyed_seconds:     pak.ScaledInteger(types.LimitedLEB128, 4 * 100)
+    friction_info:       PlayerFrictionInfo
     jumping:             types.Boolean
     jumping_frame_index: types.LimitedLEB128
     entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
 
     # Only present if transformed or rolling.
-    rotation_info: pak.Optional(RotationInfo)
+    rotation_info: pak.Optional(PlayerRotationInfo)
 
 @public
 class SetLanguagePacket(ClientboundPacket):
