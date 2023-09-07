@@ -150,7 +150,7 @@ class ClientboundObjectInfo(_ObjectInfo):
 class PlayerFrictionInfo(pak.SubPacket):
     charge: pak.ScaledInteger(types.LimitedLEB128, 100)
 
-    # How much is substracted from 'charge' per second.
+    # How much is subtracted from 'charge' per second.
     #
     # NOTE: The game uses this rate to interpolate between
     # arbitrary times. Also if the sign of this field is
