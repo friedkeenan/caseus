@@ -386,22 +386,18 @@ class StaffMessagePacket(ClientboundPacket):
     # 'ModeratorCommunity' message types, then nothing is displayed.
     disable_decoration: types.Boolean
 
-    # If 'True' then 'message' is treated as a translation key.
-    is_translation: types.Boolean
+    # If 'True' then 'message' is treated as a translation template.
+    should_translate: types.Boolean
 
-    translation_args: types.String[types.Byte]
+    template_args: types.String[types.Byte]
 
 @public
 class ServerMessagePacket(ClientboundPacket):
     id = (6, 20)
 
     general_channel: types.Boolean
-
-    # If the translation key does not start with
-    # '$', or has a space, or has a newline, then
-    # it is just treated as the final message.
-    translation_key:  types.String
-    translation_args: types.String[types.Byte]
+    template:        types.String
+    template_args:   types.String[types.Byte]
 
 @public
 class PlayEmotePacket(ClientboundPacket):
@@ -477,11 +473,11 @@ class ShowEmojiPacket(ClientboundPacket):
 class PlayerVictoryPacket(ClientboundPacket):
     id = (8, 6)
 
-    type:         pak.Enum(types.Byte, enums.VictoryType)
-    session_id:   types.Int
-    score:        types.Short
-    place:        types.Byte
-    centiseconds: types.UnsignedShort
+    type:       pak.Enum(types.Byte, enums.VictoryType)
+    session_id: types.Int
+    score:      types.Short
+    place:      types.Byte
+    seconds:    pak.ScaledInteger(types.UnsignedShort, 100)
 
 @public
 class SetPlayerScorePacket(ClientboundPacket):
@@ -1057,7 +1053,7 @@ class CaptchaPacket(ClientboundPacket):
     class Info(CompressedSubPacket):
         # NOTE: We could make these two fields into a single
         # 'Type' wrapped up together, but there are packets
-        # which say they has a custom scale and yet still
+        # which say they have a custom scale and yet still
         # specify a scale of '1' (this is a real thing that
         # I have observed), and there would be no way to
         # disambiguate such a situation with a 'Type' that
@@ -1225,8 +1221,8 @@ class OpenNPCShopPacket(ClientboundPacket):
         cost_id:       types.Int
         cost_quantity: types.Short
 
-        hover_translation_key: types.String
-        hover_translation_arg: types.String
+        hover_text_template: types.String
+        hover_text_args:     types.String
 
     name:  types.String
     items: ItemInfo[types.UnsignedByte]
@@ -1268,8 +1264,8 @@ class TranslatedGeneralMessagePacket(ClientboundPacket):
     # the language loaded, then it will retrieve them.
     language: types.String
 
-    translation_key:  types.String
-    translation_args: types.String[types.Byte]
+    template:      types.String
+    template_args: types.String[types.Byte]
 
 @public
 class PingPacket(ClientboundPacket):

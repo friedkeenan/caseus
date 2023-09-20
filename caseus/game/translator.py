@@ -66,20 +66,20 @@ class Translator(collections.abc.MutableMapping):
 
         return local_result, num_format_args
 
-    def translate(self, key, *args, gender=enums.Gender.Unknown):
+    def translate(self, template, *args, gender=enums.Gender.Unknown):
         # NOTE: This could potentially result in different
         # string representations than Actionscript would
         # give, particularly for booleans. For now we choose
         # not to care.
         args = [str(arg) for arg in args]
 
-        if key.rfind("$") == 0 and " " not in key and "\n" not in key:
-            result = self.get(key[1:], default=key)
+        if template.rfind("$") == 0 and " " not in template and "\n" not in template:
+            result = self.get(template[1:], default=template)
 
             for i, arg in enumerate(args):
                 result = arg.join(result.split(f"%{i + 1}"))
         else:
-            result = key
+            result = template
 
             translated_tracker = {} if len(args) == 0 else None
             for capture in self.NESTED_TRANSLATION_KEY_PATTERN.finditer(result):

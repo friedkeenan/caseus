@@ -84,16 +84,15 @@ class SetSynchronizerPacket(ClientboundLegacyPacket):
 class BanMessagePacket(ClientboundLegacyPacket):
     id = (26, 18)
 
-    # NOTE: 'duration' is in milliseconds,
-    # and 'reason' is a translation key.
+    # NOTE: 'duration' is in milliseconds.
     #
     # TODO: Should we use datetime stuff
     # to represent time things instead
     # of just numbers?
 
     def __init__(self, reason, duration):
-        self.reason   = reason
-        self.duration = duration
+        self.reason_template = reason_template
+        self.duration        = duration
 
     @property
     def is_permanent(self):
@@ -108,11 +107,11 @@ class BanMessagePacket(ClientboundLegacyPacket):
 
     def _body_components(self, *, ctx):
         if self.is_permanent:
-            return [self.reason]
+            return [self.reason_template]
 
-        return [str(self.duration), self.reason]
+        return [str(self.duration), self.reason_template]
 
     __repr__ = ClientboundLegacyPacket.repr_for_attrs(
-        "reason",
+        "reason_template",
         "duration",
     )
