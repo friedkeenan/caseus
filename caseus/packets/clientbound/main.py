@@ -261,6 +261,13 @@ class RoomPasswordPacket(ClientboundPacket):
     room_name: types.String
 
 @public
+class SetPlayerShameowPacket(ClientboundPacket):
+    id = (5, 43)
+
+    session_id: types.Int
+    enable:     types.Boolean
+
+@public
 class EventMapActionPacket(ClientboundPacket):
     id = (5, 44)
 
