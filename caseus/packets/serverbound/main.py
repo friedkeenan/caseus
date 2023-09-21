@@ -142,6 +142,12 @@ class SetWorldGravityPacket(ServerboundPacket):
     y: types.Short
 
 @public
+class DisableObjectGravityPacket(ServerboundPacket):
+    id = (5, 29)
+
+    object_id: types.Int
+
+@public
 class JoinRoomPacket(ServerboundPacket):
     id = (5, 38)
 

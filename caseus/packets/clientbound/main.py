@@ -219,6 +219,13 @@ class SetWorldGravityPacket(ClientboundPacket):
     y: pak.ScaledInteger(types.Int, 1000)
 
 @public
+class SetObjectGravityScalePacket(ClientboundPacket):
+    id = (5, 29)
+
+    object_id: types.Int
+    scale:     pak.ScaledInteger(types.Short, 100)
+
+@public
 class SetRollingPacket(ClientboundPacket):
     id = (5, 30)
 
