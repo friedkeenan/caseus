@@ -20,16 +20,9 @@ from .. import types
 
 @public
 class Proxy(pak.AsyncPacketHandler):
-    CORRECTED_LOADER_SIZE = 0x7EE88
+    SOCKET_POLICY_RESPONSE = b'<cross-domain-policy><allow-access-from domain="*" to-ports="*" secure="false" /></cross-domain-policy>\x00'
 
-    # NOTE: Be careful when sending packets to the server with this.
-    # Take great care to ensure that the fingerprints of packets
-    # would never get out of sync, else the server will kick you.
-    #
-    # This means that every packet you send to the server, it should be
-    # matched up with a packet sent by the client, having the same
-    # fingerprint. If that cannot work for you, then you should use
-    # 'FingerprintHandlingProxy' instead.
+    CORRECTED_LOADER_SIZE = 0x1FBD
 
     class _Connection(pak.io.Connection):
         # Used for the 'ServerConnection' and 'ClientConnection'
@@ -275,6 +268,8 @@ class Proxy(pak.AsyncPacketHandler):
         host_main_port      = 11801,
         host_satellite_port = 12801,
 
+        host_socket_policy_port = 10801,
+
         expected_address = "localhost",
 
         main_server_address = None,
@@ -285,6 +280,8 @@ class Proxy(pak.AsyncPacketHandler):
         self.host_address        = host_address
         self.host_main_port      = host_main_port
         self.host_satellite_port = host_satellite_port
+
+        self.host_socket_policy_port = host_socket_policy_port
 
         self.expected_address = expected_address
 
@@ -302,6 +299,8 @@ class Proxy(pak.AsyncPacketHandler):
 
         self._satellite_packets = []
 
+        self.socket_policy_srv = None
+
     def register_packet_listener(self, listener, *packet_types, after=False, **flags):
         super().register_packet_listener(listener, *packet_types, after=after, **flags)
 
@@ -318,12 +317,18 @@ class Proxy(pak.AsyncPacketHandler):
         if self.satellite_srv is not None:
             self.satellite_srv.close()
 
+        if self.socket_policy_srv is not None:
+            self.socket_policy_srv.close()
+
     async def wait_closed(self):
         if self.main_srv is not None:
             await self.main_srv.wait_closed()
 
         if self.satellite_srv is not None:
             await self.satellite_srv.wait_closed()
+
+        if self.socket_policy_srv is not None:
+            await self.socket_policy_srv.wait_closed()
 
     async def __aenter__(self):
         return self
@@ -418,6 +423,16 @@ class Proxy(pak.AsyncPacketHandler):
     async def open_satellite_server(self):
         return await asyncio.start_server(self.new_satellite_connection, self.host_address, self.host_satellite_port)
 
+    async def new_socket_policy_connection(self, reader, writer):
+        writer.write(self.SOCKET_POLICY_RESPONSE)
+        await writer.drain()
+
+        writer.close()
+        await writer.wait_closed()
+
+    async def open_socket_policy_server(self):
+        return await asyncio.start_server(self.new_socket_policy_connection, self.host_address, self.host_socket_policy_port)
+
     async def open_streams(self, address, ports):
         # TODO: Retry connection on different port.
         return await asyncio.open_connection(address, random.choice(ports))
@@ -426,11 +441,21 @@ class Proxy(pak.AsyncPacketHandler):
         self.main_srv      = await self.open_main_server()
         self.satellite_srv = await self.open_satellite_server()
 
+        if self.host_socket_policy_port is not None:
+            self.socket_policy_srv = await self.open_socket_policy_server()
+
     async def on_start(self):
-        await asyncio.gather(
+        # TODO: Use 'asyncio.TaskGroup' when Python 3.10 support is dropped.
+
+        server_tasks = [
             self.main_srv.serve_forever(),
             self.satellite_srv.serve_forever(),
-        )
+        ]
+
+        if self.socket_policy_srv is not None:
+            server_tasks.append(self.socket_policy_srv.serve_forever())
+
+        await asyncio.gather(*server_tasks)
 
     async def start(self):
         await self.startup()

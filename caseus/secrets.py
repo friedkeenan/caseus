@@ -212,6 +212,10 @@ class Secrets:
 
                 fields[field] = parsed_value
 
+        # Remove log file so that if getting the secrets
+        # fails in the future, stale secrets aren't used.
+        log.unlink()
+
         return cls(**fields)
 
     def copy(self, **fields):

@@ -17,6 +17,8 @@ from .. import types
 
 @public
 class MinimalServer(pak.AsyncPacketHandler):
+    SOCKET_POLICY_RESPONSE = b'<cross-domain-policy><allow-access-from domain="*" to-ports="*" secure="false" /></cross-domain-policy>\x00'
+
     MAX_AUTH_TOKEN         = 2**31 - 1
     MAX_VERIFICATION_TOKEN = 2**31 - 1
 
@@ -190,6 +192,8 @@ class MinimalServer(pak.AsyncPacketHandler):
         host_main_address = None,
         host_main_port    = 11801,
 
+        host_socket_policy_port = 10801,
+
         keep_alive_timeout = 60,
 
         loader_stage_size = None,
@@ -203,6 +207,8 @@ class MinimalServer(pak.AsyncPacketHandler):
         self.host_main_address = host_main_address
         self.host_main_port    = host_main_port
 
+        self.host_socket_policy_port = host_socket_policy_port
+
         self.keep_alive_timeout = keep_alive_timeout
 
         self.loader_stage_size = loader_stage_size
@@ -215,6 +221,8 @@ class MinimalServer(pak.AsyncPacketHandler):
 
         self.main_srv     = None
         self.main_clients = []
+
+        self.socket_policy_srv = None
 
         self.satellite_srv     = None
         self.satellite_clients = []
@@ -235,12 +243,18 @@ class MinimalServer(pak.AsyncPacketHandler):
         if self.satellite_srv is not None:
             self.satellite_srv.close()
 
+        if self.socket_policy_srv is not None:
+            self.socket_policy_srv.close()
+
     async def wait_closed(self):
         if self.main_srv is not None:
             await self.main_srv.wait_closed()
 
         if self.satellite_srv is not None:
             await self.satellite_srv.wait_closed()
+
+        if self.socket_policy_srv is not None:
+            await self.socket_policy_srv.wait_closed()
 
     async def __aenter__(self):
         return self
@@ -311,11 +325,31 @@ class MinimalServer(pak.AsyncPacketHandler):
     async def open_main_server(self):
         return await asyncio.start_server(self.new_main_connection, self.host_main_address, self.host_main_port)
 
+    async def new_socket_policy_connection(self, reader, writer):
+        writer.write(self.SOCKET_POLICY_RESPONSE)
+        await writer.drain()
+
+        writer.close()
+        await writer.wait_closed()
+
+    async def open_socket_policy_server(self):
+        return await asyncio.start_server(self.new_socket_policy_connection, self.host_main_address, self.host_socket_policy_port)
+
     async def startup(self):
         self.main_srv = await self.open_main_server()
 
+        if self.host_socket_policy_port is not None:
+            self.socket_policy_srv = await self.open_socket_policy_server()
+
     async def on_start(self):
-        await self.main_srv.serve_forever()
+        # TODO: Use 'asyncio.TaskGroup' when Python 3.10 support is dropped.
+
+        server_tasks = [self.main_srv.serve_forever()]
+
+        if self.socket_policy_srv is not None:
+            server_tasks.append(self.socket_policy_srv.serve_forever())
+
+        await asyncio.gather(*server_tasks)
 
     async def start(self):
         await self.startup()

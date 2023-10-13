@@ -23,23 +23,23 @@ class AccountError(Exception):
 
 @public
 class Client(pak.AsyncPacketHandler):
-    # NOTE: By default, we act like a Steam client.
+    # NOTE: By default, we act like a Windows standalone client.
     # These values are directly taken from such.
 
-    PLAYER_TYPE         = "Steam AIR"
+    PLAYER_TYPE         = "Éxécutable AIR"
     BROWSER_INFO        = "-"
-    LOADER_SIZE         = 0x7EE88
-    FONTS_HASH          = "5610fd5713a0ed29fb13b576d2e0e4692dd99ddbbcd7b5c0a32b7271c91083e0"
+    LOADER_SIZE         = 0x1FBD
+    FONTS_HASH          = "223eaaa7e11bf4cd2e7953ed079527de3d5f4fbbf635260ed76c563214da9eeb"
     SERVER_STRING       = (
-        "A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=WIN 16,0,0,276&"
-        "M=Adobe Windows&R=1920x1080&COL=color&AR=1.0&OS=Windows 8&ARCH=x86&L=en&IME=f&"
-        "PR32=t&PR64=t&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72"
+        "A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=t&V=WIN 50,1,1,2&"
+        "M=Adobe Windows&R=1920x1080&COL=color&AR=1.0&OS=Windows 10&ARCH=x86&L=en&IME=f&"
+        "PR32=t&PR64=t&CAS=32&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72"
     )
-    REFEREE             = enums.RefereeID.Steam
-    TIME_TILL_HANDSHAKE = 3128
-    OS                  = "Windows 8"
-    FLASH_VERSION       = "WIN 16,0,0,276"
-    LOADER_URL          = "app:/Transformice.swf/[[DYNAMIC]]/1"
+    REFEREE             = enums.RefereeID.Unknown
+    TIME_TILL_HANDSHAKE = 6884
+    OS                  = "Windows 10"
+    FLASH_VERSION       = "WIN 50,1,1,2"
+    LOADER_URL          = "app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4"
 
     class Connection(pak.io.Connection):
         def __init__(self, client, **kwargs):
