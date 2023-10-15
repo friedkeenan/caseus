@@ -150,6 +150,10 @@ class Client(pak.AsyncPacketHandler):
         if connect_to_satellite:
             self.register_packet_listener(self._on_change_satellite_server, clientbound.ChangeSatelliteServerPacket)
 
+        # TODO: Should we also set this to '0'
+        # if the client starts up again?
+        self._tribulle_fingerprint = 0
+
         self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True
 
@@ -194,6 +198,38 @@ class Client(pak.AsyncPacketHandler):
 
         finally:
             await self.end_listener_tasks()
+
+    def _advance_tribulle_fingerprint(self):
+        self._tribulle_fingerprint += 1
+        self._tribulle_fingerprint &= 0xFFFFFFFF
+
+    async def write_tribulle(self, packet_cls, /, **fields):
+        self._advance_tribulle_fingerprint()
+
+        await self.main.write_packet(
+            serverbound.TribulleWrapperPacket,
+
+            nested = self.main.create_packet(
+                packet_cls,
+
+                fingerprint = self._tribulle_fingerprint,
+
+                **fields,
+            ),
+        )
+
+        return self._tribulle_fingerprint
+
+    async def write_tribulle_instance(self, packet):
+        self._advance_tribulle_fingerprint()
+
+        await self.main.write_packet(
+            serverbound.TribulleWrapperPacket,
+
+            nested = packet.copy(fingerprint=self._tribulle_fingerprint)
+        )
+
+        return self._tribulle_fingerprint
 
     async def open_streams(self, address, ports):
         for port in random.sample(ports, len(ports)):

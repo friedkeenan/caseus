@@ -162,6 +162,9 @@ class ServerboundTribullePacket(TribullePacket):
     to be registered as such.
     """
 
+    # The tribulle-specific fingerprint.
+    fingerprint: types.Int
+
 @public
 class ClientboundTribullePacket(TribullePacket):
     r"""A clientbound :class:`TribullePacket`.
@@ -170,6 +173,11 @@ class ClientboundTribullePacket(TribullePacket):
     should inherit from :class:`ClientboundTribullePacket`
     to be registered as such.
     """
+
+@public
+class FingerprintedClientboundTribullePacket(ClientboundTribullePacket):
+    # The tribulle-specific fingerprint.
+    fingerprint: types.Int
 
 @public
 class LegacyPacket(pak.Packet, abc.ABC):
