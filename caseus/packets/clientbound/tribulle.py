@@ -2,7 +2,7 @@ import pak
 
 from public import public
 
-from ..packet import ClientboundTribullePacket
+from ..packet import ClientboundTribullePacket, FingerprintedClientboundTribullePacket
 from ... import types
 from ... import enums
 
@@ -46,3 +46,10 @@ class WhisperPacket(ClientboundTribullePacket):
     community: pak.Enum(types.Int, enums.TribulleCommunity)
     receiver:  types.SignedLengthString
     message:   types.SignedLengthString
+
+@public
+class ChangeTribeHouseMapResultPacket(FingerprintedClientboundTribullePacket):
+    id = 103
+
+    # TODO: Enum?
+    result: types.Byte

@@ -1,6 +1,7 @@
 import asyncio
 import io
 import random
+import fixedint
 import pak
 
 from public import public
@@ -152,7 +153,7 @@ class Client(pak.AsyncPacketHandler):
 
         # TODO: Should we also set this to '0'
         # if the client starts up again?
-        self._tribulle_fingerprint = 0
+        self._tribulle_fingerprint = fixedint.Int32(0)
 
         self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True
@@ -201,18 +202,17 @@ class Client(pak.AsyncPacketHandler):
 
     def _advance_tribulle_fingerprint(self):
         self._tribulle_fingerprint += 1
-        self._tribulle_fingerprint &= 0xFFFFFFFF
+
+        return int(self._tribulle_fingerprint)
 
     async def write_tribulle(self, packet_cls, /, **fields):
-        self._advance_tribulle_fingerprint()
-
         await self.main.write_packet(
             serverbound.TribulleWrapperPacket,
 
             nested = self.main.create_packet(
                 packet_cls,
 
-                fingerprint = self._tribulle_fingerprint,
+                fingerprint = self._advance_tribulle_fingerprint(),
 
                 **fields,
             ),
@@ -221,12 +221,10 @@ class Client(pak.AsyncPacketHandler):
         return self._tribulle_fingerprint
 
     async def write_tribulle_instance(self, packet):
-        self._advance_tribulle_fingerprint()
-
         await self.main.write_packet(
             serverbound.TribulleWrapperPacket,
 
-            nested = packet.copy(fingerprint=self._tribulle_fingerprint)
+            nested = packet.copy(fingerprint=self._advance_tribulle_fingerprint())
         )
 
         return self._tribulle_fingerprint

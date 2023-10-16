@@ -110,7 +110,7 @@ class RoomProperties(pak.SubPacket):
     round_duration_percentage:    types.UnsignedByte
     mice_weight_percentage:       types.Int
     max_players:                  types.Short
-    map_rotation:                 pak.Enum(types.Byte, enums.MapCategory)[types.UnsignedByte]
+    map_rotation:                 pak.EnumOr(types.Byte, enums.MapCategory)[types.UnsignedByte]
 
 class _ObjectInfo(pak.SubPacket):
     class Attributes(pak.SubPacket):
