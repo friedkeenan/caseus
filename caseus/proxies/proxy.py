@@ -394,7 +394,14 @@ class Proxy(pak.AsyncPacketHandler):
         client = self.ClientConnection(self, reader=client_reader, writer=client_writer)
 
         if self.main_server_address is not None and self.main_server_ports is not None:
-            server_reader, server_writer = await self.open_streams(self.main_server_address, self.main_server_ports)
+            try:
+                server_reader, server_writer = await self.open_streams(self.main_server_address, self.main_server_ports)
+
+            except ValueError:
+                client.close()
+                await client.wait_closed()
+
+                raise
 
             server = self.ServerConnection(self, destination=client, reader=server_reader, writer=server_writer)
 
@@ -434,8 +441,14 @@ class Proxy(pak.AsyncPacketHandler):
         return await asyncio.start_server(self.new_socket_policy_connection, self.host_address, self.host_socket_policy_port)
 
     async def open_streams(self, address, ports):
-        # TODO: Retry connection on different port.
-        return await asyncio.open_connection(address, random.choice(ports))
+        for port in random.sample(ports, len(ports)):
+            try:
+                return await asyncio.open_connection(address, port)
+
+            except Exception:
+                continue
+
+        raise ValueError(f"Unable to connect to address '{address}' on ports {ports}")
 
     async def startup(self):
         self.main_srv      = await self.open_main_server()
@@ -538,7 +551,24 @@ class Proxy(pak.AsyncPacketHandler):
         source.main    = source.Pair(client=main_client, server=main_client.destination)
         source.secrets = main_client.secrets
 
-        server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
+        try:
+            server_reader, server_writer = await self.open_streams(original_packet.address, original_packet.ports)
+
+        except ValueError:
+            # If we can't connect to the satellite server,
+            # send a dummy packet, mainly for the benefit
+            # of the game's UI responding appropriately.
+            await source.write_packet(
+                clientbound.ChangeSatelliteServerPacket,
+
+                address = "",
+                ports   = [0],
+            )
+
+            source.close()
+
+            raise
+
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
 
         # Set the serverbound fingerprint from the identification packet.
@@ -597,7 +627,14 @@ class Proxy(pak.AsyncPacketHandler):
 
         ports = packet.ports if self.main_server_ports is None else self.main_server_ports
 
-        server_reader, server_writer = await self.open_streams(address, ports)
+        try:
+            server_reader, server_writer = await self.open_streams(address, ports)
+
+        except ValueError:
+            source.close()
+
+            raise
+
         source.destination = self.ServerConnection(self, destination=source, reader=server_reader, writer=server_writer)
 
         source.main.server = source.destination
