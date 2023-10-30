@@ -1388,6 +1388,33 @@ class DisplayParticlePacket(ClientboundPacket):
     acceleration_y: pak.ScaledInteger(types.LimitedLEB128, 100)
 
 @public
+class AddPhysicObjectPacket(ClientboundPacket):
+    id = (29, 28)
+
+    physic_id:            types.LimitedLEB128
+    dynamic:              types.Boolean
+    ground_id:            types.Byte
+    x:                    types.LimitedLEB128
+    y:                    types.LimitedLEB128
+    width:                types.LimitedLEB128
+    height:               types.LimitedLEB128
+    foreground:           types.Boolean
+    friction:             pak.ScaledInteger(types.LimitedLEB128, 100)
+    restitution:          pak.ScaledInteger(types.LimitedLEB128, 100)
+    angle:                types.LimitedLEB128
+    has_color:            types.Boolean
+    color:                types.Int
+    mice_collidable:      types.Boolean
+    ground_collidable:    types.Boolean
+    fixed_rotation:       types.Boolean
+    mass:                 types.LimitedLEB128
+    linear_damping:       pak.ScaledInteger(types.LimitedLEB128, 100)
+    angular_damping:      pak.ScaledInteger(types.LimitedLEB128, 100)
+    invisible:            types.Boolean
+    image_description:    types.String
+    has_contact_listener: types.Boolean
+
+@public
 class ShowColorPickerPacket(ClientboundPacket):
     id = (29, 32)
 
@@ -1828,6 +1855,24 @@ class PlayShamanInvocationSoundPacket(ClientboundPacket):
         return self.shaman_object_id == -1
 
 @public
+class PlaySoundPacket(ClientboundPacket):
+    id = (144, 10)
+
+    SOUND_URL_FMT = "http://audio.atelier801.com/transformice/{sound}.mp3"
+
+    class LocationInfo(pak.SubPacket):
+        x: types.Short
+        y: types.Short
+
+    sound:    types.String
+    volume:   pak.ScaledInteger(types.Short, 100)
+    location: pak.Optional(LocationInfo, types.Boolean)
+
+    @property
+    def sound_url(self):
+        return self.SOUND_URL_FMT.format(sound=self.sound)
+
+@public
 class RoomPropertiesPacket(ClientboundPacket):
     id = (144, 18)
 
@@ -1995,6 +2040,12 @@ class SetNewsPopupFlyerPacket(ClientboundPacket):
         """
 
         return self.IMAGE_URL_FMT.format(image_name=self.image_name)
+
+@public
+class SetCheeseSpriteSuffxPacket(ClientboundPacket):
+    id = (144, 39)
+
+    suffix: types.String
 
 @public
 class SetPlayerCollisionPacket(ClientboundPacket):
