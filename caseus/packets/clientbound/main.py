@@ -780,6 +780,7 @@ class AddNPCPacket(ClientboundPacket):
     look:             types.String # TODO: Parse outfit.
     x:                types.LimitedLEB128
     y:                types.LimitedLEB128
+    emote:            pak.Enum(types.LimitedLEB128, enums.Emote)
     facing_right:     types.Boolean
     face_player:      types.Boolean
     interface:        pak.Enum(types.Byte, enums.NPCInterface)
