@@ -787,6 +787,13 @@ class AddNPCPacket(ClientboundPacket):
     periodic_message: types.String
 
 @public
+class ChangePlayerLookPacket(ClientboundPacket):
+    id = (8, 36)
+
+    session_id: types.Int
+    look:       types.String
+
+@public
 class MeepExplosionPacket(ClientboundPacket):
     id = (8, 38)
 
@@ -2127,6 +2134,19 @@ class PlayerMovementPacket(ClientboundPacket):
 
     # Only present if transformed or rolling.
     rotation_info: pak.Optional(PlayerRotationInfo)
+
+@public
+class ChangeNPCLookPacket(ClientboundPacket):
+    id = (144, 49)
+
+    name: types.String
+    look: types.String # TODO: Parse outfit.
+
+@public
+class RemoveNPCPacket(ClientboundPacket):
+    id = (144, 50)
+
+    name: types.String
 
 @public
 class SetLanguagePacket(ClientboundPacket):
