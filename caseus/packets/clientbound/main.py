@@ -448,14 +448,12 @@ class MovePlayerPacket(ClientboundPacket):
             if value == cls.IGNORE_VALUE:
                 return MovePlayerPacket.IGNORE
 
-            return value / 10
+            return value
 
         @classmethod
         def _pack(cls, value, *, ctx):
             if value is MovePlayerPacket.IGNORE:
                 value = cls.IGNORE_VALUE
-            else:
-                value = int(value * 10)
 
             return types.LimitedLEB128.pack(value, ctx=ctx)
 
