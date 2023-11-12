@@ -2048,6 +2048,21 @@ class SetNewsPopupFlyerPacket(ClientboundPacket):
         return self.IMAGE_URL_FMT.format(image_name=self.image_name)
 
 @public
+class DisplayDismissibleImagePacket(ClientboundPacket):
+    id = (144, 37)
+
+    IMAGE_URL_FMT = "http://www.transformice.com/images/{image_path}"
+
+    image_path: types.String
+
+    @property
+    def image_url(self):
+        if "://" in self.image_path:
+            return self.image_path
+
+        return self.IMAGE_URL_FMT.format(image_path=self.image_path)
+
+@public
 class SetCheeseSpriteSuffxPacket(ClientboundPacket):
     id = (144, 39)
 
