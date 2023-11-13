@@ -90,7 +90,7 @@ class BanMessagePacket(ClientboundLegacyPacket):
     # to represent time things instead
     # of just numbers?
 
-    def __init__(self, reason, duration):
+    def __init__(self, reason_template, duration):
         self.reason_template = reason_template
         self.duration        = duration
 
