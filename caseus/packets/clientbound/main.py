@@ -1301,9 +1301,7 @@ class SetAllowEmailAddressPacket(ClientboundPacket):
     allow_email: types.Boolean
 
 @public
-class ReaffirmServerAddressPacket(ClientboundPacket):
-    """Sent to the client to make sure it's connected to the expected server."""
-
+class ChangeMainServerPacket(ClientboundPacket):
     id = (28, 98)
 
     address: types.String

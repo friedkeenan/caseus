@@ -307,6 +307,26 @@ class BuyShopItemPacket(ServerboundPacket):
     cost:      types.Short
 
 @public
+class HitMonsterPacket(ServerboundPacket):
+    id = (26, 5)
+
+    monster_id: types.Int
+    push_right: types.ByteBoolean
+
+@public
+class CreateAccountPacket(ServerboundPacket):
+    id = (26, 7)
+
+    CIPHER = XOR
+
+    username:      types.String
+    password_hash: types.String
+    email_address: types.String
+    captcha:       types.String
+    beta_key:      types.String
+    loader_url:    types.String
+
+@public
 class LoginPacket(ServerboundPacket):
     id = (26, 8)
 
@@ -329,13 +349,6 @@ class LoginPacket(ServerboundPacket):
     # Seems to have something do with registering an account.
     # Maybe the previously tried username?
     unk_string_8: types.String
-
-@public
-class HitMonsterPacket(ServerboundPacket):
-    id = (26, 5)
-
-    monster_id: types.Int
-    push_right: types.ByteBoolean
 
 @public
 class PlayerAttackPacket(ServerboundPacket):

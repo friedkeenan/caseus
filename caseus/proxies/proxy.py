@@ -502,21 +502,9 @@ class Proxy(pak.AsyncPacketHandler):
 
         return self.DO_NOTHING
 
-    @pak.packet_listener(clientbound.ReaffirmServerAddressPacket)
-    async def _protect_proxy_address(self, source, packet):
-        # Because we are using a proxy, the client will be
-        # connected to a different address than the server
-        # will reaffirm. Therefore we intercept this packet
-        # and replace the contained address with a more
-        # complacent one.
-
-        protected = packet.copy(
-            address = self.expected_address,
-        )
-
-        await source.destination.write_packet_instance(protected)
-
-        return self.DO_NOTHING
+    @pak.packet_listener(clientbound.ChangeMainServerPacket)
+    async def _on_change_main_server(self, source, packet):
+        raise NotImplementedError(f"We do not properly handle changing the main server: {packet}")
 
     @pak.packet_listener(clientbound.LoginSuccessPacket)
     async def _on_login_success(self, source, packet):
