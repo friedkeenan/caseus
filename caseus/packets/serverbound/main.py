@@ -319,7 +319,7 @@ class CreateAccountPacket(ServerboundPacket):
 
     CIPHER = XOR
 
-    username:      types.String
+    nickname:      types.String
     password_hash: types.String
     email_address: types.String
     captcha:       types.String
