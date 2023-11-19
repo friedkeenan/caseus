@@ -452,9 +452,9 @@ class HandshakePacket(ServerboundPacket):
     server_string: types.String
 
     # How the client got referred the game. If not a
-    # value from the 'ReferralID' enum, then the value
+    # value from the 'Referrer' enum, then the value
     # is a player's global id from the old referral system.
-    referee: pak.EnumOr(types.Int, enums.RefereeID)
+    referrer: pak.EnumOr(types.Int, enums.Referrer)
 
     milliseconds_since_start: types.Int
 

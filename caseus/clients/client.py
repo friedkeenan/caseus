@@ -36,7 +36,7 @@ class Client(pak.AsyncPacketHandler):
         "M=Adobe Windows&R=1920x1080&COL=color&AR=1.0&OS=Windows 10&ARCH=x86&L=en&IME=f&"
         "PR32=t&PR64=t&CAS=32&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72"
     )
-    REFEREE             = enums.RefereeID.Unknown
+    REFERRER            = enums.Referrer.Unknown
     TIME_TILL_HANDSHAKE = 6884
     OS                  = "Windows 10"
     FLASH_VERSION       = "WIN 50,1,1,2"
@@ -123,7 +123,9 @@ class Client(pak.AsyncPacketHandler):
         password_hash,
         start_room,
 
-        language = "en",
+        system_language  = "en",
+        desired_language = None,
+
         steam_id = None,
 
         connect_to_satellite = True,
@@ -141,7 +143,8 @@ class Client(pak.AsyncPacketHandler):
         self.auth_token = 0
         self.session_id = None
 
-        self.language = language
+        self.system_language  = system_language
+        self.desired_language = desired_language
 
         if isinstance(steam_id, int):
             steam_id = str(steam_id)
@@ -286,7 +289,7 @@ class Client(pak.AsyncPacketHandler):
             return
 
     async def handshake(self):
-        language = self.language
+        language = self.system_language
         if language == "nb":
             # The game changes the language from 'Capabilities'
             # to 'no' if it has the value 'nb', corresponding
@@ -304,7 +307,7 @@ class Client(pak.AsyncPacketHandler):
             loader_stage_size           = self.LOADER_SIZE,
             concatenated_font_name_hash = self.FONTS_HASH,
             server_string               = self.SERVER_STRING,
-            referee                     = self.REFEREE,
+            referrer                    = self.REFERRER,
             milliseconds_since_start    = self.TIME_TILL_HANDSHAKE,
         )
 
@@ -337,25 +340,42 @@ class Client(pak.AsyncPacketHandler):
         except KeyboardInterrupt:
             pass
 
-    @pak.packet_listener(clientbound.HandshakeResponsePacket)
-    async def _on_handshake_response(self, server, packet):
-        self.auth_token = packet.auth_token
+    async def set_desired_language(self, *, fallback):
+        if self.desired_language is None:
+            language = fallback
+        else:
+            language = self.desired_language
 
         await self.main.write_packet(
             serverbound.SetLanguagePacket,
 
-            # The game may send a language stored in
-            # its shared data, but if that is not
-            # possible then it falls back to the one
-            # in the received packet.
-            language = packet.language,
+            language = language,
+        )
+
+    @pak.packet_listener(clientbound.HandshakeResponsePacket)
+    async def _on_handshake_response(self, server, packet):
+        self.auth_token = packet.auth_token
+
+        # The game may send a language stored in
+        # its shared data, but if that is not
+        # possible then it falls back to the one
+        # in the received packet.
+        if self.desired_language is None:
+            language = packet.language
+        else:
+            language = self.desired_language
+
+        await self.main.write_packet(
+            serverbound.SetLanguagePacket,
+
+            language = language,
         )
 
         await self.main.write_packet(
             serverbound.SystemInformationPacket,
 
             # The game uses the language from the 'Capabilities' class.
-            language      = self.language,
+            language      = self.system_language,
             os            = self.OS,
             flash_version = self.FLASH_VERSION,
         )

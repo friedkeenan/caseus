@@ -4,11 +4,11 @@ import random
 from public import public
 
 @public
-class RefereeID(enum.Enum):
+class Referrer(enum.Enum):
     # The non-zero values seem to have
     # been taken from creating an account
     # and then deleting the account, freeing
-    # up the ID for these specific referees.
+    # up the ID for these specific referrers.
 
     Unknown  = 0
     Facebook = 58524153
