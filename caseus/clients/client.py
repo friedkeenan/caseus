@@ -389,6 +389,9 @@ class Client(pak.AsyncPacketHandler):
 
     @pak.packet_listener(clientbound.ClientVerificationPacket)
     async def _on_client_verification(self, server, packet):
+        if self.secrets.client_verification_template is None:
+            return
+
         await self.main.write_packet(
             serverbound.ClientVerificationPacket,
 
