@@ -1701,6 +1701,15 @@ class NotificationPacket(ClientboundPacket):
     notification: Notification
 
 @public
+class AttachSpritePacket(ClientboundPacket):
+    id = (100, 69)
+
+    session_id: types.Int
+    sprite:     types.String
+    offset_x:   types.Short
+    offset_y:   types.Short
+
+@public
 class LaunchHotAirBalloonPacket(ClientboundPacket):
     id = (100, 71)
 
