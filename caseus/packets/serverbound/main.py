@@ -762,6 +762,21 @@ class AddFashionSquadSalePacket(ServerboundPacket):
     percentage:    types.Byte
 
 @public
+class ContactListenerPacket(ServerboundPacket):
+    id = (149, 19)
+
+    contacted_id: types.LimitedLEB128
+
+    player_x: types.LimitedLEB128
+    player_y: types.LimitedLEB128
+
+    contact_x: types.LimitedLEB128
+    contact_y: types.LimitedLEB128
+
+    speed_x: pak.ScaledInteger(types.LimitedLEB128, 100)
+    speed_y: pak.ScaledInteger(types.LimitedLEB128, 100)
+
+@public
 class InteractWithLuaNPCPacket(ServerboundPacket):
     id = (149, 20)
 
