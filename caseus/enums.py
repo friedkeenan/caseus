@@ -141,7 +141,7 @@ class StaffRole(enum.Enum):
 
     Arbitre       = 3
     Modo          = 5
-    Unknown7      = 7 # Might be sentinel? Never used in game.
+    Sentinel      = 7
     Administrator = 10
     MapCrew       = 11
     LuaTeam       = 12

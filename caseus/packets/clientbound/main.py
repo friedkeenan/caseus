@@ -1737,8 +1737,8 @@ class ChangeLoginBackgroundPacket(ClientboundPacket):
         background_image: str
         foreground_image: str
 
-        background_x: int
-        background_y: int
+        mouse_offset_x: int
+        mouse_offset_y: int
 
         @property
         def background_image_url(self):
@@ -1762,8 +1762,8 @@ class ChangeLoginBackgroundPacket(ClientboundPacket):
                 background_image = background_image,
                 foreground_image = rest[0] if len(rest) > 0 else "",
 
-                background_x = int(rest[1]) if len(rest) > 1 else 0,
-                background_y = int(rest[2]) if len(rest) > 2 else 0,
+                mouse_offset_x = int(rest[1]) if len(rest) > 1 else 0,
+                mouse_offset_y = int(rest[2]) if len(rest) > 2 else 0,
             )
 
         @classmethod
@@ -1772,16 +1772,16 @@ class ChangeLoginBackgroundPacket(ClientboundPacket):
 
             if len(value.foreground_image) > 0:
                 description += f"#{value.foreground_image}"
-            elif value.background_x != 0 or value.background_y != 0:
+            elif value.mouse_offset_x != 0 or value.mouse_offset_y != 0:
                 description += "#"
 
-            if value.background_x != 0:
-                description += f"#{value.background_x}"
+            if value.mouse_offset_x != 0:
+                description += f"#{value.mouse_offset_x}"
             else:
                 description += "#"
 
-            if value.background_y != 0:
-                description += f"#{value.background_y}"
+            if value.mouse_offset_y != 0:
+                description += f"#{value.mouse_offset_y}"
 
             return types.String.pack(description, ctx=ctx)
 

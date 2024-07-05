@@ -9,14 +9,15 @@ del importlib
 from . import types
 from . import clients
 from . import proxies
+from . import secrets
 from . import servers
 from . import sniffers
 from . import game
 
-from .secrets import *
 from .packets import *
 
 from .clients  import Client
 from .proxies  import Proxy
+from .secrets import Secrets
 from .servers  import MinimalServer
 from .sniffers import Sniffer
