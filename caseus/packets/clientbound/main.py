@@ -1442,8 +1442,9 @@ class LoadInventoryPacket(ClientboundPacket):
         quantity: types.UnsignedShort
 
         # Only used for sorting.
-        priority: types.UnsignedByte
-        is_event: types.Boolean
+        sorting_id: types.UnsignedShort
+        priority:   types.UnsignedByte
+        is_event:   types.Boolean
 
         # Looks like there are some consumables guests aren't allowed to use even if this is 'True'.
         can_use: types.Boolean
