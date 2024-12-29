@@ -161,6 +161,9 @@ class Client(pak.AsyncPacketHandler):
         self.listen_sequentially  = listen_sequentially
         self._listen_sequentially = True
 
+    def is_bot_role(self):
+        return self.secrets.is_bot_role()
+
     def register_packet_listener(self, listener, *packet_types, outgoing=False, **fields):
         super().register_packet_listener(listener, *packet_types, outgoing=outgoing, **fields)
 
@@ -311,6 +314,23 @@ class Client(pak.AsyncPacketHandler):
             milliseconds_since_start    = self.TIME_TILL_HANDSHAKE,
         )
 
+    async def login(self):
+        if self.secrets.auth_key is not None:
+            ciphered_auth_token = self.auth_token ^ self.secrets.auth_key
+        else:
+            ciphered_auth_token = None
+
+        await self.main.write_packet(
+            serverbound.LoginPacket,
+
+            username            = self.username,
+            password_hash       = self.password_hash,
+            loader_url          = self.LOADER_URL,
+            start_room          = self.start_room,
+            ciphered_auth_token = ciphered_auth_token,
+            unk_short_6         = 18,
+        )
+
     async def on_start(self):
         await self.handshake()
 
@@ -360,16 +380,7 @@ class Client(pak.AsyncPacketHandler):
         # its shared data, but if that is not
         # possible then it falls back to the one
         # in the received packet.
-        if self.desired_language is None:
-            language = packet.language
-        else:
-            language = self.desired_language
-
-        await self.main.write_packet(
-            serverbound.SetLanguagePacket,
-
-            language = language,
-        )
+        await self.set_desired_language(fallback=packet.language)
 
         await self.main.write_packet(
             serverbound.SystemInformationPacket,
@@ -389,34 +400,25 @@ class Client(pak.AsyncPacketHandler):
 
     @pak.packet_listener(clientbound.ClientVerificationPacket)
     async def _on_client_verification(self, server, packet):
-        if self.secrets.client_verification_template is None:
-            return
+        # NOTE: Bot role clients still receive this packet.
 
-        await self.main.write_packet(
-            serverbound.ClientVerificationPacket,
+        if self.secrets.client_verification_template is not None:
+            await self.main.write_packet(
+                serverbound.ClientVerificationPacket,
 
-            ciphered_data = self.secrets.client_verification_data(
-                packet.verification_token,
+                ciphered_data = self.secrets.client_verification_data(
+                    packet.verification_token,
 
-                ctx = self.main.ctx,
+                    ctx = self.main.ctx,
+                )
             )
-        )
 
         # NOTE: We allow not logging in by just
         # supplying 'None' as the username, if
         # for some reason someone wants to do the
         # equivalent of sitting at the login screen.
         if self.username is not None:
-            await self.main.write_packet(
-                serverbound.LoginPacket,
-
-                username            = self.username,
-                password_hash       = self.password_hash,
-                loader_url          = self.LOADER_URL,
-                start_room          = self.start_room,
-                ciphered_auth_token = self.auth_token ^ self.secrets.auth_key,
-                unk_short_6         = 18,
-            )
+            await self.login()
 
     @pak.packet_listener(clientbound.AccountErrorPacket)
     async def _on_account_error(self, server, packet):

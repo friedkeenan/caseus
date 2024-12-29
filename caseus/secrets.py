@@ -86,6 +86,8 @@ public(XOR = XORCipher("msg"))
 
 @public
 class Secrets:
+    BOT_ROLE_VERSION = 666
+
     _FIELDS = (
         "server_address",
         "server_ports",
@@ -217,6 +219,17 @@ class Secrets:
         log.unlink()
 
         return cls(**fields)
+
+    @classmethod
+    def for_bot_role(cls, server_address, server_ports=(11801, 12801, 13801, 14801)):
+        return cls(
+            version        = cls.BOT_ROLE_VERSION,
+            server_address = server_address,
+            server_ports   = server_ports,
+        )
+
+    def is_bot_role(self):
+        return self.version is not None and self.version == self.BOT_ROLE_VERSION
 
     def copy(self, **fields):
         for field in self._FIELDS:

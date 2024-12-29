@@ -380,7 +380,7 @@ class MapCategory(enum.Enum):
     # a specific sprite like the other categories.
 
     # NOTE: The client will forget the map author and
-    # map code and insstead just load the vanilla '0'
+    # map code and instead just load the vanilla '0'
     # map if it receives this category.
     DeletedInappropriate = 43
 
@@ -392,7 +392,7 @@ class MapCategory(enum.Enum):
     # TODO: Investigate game modes.
     UserMadeVanilla = 87
 
-    # NOTE: if the client does not receive
+    # NOTE: If the client does not receive
     # this category, then the button to return
     # to the map editor is not made available.
     MapEditor = 100

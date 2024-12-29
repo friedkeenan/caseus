@@ -1295,6 +1295,12 @@ class PingPacket(ClientboundPacket):
     main_server: types.Boolean
 
 @public
+class ClientInformationPacket(ClientboundPacket):
+    id = (28, 50)
+
+    http_info_url: types.ShiftedString
+
+@public
 class SetAllowEmailAddressPacket(ClientboundPacket):
     id = (28, 62)
 

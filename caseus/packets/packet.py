@@ -53,6 +53,9 @@ class Packet(pak.Packet):
 
             super().__init__()
 
+        def is_bot_role(self):
+            return self.secrets.is_bot_role()
+
         def __hash__(self):
             return hash(self.secrets)
 
@@ -111,14 +114,14 @@ class ServerboundPacket(Packet):
 
     @classmethod
     def cipher_data(cls, data, *, fingerprint, ctx):
-        if cls.CIPHER is None:
+        if cls.CIPHER is None or ctx.is_bot_role():
             return data
 
         return ctx.secrets.cipher(cls.CIPHER, data, fingerprint=fingerprint)
 
     @classmethod
     def decipher_data(cls, buf, *, fingerprint, ctx):
-        if cls.CIPHER is None:
+        if cls.CIPHER is None or ctx.is_bot_role():
             return buf.read()
 
         return ctx.secrets.decipher(cls.CIPHER, buf, fingerprint=fingerprint)

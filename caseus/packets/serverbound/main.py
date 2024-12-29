@@ -336,10 +336,11 @@ class LoginPacket(ServerboundPacket):
 
     # An empty string when logging in as a guest.
     password_hash: types.String
-    loader_url:    types.String
-    start_room:    types.String
 
-    ciphered_auth_token: types.Int
+    loader_url: types.String
+    start_room: types.String
+
+    ciphered_auth_token: types.UnlessBotRole(types.Int)
 
     # Hardcoded as '18' in game.
     unk_short_6: types.Short
@@ -423,10 +424,11 @@ class HandshakePacket(ServerboundPacket):
     id = (28, 1)
 
     game_version: types.Short
-    language:     types.String
+
+    language: types.UnlessBotRole(types.String)
 
     # Random hardcoded string, changed in the game's source routinely.
-    connection_token: types.String
+    connection_token: types.UnlessBotRole(types.String)
 
     player_type: types.String
 
@@ -485,6 +487,19 @@ class SystemInformationPacket(ServerboundPacket):
 
     # Always written as '0'.
     zero_byte: types.Byte
+
+@public
+class ClientInformationPacket(ServerboundPacket):
+    id = (28, 50)
+
+    # Technically decided by the response from the 'http_info_url'
+    # in the clientbound packet, but always just the user-agent.
+    http_info: types.ShiftedString
+
+    player_type:       types.ShiftedString
+    browser_info:      types.ShiftedString
+    parent_loader_url: types.ShiftedString
+    desktop:           types.ShiftedString
 
 @public
 class LuaScriptPacket(ServerboundPacket):
