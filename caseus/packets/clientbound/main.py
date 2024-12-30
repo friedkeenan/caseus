@@ -649,41 +649,10 @@ class OldNekodancerProfilePacket(BasePlayerInformationPacket):
 class LoadShopPacket(ClientboundPacket):
     id = (8, 20)
 
-    @dataclasses.dataclass
-    class OwnedShopItemInfo:
-        unique_id: int
-        colors:    typing.Optional[list]
-
-    class _OwnedShopItemInfoType(pak.Type):
-        @classmethod
-        def _unpack(cls, buf, *, ctx):
-            num_colors = types.Byte.unpack(buf, ctx=ctx)
-            unique_id  = types.Int.unpack(buf, ctx=ctx)
-
-            if num_colors == 0:
-                colors = None
-            else:
-                # NOTE: Our use of 'range' will handle non-positive lengths.
-                colors = [types.Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
-
-            return LoadShopPacket.OwnedShopItemInfo(unique_id, colors)
-
-        @classmethod
-        def _pack(cls, value, *, ctx):
-            if value.colors is None:
-                packed_colors_len = types.Byte.pack(0, ctx=ctx)
-                packed_colors     = b""
-            else:
-                packed_colors_len = types.Byte.pack(len(value.colors) + 1, ctx=ctx)
-                packed_colors     = b"".join(
-                    types.Int.pack(color, ctx=ctx) for color in value.colors
-                )
-
-            return (
-                packed_colors_len                        +
-                types.Int.pack(value.unique_id, ctx=ctx) +
-                packed_colors
-            )
+    class OwnedShopItemInfo(pak.SubPacket):
+        unique_id: types.LEB128
+        favorited: types.Boolean
+        colors:    types.LEB128[types.LEB128]
 
     class ItemInfo(pak.SubPacket):
         category_id: types.UnsignedShort
@@ -701,7 +670,7 @@ class LoadShopPacket(ClientboundPacket):
         background: pak.Enum(types.Byte, enums.FashionSquadOutfitBackground)
 
     @dataclasses.dataclass
-    class OwnedShamamanObjectInfo:
+    class OwnedShamanObjectInfo:
         shaman_object_id: int
         equipped:         bool
         colors:           typing.Optional[list]
@@ -710,8 +679,8 @@ class LoadShopPacket(ClientboundPacket):
         @classmethod
         def _unpack(cls, buf, *, ctx):
             shaman_object_id = types.Short.unpack(buf, ctx=ctx)
-            equipped = types.Boolean.unpack(buf, ctx=ctx)
-            num_colors = types.Byte.unpack(buf, ctx=ctx)
+            equipped         = types.ByteBoolean.unpack(buf, ctx=ctx)
+            num_colors       = types.Byte.unpack(buf, ctx=ctx)
 
             if num_colors == 0:
                 colors = None
@@ -719,21 +688,23 @@ class LoadShopPacket(ClientboundPacket):
                 # NOTE: Our use of 'range' will handle non-positive lengths.
                 colors = [types.Int.unpack(buf, ctx=ctx) for _ in range(num_colors - 1)]
 
-            return LoadShopPacket.OwnedShamamanObjectInfo(shaman_object_id, equipped, colors)
+            return LoadShopPacket.OwnedShamanObjectInfo(shaman_object_id, equipped, colors)
 
         @classmethod
         def _pack(cls, value, *, ctx):
             if value.colors is None:
-                packed_colors = types.Byte.pack(0, ctx=ctx)
+                packed_colors_len = types.Byte.pack(0, ctx=ctx)
+                packed_colors     = b""
             else:
-                packed_colors = types.Byte.pack(len(value.colors) + 1, ctx=ctx) + b"".join(
+                packed_colors_len = types.Byte.pack(len(value.colors) + 1, ctx=ctx)
+                packed_colors     = b"".join(
                     types.Int.pack(color, ctx=ctx) for color in value.colors
                 )
 
             return (
                 types.Short.pack(value.shaman_object_id, ctx=ctx) +
-                types.Boolean.pack(value.equipped,       ctx=ctx) +
-
+                types.ByteBoolean.pack(value.equipped,   ctx=ctx) +
+                packed_colors_len                                 +
                 packed_colors
             )
 
@@ -746,16 +717,16 @@ class LoadShopPacket(ClientboundPacket):
         fraise_cost:      types.Short
 
     class EmojiInfo(pak.SubPacket):
-        emoji_id:    types.LimitedLEB128
-        cheese_cost: types.LimitedLEB128
-        fraise_cost: types.LimitedLEB128
+        emoji_id:    types.LEB128
+        cheese_cost: types.LEB128
+        fraise_cost: types.LEB128
         is_new:      types.Boolean
 
     cheese:  types.Int
     fraises: types.Int
     look:    types.String # TODO: Parse outfit.
 
-    owned_items: _OwnedShopItemInfoType[types.Int]
+    owned_items: OwnedShopItemInfo[types.LEB128]
     items:       ItemInfo[types.Int]
 
     outfits:            OutfitInfo[types.Byte]
@@ -764,8 +735,8 @@ class LoadShopPacket(ClientboundPacket):
     owned_shaman_objects: _OwnedShamanObjectInfoType[types.Short]
     shaman_objects:       ShamanObjectInfo[types.Short]
 
-    emojis:          EmojiInfo[types.LimitedLEB128]
-    owned_emoji_ids: types.LimitedLEB128[types.LimitedLEB128]
+    emojis:          EmojiInfo[types.LEB128]
+    owned_emoji_ids: types.LEB128[types.LEB128]
 
 @public
 class AddNPCPacket(ClientboundPacket):
