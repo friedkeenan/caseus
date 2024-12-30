@@ -48,27 +48,12 @@ class Sniffer(pak.AsyncPacketHandler):
             self.reader.feed_data(data)
 
         async def _read_length(self):
-            length_data = b""
-
             type_ctx = pak.Type.Context(ctx=self.ctx)
-            while True:
-                next_byte = await self.read_data(1)
-                if next_byte is None:
-                    return None
 
-                length_data += next_byte
-
-                try:
-                    return types.VarInt.unpack(length_data, ctx=type_ctx)
-
-                except types.VarNumBufferLengthError:
-                    raise
-
-                except asyncio.CancelledError:
-                    raise
-
-                except Exception:
-                    continue
+            try:
+                return await types.PacketLength.unpack_async(self.reader, ctx=type_ctx)
+            except asyncio.IncompleteReadError:
+                return None
 
         @abc.abstractmethod
         def _packet_from_data(self, buf):

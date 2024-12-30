@@ -148,7 +148,7 @@ class ClientboundObjectInfo(_ObjectInfo):
 
 @public
 class PlayerFrictionInfo(pak.SubPacket):
-    charge: pak.ScaledInteger(types.LimitedLEB128, 100)
+    charge: pak.ScaledInteger(types.LEB128, 100)
 
     # How much is subtracted from 'charge' per second.
     #
@@ -156,7 +156,7 @@ class PlayerFrictionInfo(pak.SubPacket):
     # arbitrary times. Also if the sign of this field is
     # different from the sign of 'charge', then the duration
     # of the effect will never end on its own.
-    loss_rate: pak.ScaledInteger(types.LimitedLEB128, 10)
+    loss_rate: pak.ScaledInteger(types.LEB128, 10)
 
     @property
     def sticky(self):
@@ -168,6 +168,6 @@ class PlayerFrictionInfo(pak.SubPacket):
 
 @public
 class PlayerRotationInfo(pak.SubPacket):
-    rotation:         pak.ScaledInteger(types.LimitedLEB128, 100)
-    angular_velocity: pak.ScaledInteger(types.LimitedLEB128, 100)
+    rotation:         pak.ScaledInteger(types.LEB128, 100)
+    angular_velocity: pak.ScaledInteger(types.LEB128, 100)
     fixed_rotation:   types.Boolean

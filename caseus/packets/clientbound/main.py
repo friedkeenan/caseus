@@ -145,11 +145,11 @@ class StartRoundCountdownPacket(ClientboundPacket):
 class AddBonusPacket(ClientboundPacket):
     id = (5, 14)
 
-    x:        types.LimitedLEB128
-    y:        types.LimitedLEB128
-    bonus:    pak.Enum(types.LimitedLEB128, enums.Bonus)
-    angle:    types.LimitedLEB128
-    bonus_id: types.LimitedLEB128
+    x:        types.LEB128
+    y:        types.LEB128
+    bonus:    pak.Enum(types.LEB128, enums.Bonus)
+    angle:    types.LEB128
+    bonus_id: types.LEB128
     visible:  types.ByteBoolean
 
 @public
@@ -163,12 +163,12 @@ class AddShamanObjectPacket(ClientboundPacket):
     id = (5, 20)
 
     object_id:            types.Int # If '-1' then automatically assigned.
-    shaman_object_id:     types.LimitedLEB128
-    x:                    types.LimitedLEB128
-    y:                    types.LimitedLEB128
-    angle:                pak.ScaledInteger(types.LimitedLEB128, 100)
-    velocity_x:           pak.ScaledInteger(types.LimitedLEB128, 100)
-    velocity_y:           pak.ScaledInteger(types.LimitedLEB128, 100)
+    shaman_object_id:     types.LEB128
+    x:                    types.LEB128
+    y:                    types.LEB128
+    angle:                pak.ScaledInteger(types.LEB128, 100)
+    velocity_x:           pak.ScaledInteger(types.LEB128, 100)
+    velocity_y:           pak.ScaledInteger(types.LEB128, 100)
     has_contact_listener: types.Boolean
     mice_collidable:      types.ByteBoolean
     colors:               types.Int[types.Byte]
@@ -444,7 +444,7 @@ class MovePlayerPacket(ClientboundPacket):
 
         @classmethod
         def _unpack(cls, buf, *, ctx):
-            value = types.LimitedLEB128.unpack(buf, ctx=ctx)
+            value = types.LEB128.unpack(buf, ctx=ctx)
             if value == cls.IGNORE_VALUE:
                 return MovePlayerPacket.IGNORE
 
@@ -455,10 +455,10 @@ class MovePlayerPacket(ClientboundPacket):
             if value is MovePlayerPacket.IGNORE:
                 value = cls.IGNORE_VALUE
 
-            return types.LimitedLEB128.pack(value, ctx=ctx)
+            return types.LEB128.pack(value, ctx=ctx)
 
-    x:                 types.LimitedLEB128
-    y:                 types.LimitedLEB128
+    x:                 types.LEB128
+    y:                 types.LEB128
     position_relative: types.ByteBoolean
     velocity_x:        _Velocity
     velocity_y:        _Velocity
@@ -776,9 +776,9 @@ class AddNPCPacket(ClientboundPacket):
     title_id:         types.Short
     feminine:         types.Boolean
     look:             types.String # TODO: Parse outfit.
-    x:                types.LimitedLEB128
-    y:                types.LimitedLEB128
-    emote:            pak.Enum(types.LimitedLEB128, enums.Emote)
+    x:                types.LEB128
+    y:                types.LEB128
+    emote:            pak.Enum(types.LEB128, enums.Emote)
     facing_right:     types.Boolean
     face_player:      types.Boolean
     interface:        pak.Enum(types.Byte, enums.NPCInterface)
@@ -1081,8 +1081,8 @@ class CaptchaPacket(ClientboundPacket):
         #
         # Such a situation would have no effect on the client,
         # but I would like to avoid such a situation nonetheless.
-        type:  pak.Enum(types.LimitedLEB128, enums.CaptchaType)
-        scale: pak.Optional(types.LimitedLEB128, lambda packet: packet.type is enums.CaptchaType.ScaledColors)
+        type:  pak.Enum(types.LEB128, enums.CaptchaType)
+        scale: pak.Optional(types.LEB128, lambda packet: packet.type is enums.CaptchaType.ScaledColors)
 
         width:  types.UnsignedShort
         height: types.UnsignedShort
@@ -1390,36 +1390,36 @@ class DisplayParticlePacket(ClientboundPacket):
     id = (29, 27)
 
     particle_id:    types.Byte
-    x:              types.LimitedLEB128
-    y:              types.LimitedLEB128
-    velocity_x:     pak.ScaledInteger(types.LimitedLEB128, 100)
-    velocity_y:     pak.ScaledInteger(types.LimitedLEB128, 100)
-    acceleration_x: pak.ScaledInteger(types.LimitedLEB128, 100)
-    acceleration_y: pak.ScaledInteger(types.LimitedLEB128, 100)
+    x:              types.LEB128
+    y:              types.LEB128
+    velocity_x:     pak.ScaledInteger(types.LEB128, 100)
+    velocity_y:     pak.ScaledInteger(types.LEB128, 100)
+    acceleration_x: pak.ScaledInteger(types.LEB128, 100)
+    acceleration_y: pak.ScaledInteger(types.LEB128, 100)
 
 @public
 class AddPhysicObjectPacket(ClientboundPacket):
     id = (29, 28)
 
-    physic_id:            types.LimitedLEB128
+    physic_id:            types.LEB128
     dynamic:              types.Boolean
     ground_id:            types.Byte
-    x:                    types.LimitedLEB128
-    y:                    types.LimitedLEB128
-    width:                types.LimitedLEB128
-    height:               types.LimitedLEB128
+    x:                    types.LEB128
+    y:                    types.LEB128
+    width:                types.LEB128
+    height:               types.LEB128
     foreground:           types.Boolean
-    friction:             pak.ScaledInteger(types.LimitedLEB128, 100)
-    restitution:          pak.ScaledInteger(types.LimitedLEB128, 100)
-    angle:                types.LimitedLEB128
+    friction:             pak.ScaledInteger(types.LEB128, 100)
+    restitution:          pak.ScaledInteger(types.LEB128, 100)
+    angle:                types.LEB128
     has_color:            types.Boolean
     color:                types.Int
     mice_collidable:      types.Boolean
     ground_collidable:    types.Boolean
     fixed_rotation:       types.Boolean
-    mass:                 types.LimitedLEB128
-    linear_damping:       pak.ScaledInteger(types.LimitedLEB128, 100)
-    angular_damping:      pak.ScaledInteger(types.LimitedLEB128, 100)
+    mass:                 types.LEB128
+    linear_damping:       pak.ScaledInteger(types.LEB128, 100)
+    angular_damping:      pak.ScaledInteger(types.LEB128, 100)
     invisible:            types.Boolean
     image_description:    types.String
     has_contact_listener: types.Boolean
@@ -1928,7 +1928,7 @@ class DecoratePlayerListPacket(ClientboundPacket):
 
     class Decoration(pak.SubPacket):
         class Header(pak.SubPacket.Header):
-            id: types.LimitedLEB128
+            id: types.LEB128
 
     class VersusEventCounter(Decoration):
         id = 1
@@ -1936,7 +1936,7 @@ class DecoratePlayerListPacket(ClientboundPacket):
         class TeamInfo(pak.SubPacket):
             image_name:      types.String
             gathered_cheese: types.String
-            text_color:      types.LimitedLEB128
+            text_color:      types.LEB128
 
         left:  TeamInfo
         right: TeamInfo
@@ -1947,7 +1947,7 @@ class DecoratePlayerListPacket(ClientboundPacket):
 class LoadShamanObjectSpritesPacket(ClientboundPacket):
     id = (144, 27)
 
-    shaman_object_id_list: types.LimitedLEB128[types.LimitedLEB128]
+    shaman_object_id_list: types.LEB128[types.LEB128]
 
     SWF_URL_FMT = "http://www.transformice.com/images/x_bibliotheques/chamanes/o{base_id},{skin_id}.swf"
 
@@ -1962,11 +1962,11 @@ class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
     id = (144, 29)
 
     class SaleInfo(pak.SubPacket):
-        sale_id:    types.LimitedLEB128
+        sale_id:    types.LEB128
         item_id:    types.String
         sale_start: types.String
         sale_end:   types.String
-        percentage: types.LimitedLEB128
+        percentage: types.LEB128
 
         # Some sort of enum, for colors of sale_start and sale_end.
         #
@@ -1975,22 +1975,22 @@ class OpenFashionSquadSalesMenuPacket(ClientboundPacket):
         #
         # Other values are possible and cannot
         # cancel the sale and have color '0x60608F'.
-        unk_leb128_6: types.LimitedLEB128
+        unk_leb128_6: types.LEB128
 
-    sales: SaleInfo[types.LimitedLEB128]
+    sales: SaleInfo[types.LEB128]
 
 @public
 class SetCollisionDamagePacket(ClientboundPacket):
     id = (144, 30)
 
     enabled:     types.ByteBoolean
-    sensibility: pak.ScaledInteger(types.LimitedLEB128, 1000)
+    sensibility: pak.ScaledInteger(types.LEB128, 1000)
 
 @public
 class SetAdventureBannerPacket(ClientboundPacket):
     id = (144, 31)
 
-    banner_id: types.LimitedLEB128
+    banner_id: types.LEB128
 
     IMAGE_URL_FMT = "https://www.transformice.com/images/x_transformice/x_aventure/x_banniere/x_{banner_id}.jpg"
 
@@ -2002,16 +2002,16 @@ class SetAdventureBannerPacket(ClientboundPacket):
 class SetGravityScalePacket(ClientboundPacket):
     id = (144, 32)
 
-    session_id: types.LimitedLEB128
+    session_id: types.LEB128
 
-    x: pak.ScaledInteger(types.LimitedLEB128, 1000)
-    y: pak.ScaledInteger(types.LimitedLEB128, 1000)
+    x: pak.ScaledInteger(types.LEB128, 1000)
+    y: pak.ScaledInteger(types.LEB128, 1000)
 
 @public
 class LoadFurSpritesPacket(ClientboundPacket):
     id = (144, 34)
 
-    fur_id_list: types.LimitedLEB128[types.LimitedLEB128]
+    fur_id_list: types.LEB128[types.LEB128]
 
     SWF_URL_FMT = "https://www.transformice.com/images/x_bibliotheques/fourrures/f{fur_id}.swf"
 
@@ -2100,13 +2100,13 @@ class SetPlayerCollisionPacket(ClientboundPacket):
         # but that would be weird.
         _custom_bits: 26
 
-    session_id: types.LimitedLEB128
+    session_id: types.LEB128
 
-    collision_preset: pak.Enum(types.LimitedLEB128, enums.CollisionPreset)
+    collision_preset: pak.Enum(types.LEB128, enums.CollisionPreset)
 
     # Only used if 'Manual' is used as 'collision_preset'.
-    personal_categories:      CollisionFlags.Type(types.LimitedLEB128)
-    collides_with_categories: CollisionFlags.Type(types.LimitedLEB128)
+    personal_categories:      CollisionFlags.Type(types.LEB128)
+    collides_with_categories: CollisionFlags.Type(types.LEB128)
 
 @public
 class AvailableEmojisPacket(ClientboundPacket):
@@ -2115,7 +2115,7 @@ class AvailableEmojisPacket(ClientboundPacket):
     DEFAULT_EMOJI_IDS = range(1, 10 + 1)
 
     # Emojis besides the default ones.
-    extra_emoji_ids: types.LimitedLEB128[types.LimitedLEB128]
+    extra_emoji_ids: types.LEB128[types.LEB128]
 
     @property
     def available_emoji_ids(self):
@@ -2147,17 +2147,17 @@ class SaveWallpaperPacket(ClientboundPacket):
 class PlayerMovementPacket(ClientboundPacket):
     id = (144, 48)
 
-    session_id:          types.LimitedLEB128
+    session_id:          types.LEB128
     moving_right:        types.Boolean
     moving_left:         types.Boolean
-    x:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
-    y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
-    velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
-    velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    x:                   pak.ScaledInteger(types.LEB128, 100 / 30)
+    y:                   pak.ScaledInteger(types.LEB128, 100 / 30)
+    velocity_x:          pak.ScaledInteger(types.LEB128, 10)
+    velocity_y:          pak.ScaledInteger(types.LEB128, 10)
     friction_info:       PlayerFrictionInfo
     jumping:             types.Boolean
-    jumping_frame_index: types.LimitedLEB128
-    entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
+    jumping_frame_index: types.LEB128
+    entered_portal:      pak.Enum(types.LEB128, enums.Portal)
 
     # Only present if transformed or rolling.
     rotation_info: pak.Optional(PlayerRotationInfo)

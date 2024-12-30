@@ -126,27 +126,12 @@ class MinimalServer(pak.AsyncPacketHandler):
             return self.secrets.client_verification_data(self.verification_token, ctx=self.ctx)
 
         async def _read_length(self):
-            length_data = b""
-
             type_ctx = pak.Type.Context(ctx=self.ctx)
-            while True:
-                next_byte = await self.read_data(1)
-                if next_byte is None:
-                    return None
 
-                length_data += next_byte
-
-                try:
-                    return types.VarInt.unpack(length_data, ctx=type_ctx)
-
-                except types.VarNumBufferLengthError:
-                    raise
-
-                except asyncio.CancelledError:
-                    raise
-
-                except Exception:
-                    continue
+            try:
+                return await types.PacketLength.unpack_async(self.reader, ctx=type_ctx)
+            except asyncio.IncompleteReadError:
+                return None
 
         async def _read_next_packet(self):
             length = await self._read_length()
@@ -179,7 +164,7 @@ class MinimalServer(pak.AsyncPacketHandler):
             type_ctx = pak.Type.Context(ctx=self.ctx)
 
             await self.write_data(
-                types.VarInt.pack(len(packet_data), ctx=type_ctx) +
+                types.PacketLength.pack(len(packet_data), ctx=type_ctx) +
 
                 packet_data
             )

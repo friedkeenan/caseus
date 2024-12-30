@@ -109,16 +109,16 @@ class AddShamanObjectPacket(ServerboundPacket):
     id = (5, 20)
 
     round_id:          types.Byte
-    object_id:         types.LimitedLEB128
-    shaman_object_id:  types.LimitedLEB128
-    x:                 types.LimitedLEB128
-    y:                 types.LimitedLEB128
-    angle:             types.LimitedLEB128
-    velocity_x:        types.LimitedLEB128
-    velocity_y:        types.LimitedLEB128
+    object_id:         types.LEB128
+    shaman_object_id:  types.LEB128
+    x:                 types.LEB128
+    y:                 types.LEB128
+    angle:             types.LEB128
+    velocity_x:        types.LEB128
+    velocity_y:        types.LEB128
     mice_collidable:   types.Boolean
     spawned_by_player: types.ByteBoolean
-    session_id:        types.LimitedLEB128
+    session_id:        types.LEB128
 
 @public
 class UseIceCubePacket(ServerboundPacket):
@@ -238,8 +238,8 @@ class LoadShopPacket(ServerboundPacket):
 class MeepPacket(ServerboundPacket):
     id = (8, 39)
 
-    x: types.LimitedLEB128
-    y: types.LimitedLEB128
+    x: types.LEB128
+    y: types.LEB128
 
 @public
 class GetCollectiblePacket(ServerboundPacket):
@@ -513,19 +513,19 @@ class KeyboardPacket(ServerboundPacket):
 
     id = (29, 2)
 
-    key_code:   types.LimitedLEB128
+    key_code:   types.LEB128
     down:       types.Boolean
-    x:          types.LimitedLEB128
-    y:          types.LimitedLEB128
-    velocity_x: pak.ScaledInteger(types.LimitedLEB128, 10)
-    velocity_y: pak.ScaledInteger(types.LimitedLEB128, 10)
+    x:          types.LEB128
+    y:          types.LEB128
+    velocity_x: pak.ScaledInteger(types.LEB128, 10)
+    velocity_y: pak.ScaledInteger(types.LEB128, 10)
 
 @public
 class MouseDownPacket(ServerboundPacket):
     id = (29, 3)
 
-    x: types.LimitedLEB128
-    y: types.LimitedLEB128
+    x: types.LEB128
+    y: types.LEB128
 
 @public
 class PickColorPacket(ServerboundPacket):
@@ -603,13 +603,13 @@ class TribulleWrapperPacket(ServerboundPacket):
 class ShamanObjectPreviewPacket(ServerboundPacket):
     id = (100, 2)
 
-    shaman_object_id: types.LimitedLEB128
-    x:                types.LimitedLEB128
-    y:                types.LimitedLEB128
+    shaman_object_id: types.LEB128
+    x:                types.LEB128
+    y:                types.LEB128
 
     # If a rock with children, then the first child's angle.
     # Else the object's angle.
-    angle: types.LimitedLEB128
+    angle: types.LEB128
 
     # Only non-empty if it's a rock.
     # Has format like '2;3,4;5,6' where '2' is the number
@@ -780,16 +780,16 @@ class AddFashionSquadSalePacket(ServerboundPacket):
 class ContactListenerPacket(ServerboundPacket):
     id = (149, 19)
 
-    contacted_id: types.LimitedLEB128
+    contacted_id: types.LEB128
 
-    player_x: types.LimitedLEB128
-    player_y: types.LimitedLEB128
+    player_x: types.LEB128
+    player_y: types.LEB128
 
-    contact_x: types.LimitedLEB128
-    contact_y: types.LimitedLEB128
+    contact_x: types.LEB128
+    contact_y: types.LEB128
 
-    speed_x: pak.ScaledInteger(types.LimitedLEB128, 100)
-    speed_y: pak.ScaledInteger(types.LimitedLEB128, 100)
+    speed_x: pak.ScaledInteger(types.LEB128, 100)
+    speed_y: pak.ScaledInteger(types.LEB128, 100)
 
 @public
 class InteractWithLuaNPCPacket(ServerboundPacket):
@@ -801,8 +801,8 @@ class InteractWithLuaNPCPacket(ServerboundPacket):
 class BuyEmojiPacket(ServerboundPacket):
     id = (149, 25)
 
-    emoji_id: types.LimitedLEB128
-    currency: pak.Enum(types.LimitedLEB128, enums.Currency)
+    emoji_id: types.LEB128
+    currency: pak.Enum(types.LEB128, enums.Currency)
 
 @public
 class PlayerMovementPacket(ServerboundPacket):
@@ -810,17 +810,17 @@ class PlayerMovementPacket(ServerboundPacket):
 
     CIPHER = XOR
 
-    round_id:            types.LimitedLEB128
+    round_id:            types.LEB128
     moving_right:        types.Boolean
     moving_left:         types.Boolean
-    x:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
-    y:                   pak.ScaledInteger(types.LimitedLEB128, 100 / 30)
-    velocity_x:          pak.ScaledInteger(types.LimitedLEB128, 10)
-    velocity_y:          pak.ScaledInteger(types.LimitedLEB128, 10)
+    x:                   pak.ScaledInteger(types.LEB128, 100 / 30)
+    y:                   pak.ScaledInteger(types.LEB128, 100 / 30)
+    velocity_x:          pak.ScaledInteger(types.LEB128, 10)
+    velocity_y:          pak.ScaledInteger(types.LEB128, 10)
     friction_info:       PlayerFrictionInfo
     jumping:             types.Boolean
-    jumping_frame_index: types.LimitedLEB128
-    entered_portal:      pak.Enum(types.LimitedLEB128, enums.Portal)
+    jumping_frame_index: types.LEB128
+    entered_portal:      pak.Enum(types.LEB128, enums.Portal)
 
     # Only present if transformed or rolling.
     rotation_info: pak.Optional(PlayerRotationInfo)
