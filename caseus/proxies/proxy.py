@@ -468,6 +468,10 @@ class Proxy(pak.AsyncPacketHandler):
         except KeyboardInterrupt:
             pass
 
+    @staticmethod
+    def _secrets_for_destination(source):
+        return source.secrets
+
     @pak.packet_listener(serverbound.HandshakePacket)
     async def _fix_handshake_packet(self, source, packet):
         # With the proxy loader, the loader's stage size will
@@ -477,9 +481,10 @@ class Proxy(pak.AsyncPacketHandler):
         source.destination.fingerprint = packet.fingerprint
 
         source.secrets             = source.secrets.copy(version=packet.game_version)
-        source.destination.secrets = source.secrets
+        source.destination.secrets = self._secrets_for_destination(source)
 
         corrected = packet.copy(
+            game_version      = source.destination.secrets.version,
             loader_stage_size = self.CORRECTED_LOADER_SIZE,
         )
 
@@ -550,7 +555,7 @@ class Proxy(pak.AsyncPacketHandler):
         source.satellite = source.Pair(client=source, server=source.destination)
         main_client.satellite = main_client.Pair(client=source, server=source.destination)
 
-        source.destination.secrets = main_client.secrets
+        source.destination.secrets = self._secrets_for_destination(source)
 
     # Listen to various nested packets.
 
@@ -585,13 +590,13 @@ class Proxy(pak.AsyncPacketHandler):
     async def _load_packet_key_sources(self, source, packet):
         source.secrets = source.secrets.copy(packet_key_sources=packet.packet_key_sources)
         if source.destination is not None:
-            source.destination.secrets = source.secrets
+            source.destination.secrets = self._secrets_for_destination(source)
 
     @pak.packet_listener(serverbound.AuthKeyPacket)
     async def _load_auth_key(self, source, packet):
         source.secrets = source.secrets.copy(auth_key=packet.auth_key)
         if source.destination is not None:
-            source.destination.secrets = source.secrets
+            source.destination.secrets = self._secrets_for_destination(source)
 
     async def _connect_to_main_server(self, source, packet):
         address = packet.address
@@ -599,6 +604,8 @@ class Proxy(pak.AsyncPacketHandler):
             address = self.main_server_address
 
         ports = packet.ports if self.main_server_ports is None else self.main_server_ports
+
+        source.secrets = source.secrets.copy(server_address=address, server_ports=ports)
 
         try:
             server_reader, server_writer = await self.open_streams(address, ports)

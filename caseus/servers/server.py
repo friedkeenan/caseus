@@ -448,7 +448,7 @@ class MinimalServer(pak.AsyncPacketHandler):
             clientbound.SetLanguagePacket,
 
             language = "en",
-            country = "us",
+            country  = "us",
         )
 
     @pak.packet_listener(serverbound.SystemInformationPacket)

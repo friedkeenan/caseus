@@ -659,3 +659,17 @@ class CollisionPreset(enum.Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.Ignore
+
+@public
+class ExplosionParticles(enum.Enum):
+    # NOTE: Not a value explicated in the game, just
+    # a value that would cause no explosion particles.
+    NONE = 2
+
+    Clouds = 0
+
+    ScatterGlitter = 1
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.NONE

@@ -159,6 +159,18 @@ class RemoveObjectPacket(ClientboundPacket):
     object_id: types.Int
 
 @public
+class ExplosionPacket(ClientboundPacket):
+    id = (5, 17)
+
+    x: types.LEB128
+    y: types.LEB128
+
+    power:  types.LEB128
+    radius: types.LEB128
+
+    affect_objects: types.Boolean
+
+@public
 class AddShamanObjectPacket(ClientboundPacket):
     id = (5, 20)
 

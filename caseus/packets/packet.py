@@ -76,6 +76,8 @@ class ServerboundPacket(Packet):
     from :class:`ServerboundPacket` to be registered as such.
     """
 
+    RESERVED_FIELDS = ["fingerprint"]
+
     CIPHER = None
 
     class Header(pak.Packet.Header):
