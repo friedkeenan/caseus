@@ -1361,7 +1361,7 @@ class AddImagePacket(ClientboundPacket):
             return "https://images.atelier801.com/ArmorGame.png"
 
         if self.image_name.startswith("img@"):
-            return f"https://avatars.atelier801.com/module/{self.image_name.remove_prefix('img@')}"
+            return f"https://avatars.atelier801.com/module/{self.image_name.remove_prefix('img@')}.png"
 
         if self.image_name.startswith("discord@"):
             return f"https://media.discordapp.net/attachments/{self.image_name.remove_prefix('discord@')}"
