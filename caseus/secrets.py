@@ -2,6 +2,7 @@ import abc
 import contextlib
 import subprocess
 import sys
+import json
 import fixedint
 import pak
 
@@ -85,13 +86,23 @@ public(IDENTIFICATION = XXTEACipher("identification"))
 public(XOR = XORCipher("msg"))
 
 @public
+class UnableToDumpSecretsError(Exception):
+    def __init__(self, dumper, output):
+        self.dumper = dumper
+        self.output = output
+
+        super().__init__(
+            f"Dumping the secrets with '{dumper}' failed with output {repr(output)}"
+        )
+
+@public
 class Secrets:
     BOT_ROLE_VERSION = 666
 
     _FIELDS = (
         "server_address",
         "server_ports",
-        "version",
+        "game_version",
         "connection_token",
         "auth_key",
         "packet_key_sources",
@@ -103,7 +114,7 @@ class Secrets:
         *,
         server_address               = None,
         server_ports                 = None,
-        version                      = None,
+        game_version                 = None,
         connection_token             = None,
         auth_key                     = None,
         packet_key_sources           = None,
@@ -115,13 +126,27 @@ class Secrets:
         if packet_key_sources is not None:
             packet_key_sources = tuple(packet_key_sources)
 
+        if isinstance(client_verification_template, str):
+            client_verification_template = bytes.fromhex(client_verification_template)
+
         self.server_address               = server_address
         self.server_ports                 = server_ports
-        self.version                      = version
+        self.game_version                 = game_version
         self.connection_token             = connection_token
         self.auth_key                     = auth_key
         self.packet_key_sources           = packet_key_sources
         self.client_verification_template = client_verification_template
+
+    @classmethod
+    def load_from_dumper(cls, dumper="tfm-secrets"):
+        output = subprocess.run([dumper], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if output.returncode != 0:
+            raise UnableToDumpSecretsError(dumper, output)
+
+        fields = json.loads(output.stdout.decode())
+
+        return cls(**fields)
 
     @staticmethod
     def _debug_config_file_path():
@@ -161,7 +186,7 @@ class Secrets:
             return "server_ports", [int(x) for x in value.split(",")]
 
         if name == "Game Version":
-            return "version", int(value)
+            return "game_version", int(value)
 
         if name == "Connection Token":
             return "connection_token", value
@@ -173,7 +198,7 @@ class Secrets:
             return "packet_key_sources", [int(x) for x in value.split(",")]
 
         if name == "Client Verification Template":
-            return "client_verification_template", bytes.fromhex(value)
+            return "client_verification_template", value
 
         raise ValueError(f"Unknown secret: '{name}' with value {repr(value)}")
 
@@ -223,13 +248,13 @@ class Secrets:
     @classmethod
     def for_bot_role(cls, server_address, server_ports=(11801, 12801, 13801, 14801)):
         return cls(
-            version        = cls.BOT_ROLE_VERSION,
+            game_version   = cls.BOT_ROLE_VERSION,
             server_address = server_address,
             server_ports   = server_ports,
         )
 
     def is_bot_role(self):
-        return self.version is not None and self.version == self.BOT_ROLE_VERSION
+        return self.game_version is not None and self.game_version == self.BOT_ROLE_VERSION
 
     def copy(self, **fields):
         for field in self._FIELDS:
@@ -279,9 +304,9 @@ class Secrets:
 
         key = []
         for _ in range(len(packet_key_sources)):
-            num ^= num << 13
-            num ^= num >> 17
-            num ^= num << 5
+            num ^= (num << 13)
+            num ^= (num >> 17)
+            num ^= (num << 5)
 
             key.append(int(num))
 

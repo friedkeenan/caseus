@@ -406,6 +406,14 @@ class KeepAlivePacket(ServerboundPacket):
     id = (26, 26)
 
 @public
+class AnticheatPacket(ServerboundPacket):
+    id = (26, 28)
+
+    # The game sets this to an assortment of
+    # values depending on what it detects.
+    detected_cheat_id: types.Short
+
+@public
 class RoomListPacket(ServerboundPacket):
     id = (26, 35)
 
@@ -623,6 +631,16 @@ class ShamanObjectPreviewPacket(ServerboundPacket):
 @public
 class RemoveShamanObjectPreviewPacket(ServerboundPacket):
     id = (100, 3)
+
+@public
+class RetainBeingShamanPacket(ServerboundPacket):
+    id = (100, 20)
+
+    # Used in the stream-room control
+    # panel to set whether the host
+    # should keep being the shaman.
+
+    retain: types.Boolean
 
 @public
 class VisualConsumableInfoPacket(ServerboundPacket):

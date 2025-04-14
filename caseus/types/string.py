@@ -82,13 +82,13 @@ class ShiftedString(pak.Type):
 
     @classmethod
     def _shift_amount(cls, *, ctx):
-        shift_amount = ctx.secrets.version % 5
+        shift_amount = ctx.secrets.game_version % 5
 
         return shift_amount
 
     @classmethod
     def _unpack(cls, buf, *, ctx):
-        if ctx.is_bot_role():
+        if ctx.is_bot_role() or ctx.secrets.game_version is None:
             # The bot role secrets don't know
             # the actual game version, so don't
             # bother trying to unshift the string.
@@ -107,7 +107,7 @@ class ShiftedString(pak.Type):
 
     @classmethod
     def _pack(cls, value, *, ctx):
-        if ctx.is_bot_role():
+        if ctx.is_bot_role() or ctx.secrets.game_version is None:
             # The bot role secrets don't know
             # the actual game version, so don't
             # bother trying to unshift the string.

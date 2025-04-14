@@ -20,7 +20,7 @@ class LoggingSniffer(Sniffer):
         else:
             self.register_packet_listener(self._log_specific_packets, Packet)
 
-    async def _log_packet(self, server, packet):
+    async def _log_packet(self, server, connection, packet):
         if isinstance(packet, ServerboundPacket):
             bound = "Serverbound"
         else:
@@ -28,7 +28,7 @@ class LoggingSniffer(Sniffer):
 
         await aprint(f"{server.name}: {bound}: {packet}")
 
-    async def _log_specific_packets(self, server, packet):
+    async def _log_specific_packets(self, server, connection, packet):
         if isinstance(packet, pak.GenericPacket):
             return
 

@@ -480,11 +480,11 @@ class Proxy(pak.AsyncPacketHandler):
         # Set the serverbound fingerprint from the handshake packet.
         source.destination.fingerprint = packet.fingerprint
 
-        source.secrets             = source.secrets.copy(version=packet.game_version)
+        source.secrets             = source.secrets.copy(game_version=packet.game_version)
         source.destination.secrets = self._secrets_for_destination(source)
 
         corrected = packet.copy(
-            game_version      = source.destination.secrets.version,
+            game_version      = source.destination.secrets.game_version,
             loader_stage_size = self.CORRECTED_LOADER_SIZE,
         )
 
@@ -518,6 +518,8 @@ class Proxy(pak.AsyncPacketHandler):
 
     @pak.packet_listener(serverbound.SatelliteDelayedIdentificationPacket)
     async def _complete_satellite_proxy(self, source, packet):
+        # TODO: I'm probably forgetting to close a previous satellite connection here.
+
         original_packet, main_client = self._satellite_info_with_auth_id(packet.auth_id)
         if original_packet is None:
             source.close()

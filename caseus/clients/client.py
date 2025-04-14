@@ -287,7 +287,7 @@ class Client(pak.AsyncPacketHandler):
         await self.main.write_packet(
             serverbound.HandshakePacket,
 
-            game_version                = self.secrets.version,
+            game_version                = self.secrets.game_version,
             language                    = language,
             connection_token            = self.secrets.connection_token,
             player_type                 = self.PLAYER_TYPE,

@@ -1,3 +1,5 @@
+# TODO: Redo this whole thing.
+
 import abc
 import asyncio
 import io
@@ -25,7 +27,7 @@ from .. import types
 
 @public
 class Sniffer(pak.AsyncPacketHandler):
-    MAIN_IP_ADDR = "193.70.81.30"
+    MAIN_IP_ADDR = "51.38.60.113"
     MAIN_PORTS   = [11801, 12801, 13801, 14801]
 
     # TODO: Reduce code duplication between this
@@ -38,7 +40,11 @@ class Sniffer(pak.AsyncPacketHandler):
 
         @property
         def secrets(self):
-            return self.sniffer.secrets
+            return self.ctx.secrets
+
+        @secrets.setter
+        def secrets(self, value):
+            self.ctx = Packet.Context(value)
 
         async def open_streams(self):
             self.reader = asyncio.StreamReader()
@@ -90,10 +96,6 @@ class Sniffer(pak.AsyncPacketHandler):
             # The fingerprint is not included in the packet length.
             return await super()._read_length() + 1
 
-        @property
-        def should_decipher(self):
-            return self.secrets is not None
-
         def _packet_from_data(self, buf):
             header = ServerboundPacket.Header.unpack(buf, ctx=self.ctx)
 
@@ -101,7 +103,7 @@ class Sniffer(pak.AsyncPacketHandler):
             if packet_cls is None:
                 packet_cls = ServerboundPacket.GenericWithID(header.id)
 
-            if self.should_decipher:
+            if self.secrets.packet_key_sources is not None:
                 buf = packet_cls.decipher_data(buf, secrets=self.secrets)
             elif packet_cls.CIPHER is not None:
                 packet_cls = ServerboundPacket.GenericWithID(header.id)
@@ -135,14 +137,8 @@ class Sniffer(pak.AsyncPacketHandler):
                 self.sniffer._listen_to_packets(self, self.serverbound),
             )
 
-    def __init__(self, *, key_sources_path=None):
+    def __init__(self):
         super().__init__()
-
-        self.secrets = None
-
-        if key_sources_path is not None:
-            self._key_sources_path = key_sources_path
-            self.register_packet_listener(self._read_key_sources, serverbound.HandshakePacket)
 
         self.main      = self.ServerInfo("MAIN", self.MAIN_IP_ADDR, self.MAIN_PORTS, sniffer=self)
         self.satellite = self.ServerInfo("SATELLITE", "", [], sniffer=self)
@@ -192,7 +188,7 @@ class Sniffer(pak.AsyncPacketHandler):
     async def _listen_dispatch(self, server, connection, packet, **flags):
         async with self.listener_task_group(listen_sequentially=False) as group:
             for listener in self.listeners_for_packet(packet, **flags):
-                group.create_task(listener(server, packet))
+                group.create_task(listener(server, connection, packet))
 
     async def _listen_to_packets(self, server, connection):
         async for packet in connection.continuously_read_packets():
@@ -249,13 +245,11 @@ class Sniffer(pak.AsyncPacketHandler):
         except KeyboardInterrupt:
             pass
 
-    async def _read_key_sources(self, server, packet):
-        with self._key_sources_path.open() as f:
-            key_sources = (int(x) for x in f.read().split(","))
-
-        self.secrets = Secrets(key_sources)
+    @pak.packet_listener(serverbound.HandshakePacket)
+    async def _fill_in_game_version(self, server, source, packet):
+        source.secrets = source.secrets.copy(game_version=packet.game_version)
 
     @pak.packet_listener(clientbound.ChangeSatelliteServerPacket)
-    async def _change_satellite_server(self, server, packet):
+    async def _change_satellite_server(self, server, source, packet):
         self.satellite.ip_addr = packet.address
         self.satellite.ports   = packet.ports

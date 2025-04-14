@@ -183,7 +183,7 @@ class MinimalServer(pak.AsyncPacketHandler):
 
         loader_stage_size = None,
 
-        version                      = None,
+        game_version                 = None,
         auth_key                     = None,
         client_verification_template = None,
     ):
@@ -199,7 +199,7 @@ class MinimalServer(pak.AsyncPacketHandler):
         self.loader_stage_size = loader_stage_size
 
         self.initial_secrets = Secrets(
-            version                      = version,
+            game_version                 = game_version,
             auth_key                     = auth_key,
             client_verification_template = client_verification_template,
         )
@@ -350,12 +350,12 @@ class MinimalServer(pak.AsyncPacketHandler):
             pass
 
     @property
-    def version(self):
-        return self.initial_secrets.version
+    def game_version(self):
+        return self.initial_secrets.game_version
 
-    @version.setter
-    def version(self, value):
-        self.initial_secrets = self.initial_secrets.copy(version=value)
+    @game_version.setter
+    def game_version(self, value):
+        self.initial_secrets = self.initial_secrets.copy(game_version=value)
 
     @property
     def auth_key(self):
@@ -398,11 +398,11 @@ class MinimalServer(pak.AsyncPacketHandler):
 
             return
 
-        if self.version is None:
+        if self.game_version is None:
             # NOTE: We only track what could matter.
-            client.secrets = client.secrets.copy(version=packet.game_version)
+            client.secrets = client.secrets.copy(game_version=packet.game_version)
 
-        elif packet.game_version != self.version:
+        elif packet.game_version != self.game_version:
             client.close()
             await client.wait_closed()
 
@@ -460,7 +460,7 @@ class MinimalServer(pak.AsyncPacketHandler):
 
     @pak.packet_listener(serverbound.ClientVerificationPacket)
     async def _on_client_verification(self, client, packet):
-        if packet.ciphered_data != self.secrets.client_verification_data(client.verification_token, ctx=ctx):
+        if packet.ciphered_data != client.client_verification_data():
             client.close()
             await client.wait_closed()
 
