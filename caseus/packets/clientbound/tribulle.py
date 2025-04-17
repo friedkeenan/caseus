@@ -57,18 +57,22 @@ class WhisperPacket(ClientboundTribullePacket):
 class ChangeTribeHouseMapResultPacket(FingerprintedClientboundTribullePacket):
     id = 103
 
-    # TODO: Enum?
     result: types.Byte
 
 @public
-class GetTribeSettingsResultPacket(FingerprintedClientboundTribullePacket):
+class OpenTribeMenuResultPacket(FingerprintedClientboundTribullePacket):
     id = 109
 
-    # TODO: Enum?
     result: types.Byte
 
 @public
-class TribeSettingsPacket(ClientboundTribullePacket):
+class CloseTribeMenuResultPacket(FingerprintedClientboundTribullePacket):
+    id = 111
+
+    result: types.Byte
+
+@public
+class TribeMenuPacket(ClientboundTribullePacket):
     id = 130
 
     class MemberInfo(pak.SubPacket):
