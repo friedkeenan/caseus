@@ -5,6 +5,25 @@ from ..packet import ServerboundTribullePacket
 from ... import types
 
 @public
+class TribeInvitePacket(ServerboundTribullePacket):
+    id = 78
+
+    target: types.String
+
+@public
+class AnswerTribeInvitePacket(ServerboundTribullePacket):
+    id = 80
+
+    inviter:  types.String
+    accepted: types.ByteBoolean
+
+@public
+class CreateTribePacket(ServerboundTribullePacket):
+    id = 84
+
+    tribe_name: types.String
+
+@public
 class ChangeTribeHouseMapPacket(ServerboundTribullePacket):
     id = 102
 
@@ -19,3 +38,10 @@ class OpenTribeMenuPacket(ServerboundTribullePacket):
 @public
 class CloseTribeMenuPacket(ServerboundTribullePacket):
     id = 110
+
+@public
+class ChangeTribeMemberRankPacket(ServerboundTribullePacket):
+    id = 112
+
+    target:     types.String
+    rank_index: types.Byte

@@ -171,3 +171,24 @@ class PlayerRotationInfo(pak.SubPacket):
     rotation:         pak.ScaledInteger(types.LEB128, 100)
     angular_velocity: pak.ScaledInteger(types.LEB128, 100)
     fixed_rotation:   types.Boolean
+
+@public
+class TribeRankInfo(pak.SubPacket):
+    name:        types.SignedLengthString
+    permissions: types.Int
+
+@public
+class TribeMemberInfo(pak.SubPacket):
+    class LocationInfo(pak.SubPacket):
+        service_id: types.Int
+        room_name:  types.SignedLengthString
+
+    global_id: types.Int
+    username:  types.SignedLengthString
+
+    gender:     pak.Enum(types.Byte, enums.Gender)
+    avatar_id:  types.Int
+    last_login: types.Int
+    rank_index: types.Byte
+
+    location: LocationInfo
