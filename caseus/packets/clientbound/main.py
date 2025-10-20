@@ -633,6 +633,7 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
     # seem to be the explicit intention.
     display_adventure_points: types.Boolean
     adventure_points:         types.Int
+    adventure_banner_id:      types.UnsignedShort
 
 @public
 class OldNekodancerProfilePacket(BasePlayerInformationPacket):
