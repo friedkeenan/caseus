@@ -633,7 +633,7 @@ class PlayerProfilePacket(BasePlayerInformationPacket):
     # seem to be the explicit intention.
     display_adventure_points: types.Boolean
     adventure_points:         types.Int
-    adventure_banner_id:      types.UnsignedShort
+    banner_id:                types.UnsignedShort
 
 @public
 class OldNekodancerProfilePacket(BasePlayerInformationPacket):
@@ -735,6 +735,12 @@ class LoadShopPacket(ClientboundPacket):
         fraise_cost: types.LEB128
         is_new:      types.Boolean
 
+    class BannerInfo(pak.SubPacket):
+        banner_id:   types.LEB128
+        cheese_cost: types.LEB128
+        fraise_cost: types.LEB128
+        is_new:      types.Boolean
+
     cheese:  types.Int
     fraises: types.Int
     look:    types.String # TODO: Parse outfit.
@@ -750,6 +756,10 @@ class LoadShopPacket(ClientboundPacket):
 
     emojis:          EmojiInfo[types.LEB128]
     owned_emoji_ids: types.LEB128[types.LEB128]
+
+    banners:           BannerInfo[types.LEB128]
+    owned_banner_ids:  types.LEB128[types.LEB128]
+    current_banner_id: types.LEB128
 
 @public
 class AddNPCPacket(ClientboundPacket):

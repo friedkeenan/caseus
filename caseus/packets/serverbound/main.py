@@ -844,6 +844,19 @@ class PlayerMovementPacket(ServerboundPacket):
     rotation_info: pak.Optional(PlayerRotationInfo)
 
 @public
+class UnequipBannerPacket(ServerboundPacket):
+    id = (149, 32)
+
+    banner_id: types.LEB128
+
+@public
+class BuyBannerPacket(ServerboundPacket):
+    id = (149, 33)
+
+    banner_id: types.LEB128
+    currency:  pak.Enum(types.LEB128, enums.Currency)
+
+@public
 class SetLanguagePacket(ServerboundPacket):
     id = (176, 1)
 
