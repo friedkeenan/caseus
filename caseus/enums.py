@@ -314,13 +314,14 @@ class NPCItemType(enum.Enum):
     # NOTE: The game defines constants for
     # values '0' and '6' but they are never used.
 
-    Badge     = 1
-    Cartouche = 2
-    Title     = 3
-    Inventory = 4
-    ShopItem  = 5
-
-    Emoji = 7
+    Badge        = 1
+    Cartouche    = 2
+    Title        = 3
+    Inventory    = 4
+    ShopItem     = 5
+    Emoji        = 7
+    ShamanObject = 8
+    Banner       = 9
 
 @public
 class MapCategory(enum.Enum):
